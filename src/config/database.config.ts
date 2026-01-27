@@ -27,7 +27,7 @@ function connectDb(): TypeOrmModuleOptions {
 
   return {
     type: 'postgres',
-    url: `postgresql://${process.env[`${envi}_DB_NAME`]}:${process.env[`${envi}_DB_PASSWORD`]}@${process.env[`${envi}_DB_HOST`]}:${Number(process.env[`${envi}_DB_PORT`])}/${process.env[`${envi}_DB_NAME`]}`,
+    url: `postgresql://${process.env[`${envi}_DB_USERNAME`]}:${process.env[`${envi}_DB_PASSWORD`]}@${process.env[`${envi}_DB_HOST`]}:${Number(process.env[`${envi}_DB_PORT`])}/${process.env[`${envi}_DB_NAME`]}`,
     // host: 'localhost',
     // database: process.env[`${envi}_DB_NAME`],
     // username: process.env[`${envi}_DB_USERNAME`],
