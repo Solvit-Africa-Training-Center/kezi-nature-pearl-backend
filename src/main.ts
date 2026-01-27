@@ -45,9 +45,9 @@ async function bootstrap() {
     .build();
 
   const documentFactory = () => SwaggerModule.createDocument(app, config);
-  if (process.env.NODE_ENV !== 'production') {
-    SwaggerModule.setup(`/${prefix}/docs`, app, documentFactory);
-  }
+  // if (process.env.NODE_ENV !== 'production') {
+  SwaggerModule.setup(`/${prefix}/docs`, app, documentFactory);
+  // }
 
   app.setGlobalPrefix(prefix);
 
