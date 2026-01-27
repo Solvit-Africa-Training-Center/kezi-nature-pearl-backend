@@ -15,8 +15,9 @@ export class IngredientController {
   constructor(private readonly ingredientService: IngredientService) {}
 
   @Post()
-  create(@Body() createIngredientDto: CreateIngredientDto) {
-    return this.ingredientService.create(createIngredientDto);
+  async create(@Body() createIngredientDto: CreateIngredientDto) {
+    await this.ingredientService.create(createIngredientDto);
+    return 'Ingredient Created';
   }
 
   @Get()
@@ -30,15 +31,17 @@ export class IngredientController {
   }
 
   @Patch(':ingredientId')
-  update(
+  async update(
     @Param('ingredientId') id: string,
     @Body() updateIngredientDto: UpdateIngredientDto,
   ) {
-    return this.ingredientService.update(id, updateIngredientDto);
+    this.ingredientService.update(id, updateIngredientDto);
+    return 'Ingredient Updated';
   }
 
   @Delete(':ingredientId')
-  remove(@Param('ingredientId') id: string) {
-    return this.ingredientService.remove(id);
+  async remove(@Param('ingredientId') id: string) {
+    this.ingredientService.remove(id);
+    return 'Ingredient Deleted';
   }
 }

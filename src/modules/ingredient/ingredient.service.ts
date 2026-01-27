@@ -26,10 +26,15 @@ export class IngredientService {
     const ingredient = await this.findOne({ ingredientId });
     if (!ingredient) throw new NotFoundException('Ingredient not found');
 
+    ingredient.name = updateIngredientDto.name ?? ingredient.name;
+
     return await this.ingredientRepo.save(ingredient);
   }
 
   async remove(ingredientId: string) {
+    const ingredient = await this.findOne({ ingredientId });
+    if (!ingredient) throw new NotFoundException('Ingredient Not Found');
+
     return await this.ingredientRepo.delete({ ingredientId });
   }
 }
