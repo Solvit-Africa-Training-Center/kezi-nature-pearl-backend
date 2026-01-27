@@ -1,13 +1,13 @@
 import { registerAs } from '@nestjs/config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { Category } from 'src/modules/category/category.entity';
-import { EmailVerificationToken } from 'src/modules/emailVerificationToken/emailVerification.entity';
-import { Ingredient } from 'src/modules/ingredient/entities/ingredient.entity';
-import { PasswordResetToken } from 'src/modules/passwordResetToken/passwordResetToken.entity';
-import { Product } from 'src/modules/product/product.entity';
-import { User } from 'src/modules/user/user.entity';
+import { Category } from '../modules/category/category.entity';
+import { EmailVerificationToken } from '../modules/emailVerificationToken/emailVerification.entity';
+import { Ingredient } from '../modules/ingredient/entities/ingredient.entity';
+import { PasswordResetToken } from '../modules/passwordResetToken/passwordResetToken.entity';
+import { Product } from '../modules/product/product.entity';
+import { User } from '../modules/user/user.entity';
 
-function envDetermine(): string {
+export function envDetermine(): string {
   const envi: string = String(process.env.NODE_ENV);
 
   switch (envi) {
@@ -24,10 +24,17 @@ function envDetermine(): string {
 
 function connectDb(): TypeOrmModuleOptions {
   const envi: string = envDetermine();
+  const url = process.env[`${envi}_DATABASE_URL`];
+
+  if (!url) {
+    throw new Error('DATABASE_URL is not defined');
+  }
+
+  const isProd = process.env.NODE_ENV === 'production';
 
   return {
     type: 'postgres',
-    url: `postgresql://${process.env[`${envi}_DB_USERNAME`]}:${process.env[`${envi}_DB_PASSWORD`]}@${process.env[`${envi}_DB_HOST`]}:${Number(process.env[`${envi}_DB_PORT`])}/${process.env[`${envi}_DB_NAME`]}`,
+    url,
     // host: 'localhost',
     // database: process.env[`${envi}_DB_NAME`],
     // username: process.env[`${envi}_DB_USERNAME`],
@@ -43,6 +50,7 @@ function connectDb(): TypeOrmModuleOptions {
       Ingredient,
     ],
     synchronize: false,
+    ssl: isProd ? { rejectUnauthorized: false } : false,
   };
 }
 

@@ -1,4 +1,4 @@
-import { productEnum } from 'src/common/enums/product.enum';
+import { productEnum } from '../../common/enums/product.enum';
 import {
   Column,
   CreateDateColumn,
