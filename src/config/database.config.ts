@@ -27,11 +27,13 @@ function connectDb(): TypeOrmModuleOptions {
 
   return {
     type: 'postgres',
-    host: 'localhost',
-    database: process.env[`${envi}_DB_NAME`],
-    username: process.env[`${envi}_DB_USERNAME`],
-    password: process.env[`${envi}_DB_PASSWORD`],
-    port: Number(process.env[`${envi}_DB_PORT`]),
+    url: `postgresql://${process.env[`${envi}_DB_NAME`]}:${process.env[`${envi}_DB_PASSWORD`]}@${process.env[`${envi}_DB_HOST`]}:${Number(process.env[`${envi}_DB_PORT`])}/${process.env[`${envi}_DB_NAME`]}`,
+    // host: 'localhost',
+    // database: process.env[`${envi}_DB_NAME`],
+    // username: process.env[`${envi}_DB_USERNAME`],
+    // password: process.env[`${envi}_DB_PASSWORD`],
+    // port: Number(process.env[`${envi}_DB_PORT`]),
+    // host: process.env[`${envi}_DB_HOST`],
     entities: [
       User,
       Category,
@@ -40,7 +42,7 @@ function connectDb(): TypeOrmModuleOptions {
       PasswordResetToken,
       Ingredient,
     ],
-    synchronize: true,
+    synchronize: false,
   };
 }
 
