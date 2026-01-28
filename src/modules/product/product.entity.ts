@@ -1,4 +1,4 @@
-import { productEnum } from '../../common/enums/product.enum';
+import { productStatusEnum } from '../../common/enums/productStatus.enum';
 import {
   Column,
   CreateDateColumn,
@@ -29,11 +29,11 @@ export class Product {
 
   @Column({
     type: 'enum',
-    enum: productEnum,
-    default: productEnum.ACTIVE,
+    enum: productStatusEnum,
+    default: productStatusEnum.ACTIVE,
     nullable: false,
   })
-  status: productEnum;
+  status: productStatusEnum;
 
   @Column()
   categoryId: string;

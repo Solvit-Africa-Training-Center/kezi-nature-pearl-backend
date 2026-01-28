@@ -1,6 +1,6 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
 import { UserBaseDTO } from '../user/user.dto';
-import { roleEnum } from 'src/common/enums/role.enum';
+import { userRoleEnum } from 'src/common/enums/userRole.enum';
 import {
   IsString,
   Validate,
@@ -12,9 +12,8 @@ export class RegisterDTO extends PickType(UserBaseDTO, [
   'email',
   'password',
   'phoneNumber',
-  'fullName',
 ]) {
-  role: roleEnum = roleEnum.CUSTOMER;
+  role: userRoleEnum = userRoleEnum.CUSTOMER;
 }
 
 @ValidatorConstraint({ name: 'emailOrPhone', async: false })

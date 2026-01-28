@@ -1,4 +1,4 @@
-export enum categoryEnum {
+export enum productCategoryEnum {
   KIDS = 'kids',
   ADULTS = 'adults',
   ELDERS = 'elders',
