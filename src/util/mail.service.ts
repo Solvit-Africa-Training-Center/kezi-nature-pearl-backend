@@ -27,8 +27,11 @@ export class MailService {
     await this.transporter.verify(); // DEBUG (remove later)
 
     await this.transporter.sendMail({
-      from: `"KEZI Natural Pearl" <${process.env.MAIL_FROM}>`,
-      ...options,
+      from: 'KEZI Natural Pearl',
+      to: options.to,
+      subject: options.subject,
+      text: options.text,
+      html: options.html,
     });
   }
 }
