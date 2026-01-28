@@ -7,7 +7,7 @@ export default registerAs(
     from: String(process.env.MAIL_FROM),
     host: String(process.env.MAIL_HOST),
     port: Number(process.env.MAIL_PORT),
-    secure: false,
+    secure: Number(process.env.MAIL_PORT) === 465,
     auth: {
       user: String(process.env.MAIL_USER),
       pass: String(process.env.MAIL_PASS),
