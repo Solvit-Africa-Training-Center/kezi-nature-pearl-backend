@@ -7,10 +7,13 @@ import mailConfig from 'src/config/mail.config';
 @Injectable()
 export class MailService {
   private readonly transporter: Transporter;
+
   constructor(private readonly configService: ConfigService) {
     const mailconfig = this.configService.get<SMTPTransport.Options>('mail');
 
-    if (!mailConfig) throw new Error('Mail Configuration is missing');
+    if (!mailconfig) {
+      throw new Error('Mail configuration is missing');
+    }
 
     this.transporter = nodemailer.createTransport(mailconfig);
   }
@@ -21,12 +24,11 @@ export class MailService {
     text?: string;
     html?: string;
   }) {
-    console.log('success');
+    await this.transporter.verify(); // DEBUG (remove later)
 
     await this.transporter.sendMail({
-      from: 'KEZI Natural Pearl',
+      from: `"KEZI Natural Pearl" <${process.env.MAIL_FROM}>`,
       ...options,
     });
-    console.log('sent');
   }
 }

@@ -4,13 +4,15 @@ import SMTPTransport from 'nodemailer/lib/smtp-transport';
 export default registerAs(
   'mail',
   (): SMTPTransport.Options => ({
-    from: String(process.env.MAIL_FROM),
-    host: String(process.env.MAIL_HOST),
+    host: process.env.MAIL_HOST!,
     port: Number(process.env.MAIL_PORT),
     secure: Number(process.env.MAIL_PORT) === 465,
     auth: {
-      user: String(process.env.MAIL_USER),
-      pass: String(process.env.MAIL_PASS),
+      user: process.env.MAIL_USER!,
+      pass: process.env.MAIL_PASS!,
+    },
+    tls: {
+      rejectUnauthorized: false,
     },
   }),
 );
