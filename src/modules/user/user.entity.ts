@@ -17,6 +17,8 @@ export class User {
   @PrimaryGeneratedColumn('uuid')
   userId: string;
 
+  profile: string;
+
   @Column({
     unique: true,
     nullable: false,

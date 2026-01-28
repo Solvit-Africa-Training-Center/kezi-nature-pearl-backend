@@ -15,6 +15,7 @@ import mailConfig from './config/mail.config';
 import { EmailVerificationTokenModule } from './modules/emailVerificationToken/emailVerificationToken.module';
 import { PasswordResetTokenModule } from './modules/passwordResetToken/passwordResetToken.module';
 import { IngredientModule } from './modules/ingredient/ingredient.module';
+import { FileModule } from './modules/file/file.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { IngredientModule } from './modules/ingredient/ingredient.module';
     EmailVerificationTokenModule,
     PasswordResetTokenModule,
     IngredientModule,
+    FileModule,
   ],
   providers: [],
   controllers: [],
