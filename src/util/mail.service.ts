@@ -25,5 +25,6 @@ export class MailService {
       from: 'KEZI Natural Pearl',
       ...options,
     });
+    console.log('sent');
   }
 }
