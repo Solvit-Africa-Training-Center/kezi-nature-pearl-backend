@@ -8,7 +8,7 @@ import mailConfig from 'src/config/mail.config';
 export class MailService {
   private readonly transporter: Transporter;
   constructor(private readonly configService: ConfigService) {
-    const mailconfig = configService.get<SMTPTransport.Options>('mail');
+    const mailconfig = this.configService.get<SMTPTransport.Options>('mail');
 
     if (!mailConfig) throw new Error('Mail Configuration is missing');
 
