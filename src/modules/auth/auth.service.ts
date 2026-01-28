@@ -32,7 +32,7 @@ export class AuthService {
       ...user,
       password: hashContent(user.password),
     });
-    this.sendVerification(newuser.email);
+    await this.sendVerification(newuser.email);
     return;
   }
 
