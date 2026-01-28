@@ -83,10 +83,10 @@ export class AuthService {
         updateToken,
       );
     }
+    console.log('success');
 
     const link = `http://localhost:${this.configService.get<number>('server.port')}/${this.configService.get<number>('server.prefix')}/auth/verify-email/?id=${emailverificationToken.id}&token=${token}`;
 
-    console.log('success');
     await this.mailService.sendMail({
       to: email,
       subject: 'Welcome To Kezi Natural Pearl',
