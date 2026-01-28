@@ -1,11 +1,5 @@
-import { Product } from 'src/modules/product/product.entity';
-import {
-  Column,
-  Entity,
-  JoinTable,
-  ManyToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Product } from '../../../modules/product/product.entity';
+import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('ingredients')
 export class Ingredient {

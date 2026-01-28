@@ -16,28 +16,28 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const port: number = Number(configService.get<number>('server.port'));
   const prefix: string = String(configService.get<string>('server.prefix'));
-  const origin: string = String(configService.get<string>('server.origin'));
+  // const origin: string = String(configService.get<string>('server.origin'));
 
-  if (!origin) {
-    throw new Error('SERVER_ORIGIN is not defined');
-  }
+  // if (!origin) {
+  //   throw new Error('SERVER_ORIGIN is not defined');
+  // }
 
-  app.enableCors({
-    origin: (requestOrigin, callback) => {
-      if (!requestOrigin) {
-        return callback(null, true);
-      }
+  // app.enableCors({
+  //   origin: (requestOrigin, callback) => {
+  //     if (!requestOrigin) {
+  //       return callback(null, true);
+  //     }
 
-      if (origin.includes(requestOrigin)) {
-        return callback(null, true);
-      }
+  //     if (origin.includes(requestOrigin)) {
+  //       return callback(null, true);
+  //     }
 
-      callback(new Error('Not allowed by CORS'));
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  });
+  //     callback(new Error('Not allowed by CORS'));
+  //   },
+  //   credentials: true,
+  //   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  //   allowedHeaders: ['Content-Type', 'Authorization'],
+  // });
 
   const config = new DocumentBuilder()
     .setTitle('Kezi Natural Pearl')
@@ -45,9 +45,9 @@ async function bootstrap() {
     .build();
 
   const documentFactory = () => SwaggerModule.createDocument(app, config);
-  if (process.env.NODE_ENV !== 'production') {
-    SwaggerModule.setup(`/${prefix}/docs`, app, documentFactory);
-  }
+  // if (process.env.NODE_ENV !== 'production') {
+  SwaggerModule.setup(`/${prefix}/docs`, app, documentFactory);
+  // }
 
   app.setGlobalPrefix(prefix);
 
