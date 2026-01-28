@@ -24,7 +24,7 @@ export class MailService {
     text?: string;
     html?: string;
   }) {
-    await this.transporter.verify(); // DEBUG (remove later)
+    // await this.transporter.verify(); // DEBUG (remove later)
 
     await this.transporter.sendMail({
       from: 'KEZI Natural Pearl',
