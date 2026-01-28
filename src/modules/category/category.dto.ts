@@ -1,4 +1,4 @@
-import { categoryEnum } from 'src/common/enums/category.enum';
+import { productCategoryEnum } from 'src/common/enums/productCategory.enum';
 import { Product } from '../product/product.entity';
 import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
 import { IsEnum, IsString, IsUUID } from 'class-validator';
@@ -9,8 +9,8 @@ class CategoryBaseDTO {
   categoryId: string;
 
   @ApiProperty()
-  @IsEnum(categoryEnum)
-  name: categoryEnum;
+  @IsEnum(productCategoryEnum)
+  name: productCategoryEnum;
 
   @ApiProperty()
   @IsString()

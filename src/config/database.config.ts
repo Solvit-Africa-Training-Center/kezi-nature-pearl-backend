@@ -35,12 +35,6 @@ function connectDb(): TypeOrmModuleOptions {
   return {
     type: 'postgres',
     url,
-    // host: 'localhost',
-    // database: process.env[`${envi}_DB_NAME`],
-    // username: process.env[`${envi}_DB_USERNAME`],
-    // password: process.env[`${envi}_DB_PASSWORD`],
-    // port: Number(process.env[`${envi}_DB_PORT`]),
-    // host: process.env[`${envi}_DB_HOST`],
     entities: [
       User,
       Category,
