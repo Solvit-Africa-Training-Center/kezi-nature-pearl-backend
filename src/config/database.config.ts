@@ -6,6 +6,7 @@ import { Ingredient } from '../modules/ingredient/entities/ingredient.entity';
 import { PasswordResetToken } from '../modules/passwordResetToken/passwordResetToken.entity';
 import { Product } from '../modules/product/product.entity';
 import { User } from '../modules/user/user.entity';
+import { Order } from '../modules/orders/entities/order.entity';
 
 export function envDetermine(): string {
   const envi: string = String(process.env.NODE_ENV);
@@ -42,6 +43,7 @@ function connectDb(): TypeOrmModuleOptions {
       EmailVerificationToken,
       PasswordResetToken,
       Ingredient,
+      Order
     ],
     synchronize: false,
     ssl: isProd ? { rejectUnauthorized: false } : false,

@@ -15,6 +15,9 @@ export class CreateEnums1769591901100 implements MigrationInterface {
 
     await queryRunner.query(`
     CREATE TYPE "public"."users_status_enum" AS ENUM ('active', 'inactive')`);
+
+     await queryRunner.query(`
+    CREATE TYPE "public"."users_status_enum" AS ENUM ('PLACED', 'PAID', 'SHIPPED', DELIVERED, 'CANCELLED')`);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
