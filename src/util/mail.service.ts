@@ -33,5 +33,6 @@ export class MailService {
       text: options.text,
       html: options.html,
     });
+    console.log('Mail Sent');
   }
 }
