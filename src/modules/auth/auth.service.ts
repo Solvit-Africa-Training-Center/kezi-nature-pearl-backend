@@ -112,7 +112,6 @@ export class AuthService {
       `,
       text: `Hello ${user.fullName}`,
     });
-    console.log('success');
   }
 
   async verifyEmail(verifiyEmailDTO: VerifyEmailDTO) {

@@ -21,6 +21,8 @@ export class MailService {
     text?: string;
     html?: string;
   }) {
+    console.log('success');
+
     await this.transporter.sendMail({
       from: 'KEZI Natural Pearl',
       ...options,
