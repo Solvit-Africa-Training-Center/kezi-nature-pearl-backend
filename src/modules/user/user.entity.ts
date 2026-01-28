@@ -1,5 +1,3 @@
-import { roleEnum } from 'src/common/enums/role.enum';
-import { statusEnum } from 'src/common/enums/status.enum';
 import {
   Column,
   CreateDateColumn,
@@ -11,11 +9,16 @@ import {
 } from 'typeorm';
 import { PasswordResetToken } from '../passwordResetToken/passwordResetToken.entity';
 import { EmailVerificationToken } from '../emailVerificationToken/emailVerification.entity';
+import { userRoleEnum } from '../../common/enums/userRole.enum';
+import { userStatusEnum } from '../../common/enums/userStatus.enum';
 
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
   userId: string;
+
+  @Column({ nullable: true })
+  profile: string;
 
   @Column({
     unique: true,
@@ -29,7 +32,7 @@ export class User {
   password: string;
 
   @Column({
-    nullable: false,
+    nullable: true,
   })
   fullName: string;
 
@@ -41,19 +44,19 @@ export class User {
 
   @Column({
     type: 'enum',
-    enum: roleEnum,
-    default: roleEnum.CUSTOMER,
+    enum: userRoleEnum,
+    default: userRoleEnum.CUSTOMER,
     nullable: false,
   })
-  role: roleEnum;
+  role: userRoleEnum;
 
   @Column({
     type: 'enum',
-    enum: statusEnum,
-    default: statusEnum.ACTIVE,
+    enum: userStatusEnum,
+    default: userStatusEnum.ACTIVE,
     nullable: false,
   })
-  status: statusEnum;
+  status: userStatusEnum;
 
   @Column({ nullable: true })
   emailVerifiedAt: Date;
