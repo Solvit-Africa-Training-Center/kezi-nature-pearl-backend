@@ -18,14 +18,14 @@ export class Product {
   @PrimaryGeneratedColumn('uuid')
   productId: string;
 
+  @Column({ nullable: true })
+  imageId: string;
+
   @Column()
   name: string;
 
   @Column()
   description: string;
-
-  @Column()
-  productCode: string;
 
   @Column({
     type: 'enum',

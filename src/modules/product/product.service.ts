@@ -28,7 +28,6 @@ export class ProductService {
     if (!exists) throw new NotFoundException();
     exists.name = product.name ?? exists.name;
     exists.description = product.description ?? exists.description;
-    exists.productCode = product.productCode ?? exists.productCode;
     exists.status = product.status ?? exists.status;
 
     return await this.productRepo.save(exists);
