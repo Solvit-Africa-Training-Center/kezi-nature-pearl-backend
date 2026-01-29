@@ -24,7 +24,6 @@ export class MailService {
     text?: string;
     html?: string;
   }) {
-    console.log('from: ', this.from);
     try {
       await sgMail.send({
         to: options.to,

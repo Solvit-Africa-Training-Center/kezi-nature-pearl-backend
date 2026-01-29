@@ -27,25 +27,29 @@ export class AuthController {
   @Post('/login')
   @ApiOperation({ summary: 'Login User' })
   async login(@Body() dto: LoginDTO) {
-    return await this.authService.login(dto);
+    const message = await this.authService.login(dto);
+    return { message };
   }
 
   @Post('/resend-verification')
   @ApiOperation({ summary: 'Send email verification link' })
   async sendVerification(@Body() dto: EmailDTO) {
-    return await this.authService.sendVerification(dto.email);
+    const message = await this.authService.sendVerification(dto.email);
+    return { message };
   }
 
   @Get('/verify-email')
   @ApiExcludeEndpoint()
   async verifyEmail(@Query() dto: VerifyEmailDTO) {
-    return await this.authService.verifyEmail(dto);
+    const message = await this.authService.verifyEmail(dto);
+    return { message };
   }
 
   @Post('/forgot-password')
   @ApiOperation({ summary: 'Send password reset link' })
   async forgotpassword(@Body() dto: EmailDTO) {
-    return await this.authService.forgotPasswordService(dto.email);
+    const message = await this.authService.forgotPasswordService(dto.email);
+    return { message };
   }
 
   @Post('/reset-password')
@@ -54,6 +58,10 @@ export class AuthController {
     @Query() passwordTokenId: ResetPasswordTokenIdDTO,
     @Body() dto: ResetPasswordDTO,
   ) {
-    return await this.authService.resetPasswordService(passwordTokenId, dto);
+    const message = await this.authService.resetPasswordService(
+      passwordTokenId,
+      dto,
+    );
+    return { message };
   }
 }
