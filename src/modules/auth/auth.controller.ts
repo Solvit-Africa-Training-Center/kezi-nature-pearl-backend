@@ -36,7 +36,7 @@ export class AuthController {
   @Post('/resend-verification')
   @ApiOperation({ summary: 'Send email verification link' })
   async sendVerification(@Body() dto: EmailDTO) {
-    this.authService.sendVerification(dto.email);
+    await this.authService.sendVerification(dto.email);
     return 'Account Verification Link Sent';
   }
 
