@@ -33,12 +33,12 @@ import { JwtModule } from '@nestjs/jwt';
     PasswordResetTokenModule,
     IngredientModule,
   ],
-  providers: [
-    {
-      provide: APP_FILTER,
-      useClass: AllExceptionsFilter,
-    },
-  ],
+  // providers: [
+  //   {
+  //     provide: APP_FILTER,
+  //     useClass: AllExceptionsFilter,
+  //   },
+  // ],
   controllers: [],
 })
 export class AppModule {}
