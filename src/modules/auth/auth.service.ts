@@ -126,6 +126,7 @@ export class AuthService {
       });
       return 'Account Verification Link Sent';
     } catch (error) {
+      console.log(error);
       throw new HttpException(
         {
           status: HttpStatus.FORBIDDEN,
