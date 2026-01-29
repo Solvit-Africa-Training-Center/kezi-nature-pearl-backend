@@ -58,42 +58,45 @@ export class AuthService {
   }
 
   async sendVerification(email: string) {
-    const user = await this.userService.findOne({ email });
+    try {
+      const user = await this.userService.findOne({ email });
 
-    if (!user) throw new Error('User not found');
+      if (!user) throw new Error('User not found');
 
-    const token = randomBytes(32).toString('hex');
-    const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
+      const token = randomBytes(32).toString('hex');
+      const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
 
-    const existingToken = await this.emailVerificationTokenService.findOne({
-      userId: user.userId,
-    });
-
-    let emailverificationToken: EmailVerificationToken;
-
-    if (!existingToken) {
-      emailverificationToken = await this.emailVerificationTokenService.create({
+      const existingToken = await this.emailVerificationTokenService.findOne({
         userId: user.userId,
-        token: hashContent(token),
-        expiresAt,
       });
-    } else {
-      const updateToken: UpdateEmailVerificationTokenDTO = {
-        token: hashContent(token),
-        expiresAt,
-      };
-      emailverificationToken = await this.emailVerificationTokenService.update(
-        existingToken.id,
-        updateToken,
-      );
-    }
 
-    const link = `http://localhost:${this.configService.get<number>('server.port')}/${this.configService.get<number>('server.prefix')}/auth/verify-email/?id=${emailverificationToken.id}&token=${token}`;
+      let emailverificationToken: EmailVerificationToken;
 
-    await this.mailService.sendMail({
-      to: email,
-      subject: 'Welcome To Kezi Natural Pearl',
-      html: `
+      if (!existingToken) {
+        emailverificationToken =
+          await this.emailVerificationTokenService.create({
+            userId: user.userId,
+            token: hashContent(token),
+            expiresAt,
+          });
+      } else {
+        const updateToken: UpdateEmailVerificationTokenDTO = {
+          token: hashContent(token),
+          expiresAt,
+        };
+        emailverificationToken =
+          await this.emailVerificationTokenService.update(
+            existingToken.id,
+            updateToken,
+          );
+      }
+
+      const link = `http://localhost:${this.configService.get<number>('server.port')}/${this.configService.get<number>('server.prefix')}/auth/verify-email/?id=${emailverificationToken.id}&token=${token}`;
+
+      await this.mailService.sendMail({
+        to: email,
+        subject: 'Welcome To Kezi Natural Pearl',
+        html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.6;">
           <p>Please verify your email by clicking the button below:</p>
 
@@ -114,9 +117,12 @@ export class AuthService {
           </a>
         </div>
       `,
-      text: `Hello ${user.fullName}`,
-    });
-    return 'Account Verification Link Sent';
+        text: `Hello ${user.fullName}`,
+      });
+      return 'Account Verification Link Sent';
+    } catch (error) {
+      throw new error();
+    }
   }
 
   async verifyEmail(verifiyEmailDTO: VerifyEmailDTO) {
