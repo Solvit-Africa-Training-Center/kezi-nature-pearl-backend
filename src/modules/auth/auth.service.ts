@@ -102,8 +102,6 @@ export class AuthService {
 
       const link = `${host}/${this.configService.get<number>('server.prefix')}/auth/verify-email/?id=${emailverificationToken.id}&token=${token}`;
 
-      console.log(link);
-
       await this.mailService.sendMail({
         to: email,
         subject: 'Welcome To Kezi Natural Pearl',
@@ -203,7 +201,11 @@ export class AuthService {
       );
     }
 
-    const link = `http://localhost:${this.configService.get<number>('server.port')}/auth/verify-email/?id=${passwordResetToken.id}&token=${token}`;
+    const host = this.configService.get<number>('server.backend_source')
+      ? `${this.configService.get<number>('server.backend_source')}`
+      : `http://localhost:${this.configService.get<number>('server.port')}`;
+
+    const link = `${host}/${this.configService.get<number>('server.prefix')}/auth/verify-email/?id=${passwordResetToken.id}&token=${token}`;
 
     await this.mailService.sendMail({
       to: email,
