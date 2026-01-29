@@ -28,7 +28,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Login User' })
   async login(@Body() dto: LoginDTO) {
     const message = await this.authService.login(dto);
-    return { message };
+    return message;
   }
 
   @Post('/resend-verification')
