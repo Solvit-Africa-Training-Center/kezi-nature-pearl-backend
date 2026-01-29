@@ -16,10 +16,6 @@ class ProductBaseDTO {
   description: string;
 
   @ApiProperty()
-  @IsString()
-  productCode: string;
-
-  @ApiProperty()
   @IsEnum(productStatusEnum)
   status: productStatusEnum;
 
@@ -32,7 +28,6 @@ export class ProductDTO extends PartialType(
   PickType(ProductBaseDTO, [
     'name',
     'description',
-    'productCode',
     'status',
     'categoryId',
     'productId',
@@ -42,18 +37,11 @@ export class ProductDTO extends PartialType(
 export class CreateProductDTO extends PickType(ProductBaseDTO, [
   'name',
   'description',
-  'productCode',
   'categoryId',
 ]) {}
 
 export class UpdateProductDTO extends PartialType(
-  PickType(ProductBaseDTO, [
-    'name',
-    'description',
-    'productCode',
-    'categoryId',
-    'status',
-  ]),
+  PickType(ProductBaseDTO, ['name', 'description', 'categoryId', 'status']),
 ) {}
 
 export class IdProductDTO extends PickType(ProductBaseDTO, ['productId']) {}
