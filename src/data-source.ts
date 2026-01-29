@@ -11,6 +11,7 @@ import { EmailVerificationToken } from './modules/emailVerificationToken/emailVe
 import { PasswordResetToken } from './modules/passwordResetToken/passwordResetToken.entity';
 import { envDetermine } from './config/database.config';
 import { Order } from './modules/orders/entities/order.entity';
+import { Contact } from './modules/contactus/entities/contactus.entity';
 
 const envi = envDetermine() || 'DEV';
 
@@ -33,7 +34,8 @@ export const AppDataSource = new DataSource({
     Ingredient,
     EmailVerificationToken,
     PasswordResetToken,
-    Order
+    Order,
+    Contact,
   ],
   migrations: ['src/migrations/*.{ts,js}'],
   synchronize: false,

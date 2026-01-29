@@ -12,6 +12,7 @@ import { EmailVerificationTokenModule } from './modules/emailVerificationToken/e
 import { PasswordResetTokenModule } from './modules/passwordResetToken/passwordResetToken.module';
 import { IngredientModule } from './modules/ingredient/ingredient.module';
 import { OrdersModule } from './modules/orders/orders.module';
+import { ContactusModule } from './modules/contactus/contactus.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { OrdersModule } from './modules/orders/orders.module';
     PasswordResetTokenModule,
     IngredientModule,
     OrdersModule,
+    ContactusModule,
   ],
   providers: [],
   controllers: [],
