@@ -32,7 +32,7 @@ export class TokenService {
     return {
       accessToken: await this.jwtService.signAsync(payload, {
         secret: accessSecret,
-        expiresIn: '1M',
+        expiresIn: '15M',
       }),
       refreshToken: await this.jwtService.signAsync(payload, {
         secret: refreshSecret,

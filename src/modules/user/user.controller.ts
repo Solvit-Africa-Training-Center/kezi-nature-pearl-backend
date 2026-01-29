@@ -26,7 +26,6 @@ import type { Payload } from 'src/util/token.service';
 
 @Controller('user')
 @UseGuards(AuthGuard)
-@UseGuards(RoleGuard)
 @ApiBearerAuth()
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -36,11 +35,18 @@ export class UserController {
   @Get('me')
   @ApiOperation({ summary: 'Get User Profile' })
   async getMe(@User() user: Payload) {
-    return await this.userService.findOne({ userId: user.sub });
+    const data = await this.userService.findOne({ userId: user.sub });
+    return {
+      fullName: data?.fullName,
+      email: data?.email,
+      phoneNumber: data?.phoneNumber,
+      role: data?.role,
+    };
   }
 
   //admin
   @Get()
+  @UseGuards(RoleGuard)
   @Roles(userRoleEnum.ADMIN)
   @ApiOperation({ summary: 'List Users' })
   async find() {
@@ -48,14 +54,15 @@ export class UserController {
   }
 
   @Get('/:id')
+  @UseGuards(RoleGuard)
   @Roles(userRoleEnum.ADMIN)
   @ApiOperation({ summary: 'Find User By Id' })
   async findById(@Param() param: UserIdDTO) {
-    const data = await this.userService.findOne({ userId: param.userId });
-    return { data };
+    return await this.userService.findOne({ userId: param.userId });
   }
 
   @Get('/search')
+  @UseGuards(RoleGuard)
   @Roles(userRoleEnum.ADMIN)
   @ApiOperation({ summary: 'Search User' })
   async searchUser(@Query() queries: UserDTO) {
@@ -63,6 +70,7 @@ export class UserController {
   }
 
   @Post()
+  @UseGuards(RoleGuard)
   @Roles(userRoleEnum.ADMIN)
   @ApiOperation({ summary: 'Create Admin' })
   async createAdmin(@Body() dto: CreateAdminDTO) {
@@ -71,6 +79,8 @@ export class UserController {
   }
 
   // @Patch()
+  // @UseGuards(RoleGuard)
+  // @Roles(userRoleEnum.ADMIN)
   // @ApiOperation({ summary: 'Update User Profile' })
   // async updateProfile(@Body() dto: UpdateUserProfile) {
   //   await this.userService.update(dto);
@@ -78,6 +88,7 @@ export class UserController {
   // }
 
   @Delete('/delete/:userId')
+  @UseGuards(RoleGuard)
   @Roles(userRoleEnum.ADMIN)
   @ApiOperation({ summary: 'Delete Admin' })
   async deleteUser(@Param() params: UserIdDTO) {
@@ -86,6 +97,7 @@ export class UserController {
   }
 
   @Delete('/remove/:userId')
+  @UseGuards(RoleGuard)
   @Roles(userRoleEnum.ADMIN)
   @ApiOperation({ summary: 'Remove Admin' })
   async removeUser(@Param() params: UserIdDTO) {
