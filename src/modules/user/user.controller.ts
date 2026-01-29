@@ -21,7 +21,7 @@ export class UserController {
     return await this.userService.find();
   }
 
-  @Get(':id')
+  @Get('/search')
   @ApiOperation({ summary: 'Search User' })
   async searchUser(@Query() queries: UserDTO) {
     return await this.userService.find(queries);

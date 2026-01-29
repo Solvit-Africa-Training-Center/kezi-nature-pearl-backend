@@ -39,6 +39,10 @@ async function bootstrap() {
   //   allowedHeaders: ['Content-Type', 'Authorization'],
   // });
 
+  app.enableCors({
+    origin: true,
+  });
+
   const config = new DocumentBuilder()
     .setTitle('Kezi Natural Pearl')
     .setVersion('1.0')
