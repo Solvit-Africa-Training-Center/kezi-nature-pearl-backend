@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { LoginDTO, RegisterDTO, ResetPasswordDTO } from './auth.dto';
 import { UserService } from '../user/user.service';
 import { comparehashContent, hashContent } from 'src/util/lib';
@@ -121,7 +126,16 @@ export class AuthService {
       });
       return 'Account Verification Link Sent';
     } catch (error) {
-      throw new error();
+      throw new HttpException(
+        {
+          status: HttpStatus.FORBIDDEN,
+          error: 'This is a custom message',
+        },
+        HttpStatus.FORBIDDEN,
+        {
+          cause: error,
+        },
+      );
     }
   }
 
