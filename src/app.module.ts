@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, UseFilters } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import serverConfig from './config/server.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -11,6 +11,9 @@ import mailConfig from './config/mail.config';
 import { EmailVerificationTokenModule } from './modules/emailVerificationToken/emailVerificationToken.module';
 import { PasswordResetTokenModule } from './modules/passwordResetToken/passwordResetToken.module';
 import { IngredientModule } from './modules/ingredient/ingredient.module';
+import { APP_FILTER } from '@nestjs/core';
+import { AllExceptionsFilter } from './common/filters/HttpExceptionFilter';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -19,6 +22,9 @@ import { IngredientModule } from './modules/ingredient/ingredient.module';
       load: [serverConfig, mailConfig],
     }),
     TypeOrmModule.forRootAsync(databaseConfig.asProvider()),
+    JwtModule.register({
+      global: true,
+    }),
     UserModule,
     AuthModule,
     CategoryModule,
@@ -27,7 +33,12 @@ import { IngredientModule } from './modules/ingredient/ingredient.module';
     PasswordResetTokenModule,
     IngredientModule,
   ],
-  providers: [],
+  providers: [
+    {
+      provide: APP_FILTER,
+      useClass: AllExceptionsFilter,
+    },
+  ],
   controllers: [],
 })
 export class AppModule {}

@@ -6,6 +6,7 @@ import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true, // Automatically transforms payloads to the appropriate DTO types
@@ -46,6 +47,7 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('Kezi Natural Pearl')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
 
   const documentFactory = () => SwaggerModule.createDocument(app, config);

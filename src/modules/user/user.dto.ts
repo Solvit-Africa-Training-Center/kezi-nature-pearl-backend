@@ -48,4 +48,10 @@ export class CreateAdminDTO extends PickType(UserBaseDTO, [
   role: userRoleEnum = userRoleEnum.ADMIN;
 }
 
+export class UpdateUserProfile extends PartialType(
+  PickType(UserBaseDTO, ['email', 'password', 'phoneNumber', 'fullName']),
+) {
+  role: userRoleEnum = userRoleEnum.ADMIN;
+}
+
 export class UserIdDTO extends PickType(UserBaseDTO, ['userId']) {}

@@ -15,6 +15,7 @@ describe('UserController', () => {
           provide: UserService,
           useValue: {
             find: jest.fn(),
+            searchUser: jest.fn(),
           },
         },
       ],
@@ -30,7 +31,7 @@ describe('UserController', () => {
 
       userService.find.mockResolvedValue(result);
 
-      const users = await userController.listUsers();
+      const users = await userController.find();
 
       expect(users).toEqual(result);
       expect(userService.find).toHaveBeenCalled();

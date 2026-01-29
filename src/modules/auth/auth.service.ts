@@ -17,6 +17,7 @@ import {
   ResetPasswordTokenIdDTO,
   UpdatePasswordResetTokenDTO,
 } from '../passwordResetToken/passwordresettoken.dto';
+import { TokenService } from 'src/util/token.service';
 
 @Injectable()
 export class AuthService {
@@ -26,6 +27,7 @@ export class AuthService {
     private readonly emailVerificationTokenService: EmailverificationTokenService,
     private readonly passwordResetTokenService: PasswordResetTokenService,
     private readonly mailService: MailService,
+    private readonly tokenService: TokenService,
   ) {}
   async register(user: RegisterDTO) {
     const newuser = await this.userService.create({
@@ -33,7 +35,7 @@ export class AuthService {
       password: hashContent(user.password),
     });
     await this.sendVerification(newuser.email);
-    return;
+    return 'User Registered Successfully';
   }
 
   async login(dto: LoginDTO) {
@@ -50,7 +52,9 @@ export class AuthService {
 
     if (!user.emailVerifiedAt) throw new Error('Account not verified');
 
-    return user;
+    const token = (await this.tokenService.generateToken(user)).accessToken;
+
+    return { message: 'User Login Successfully', token };
   }
 
   async sendVerification(email: string) {
@@ -112,6 +116,7 @@ export class AuthService {
       `,
       text: `Hello ${user.fullName}`,
     });
+    return 'Account Verification Link Sent';
   }
 
   async verifyEmail(verifiyEmailDTO: VerifyEmailDTO) {
@@ -136,7 +141,8 @@ export class AuthService {
     await this.emailVerificationTokenService.delete(emailVerificationToken.id);
     user.emailVerifiedAt = new Date();
 
-    return await this.userService.update(user);
+    await this.userService.update(user);
+    return 'Account Verified  Successfully';
   }
 
   async forgotPasswordService(email: string) {
@@ -201,6 +207,7 @@ export class AuthService {
       `,
       text: `Hello ${user.fullName}`,
     });
+    return 'Password Reset Link sent';
   }
 
   async resetPasswordService(
@@ -230,6 +237,6 @@ export class AuthService {
     user.emailVerifiedAt = new Date();
 
     await this.userService.update(user);
-    return 'Password Change';
+    return 'Password Reset Successfully';
   }
 }
