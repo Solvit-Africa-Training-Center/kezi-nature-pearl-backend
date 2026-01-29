@@ -96,7 +96,7 @@ export class AuthService {
           );
       }
 
-      const link = `http://localhost:${this.configService.get<number>('server.port')}/${this.configService.get<number>('server.prefix')}/auth/verify-email/?id=${emailverificationToken.id}&token=${token}`;
+      const link = `https://${this.configService.get<string>('server.backend_source')}:${this.configService.get<number>('server.port')}/${this.configService.get<number>('server.prefix')}/auth/verify-email/?id=${emailverificationToken.id}&token=${token}`;
 
       await this.mailService.sendMail({
         to: email,
