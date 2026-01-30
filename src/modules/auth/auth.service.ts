@@ -150,9 +150,11 @@ export class AuthService {
 
     await this.userService.update(user);
 
+    const host = this.configService.get<string>('server.host');
+
     const token = (await this.tokenService.generateToken(user)).accessToken;
 
-    return { message: 'User Login Successfully', token };
+    return `${host}/verification-successful?token=${token}`;
   }
 
   async forgotPasswordService(email: string) {
@@ -186,9 +188,7 @@ export class AuthService {
       );
     }
 
-    const host = this.configService.get<number>('server.backend_source')
-      ? `${this.configService.get<number>('server.backend_source')}`
-      : `http://localhost:${this.configService.get<number>('server.port')}`;
+    const host = this.configService.get<string>('server.host');
 
     const link = `${host}/${this.configService.get<number>('server.prefix')}/auth/verify-email/?id=${passwordResetToken.id}&token=${token}`;
 
