@@ -62,6 +62,14 @@ describe('ContactusService', () => {
     expect(repo.findOne).toHaveBeenCalledWith({ where: { id: '999' } });
   });
 
-  
+  it('should return all contacts', async () => {
+    const contact = { id: '1', name: 'John' };
+    repo.find.mockResolvedValue(contact as any)
+
+    const result = await service.findAll();
+
+    expect(repo.find).toHaveBeenCalled();
+    expect(result).toEqual(contact as any);
+  });
   
 });

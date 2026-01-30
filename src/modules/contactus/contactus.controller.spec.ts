@@ -53,5 +53,12 @@ describe('ContactusController', () => {
     expect(service.findOne).toHaveBeenCalledWith(id);
     expect(response).toEqual(result);
   });
+  it('should get all contacts', async () => {
+    const id = '22'
+    const result = await controller.findAll();
+
+    expect(result).toEqual(result);
+    expect(service.findAll).toHaveBeenCalled();
+  });
  
 });
