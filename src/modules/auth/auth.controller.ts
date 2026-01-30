@@ -33,9 +33,9 @@ export class AuthController {
 
   @Get('/verify-email')
   @ApiExcludeEndpoint()
-  async verifyEmail(@Query() dto: VerifyEmailDTO, @Res() res: Response) {
-    const origin = String(await this.authService.verifyEmail(dto));
-    res.redirect(origin);
+  async verifyEmail(@Query() dto: VerifyEmailDTO) {
+    const data = await this.authService.verifyEmail(dto);
+    return data;
   }
 
   @Post('/forgot-password')

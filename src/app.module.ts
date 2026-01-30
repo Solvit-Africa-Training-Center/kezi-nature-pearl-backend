@@ -12,7 +12,7 @@ import { EmailVerificationTokenModule } from './modules/emailVerificationToken/e
 import { PasswordResetTokenModule } from './modules/passwordResetToken/passwordResetToken.module';
 import { IngredientModule } from './modules/ingredient/ingredient.module';
 import { APP_FILTER } from '@nestjs/core';
-import { AllExceptionsFilter } from './common/filters/HttpExceptionFilter';
+import { AllExceptionsFilter } from './common/filters/AllExceptionFilter';
 import { JwtModule } from '@nestjs/jwt';
 import { OrdersModule } from './modules/orders/orders.module';
 import { ContactusModule } from './modules/contactus/contactus.module';
@@ -37,12 +37,12 @@ import { ContactusModule } from './modules/contactus/contactus.module';
     OrdersModule,
     ContactusModule,
   ],
-  // providers: [
-  //   {
-  //     provide: APP_FILTER,
-  //     useClass: AllExceptionsFilter,
-  //   },
-  // ],
+  providers: [
+    {
+      provide: APP_FILTER,
+      useClass: AllExceptionsFilter,
+    },
+  ],
   controllers: [],
 })
 export class AppModule {}

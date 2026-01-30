@@ -149,7 +149,10 @@ export class AuthService {
     user.emailVerifiedAt = new Date();
 
     await this.userService.update(user);
-    return this.configService.get<string>('server.origin');
+
+    const token = (await this.tokenService.generateToken(user)).accessToken;
+
+    return { message: 'User Login Successfully', token };
   }
 
   async forgotPasswordService(email: string) {
