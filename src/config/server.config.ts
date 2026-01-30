@@ -6,5 +6,5 @@ export default registerAs('server', () => ({
   origin: process.env.FRONTEND_SOURCE,
   jwt_access_secret: process.env.JWT_ACCESS_SECRET,
   jwt_refresh_secret: process.env.JWT_REFRESH_SECRET,
-  host: process.env.BACKEND_SOURCE || `http//localhost:${process.env.PORT}`,
+  host: process.env.BACKEND_SOURCE || `http://localhost:${process.env.PORT}`,
 }));

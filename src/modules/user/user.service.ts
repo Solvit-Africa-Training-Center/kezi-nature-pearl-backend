@@ -27,7 +27,6 @@ export class UserService {
   async findOne(filter: Partial<User>) {
     return await this.userRepo.findOne({
       where: filter,
-      select: ['email', 'fullName', 'phoneNumber', 'profile'],
     });
   }
 
@@ -44,6 +43,7 @@ export class UserService {
     exist.email = user.email ?? exist.email;
     exist.fullName = user.fullName ?? exist.fullName;
     exist.phoneNumber = user.phoneNumber ?? exist.phoneNumber;
+    exist.emailVerifiedAt = user.emailVerifiedAt ?? exist.emailVerifiedAt;
 
     if (options) {
       if (options.currentPassword && options.newPassword) {

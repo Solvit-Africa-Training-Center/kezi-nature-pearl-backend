@@ -63,47 +63,46 @@ export class AuthService {
   }
 
   async sendVerification(email: string) {
-    try {
-      const user = await this.userService.findOne({ email });
+    const user = await this.userService.findOne({ email });
 
-      if (!user) throw new Error('User not found');
+    if (!user) throw new Error('User not found');
 
-      const token = randomBytes(32).toString('hex');
-      const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
+    const token = randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
 
-      const existingToken = await this.emailVerificationTokenService.findOne({
+    const existingToken = await this.emailVerificationTokenService.findOne({
+      userId: user.userId,
+    });
+
+    console.log('userId: ', user.userId);
+
+    let emailverificationToken: EmailVerificationToken;
+
+    if (!existingToken) {
+      emailverificationToken = await this.emailVerificationTokenService.create({
         userId: user.userId,
+        token: hashContent(token),
+        expiresAt,
       });
+    } else {
+      const updateToken: UpdateEmailVerificationTokenDTO = {
+        token: hashContent(token),
+        expiresAt,
+      };
+      emailverificationToken = await this.emailVerificationTokenService.update(
+        existingToken.id,
+        updateToken,
+      );
+    }
 
-      let emailverificationToken: EmailVerificationToken;
+    const host = this.configService.get<string>('server.host');
 
-      if (!existingToken) {
-        emailverificationToken =
-          await this.emailVerificationTokenService.create({
-            userId: user.userId,
-            token: hashContent(token),
-            expiresAt,
-          });
-      } else {
-        const updateToken: UpdateEmailVerificationTokenDTO = {
-          token: hashContent(token),
-          expiresAt,
-        };
-        emailverificationToken =
-          await this.emailVerificationTokenService.update(
-            existingToken.id,
-            updateToken,
-          );
-      }
+    const link = `${host}/${this.configService.get<number>('server.prefix')}/auth/verify-email/?id=${emailverificationToken.id}&token=${token}`;
 
-      const host = this.configService.get<number>('server.host');
-
-      const link = `${host}/${this.configService.get<number>('server.prefix')}/auth/verify-email/?id=${emailverificationToken.id}&token=${token}`;
-
-      await this.mailService.sendMail({
-        to: email,
-        subject: 'Welcome To Kezi Natural Pearl',
-        html: `
+    await this.mailService.sendMail({
+      to: email,
+      subject: 'Welcome To Kezi Natural Pearl',
+      html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.6;">
           <p>Please verify your email by clicking the button below:</p>
 
@@ -124,22 +123,9 @@ export class AuthService {
           </a>
         </div>
       `,
-        text: `Hello ${user.fullName}`,
-      });
-      return 'Account Verification Link Sent';
-    } catch (error) {
-      console.log(error);
-      throw new HttpException(
-        {
-          status: HttpStatus.FORBIDDEN,
-          error: 'This is a custom message',
-        },
-        HttpStatus.FORBIDDEN,
-        {
-          cause: error,
-        },
-      );
-    }
+      text: `Hello ${user.fullName}`,
+    });
+    return 'Account Verification Link Sent';
   }
 
   async verifyEmail(verifiyEmailDTO: VerifyEmailDTO) {
