@@ -11,14 +11,11 @@ import mailConfig from './config/mail.config';
 import { EmailVerificationTokenModule } from './modules/emailVerificationToken/emailVerificationToken.module';
 import { PasswordResetTokenModule } from './modules/passwordResetToken/passwordResetToken.module';
 import { IngredientModule } from './modules/ingredient/ingredient.module';
-<<<<<<< HEAD
 import { APP_FILTER } from '@nestjs/core';
 import { AllExceptionsFilter } from './common/filters/HttpExceptionFilter';
 import { JwtModule } from '@nestjs/jwt';
-=======
 import { OrdersModule } from './modules/orders/orders.module';
 import { ContactusModule } from './modules/contactus/contactus.module';
->>>>>>> 1a4ad2e4bb23b5de087b39ce70e32bb506bba72d
 
 @Module({
   imports: [
@@ -47,6 +44,5 @@ import { ContactusModule } from './modules/contactus/contactus.module';
   //   },
   // ],
   controllers: [],
-
 })
 export class AppModule {}

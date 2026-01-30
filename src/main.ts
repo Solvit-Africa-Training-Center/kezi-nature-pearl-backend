@@ -17,6 +17,8 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const port: number = Number(configService.get<number>('server.port'));
   const prefix: string = String(configService.get<string>('server.prefix'));
+  const host: string = String(configService.get<string>('server.host'));
+
   // const origin: string = String(configService.get<string>('server.origin'));
 
   // if (!origin) {
@@ -40,17 +42,13 @@ async function bootstrap() {
   //   allowedHeaders: ['Content-Type', 'Authorization'],
   // });
 
-<<<<<<< HEAD
   app.enableCors({
     origin: true,
   });
 
-  const config = new DocumentBuilder()
-=======
-  app.setGlobalPrefix('api/v1');
+  app.setGlobalPrefix(prefix);
 
   const swaggerConfig = new DocumentBuilder()
->>>>>>> 1a4ad2e4bb23b5de087b39ce70e32bb506bba72d
     .setTitle('Kezi Natural Pearl')
     .setVersion('1.0')
     .addBearerAuth()
@@ -64,7 +62,7 @@ async function bootstrap() {
 
   await app.listen(port, () => {
     console.log(`Server running on port ${port}`);
-    console.log(`Swagger docs at http://localhost:${port}/${prefix}/docs`);
+    console.log(`Swagger docs at ${host}/${prefix}/docs`);
   });
 }
 bootstrap();

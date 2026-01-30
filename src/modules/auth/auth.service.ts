@@ -96,9 +96,7 @@ export class AuthService {
           );
       }
 
-      const host = this.configService.get<number>('server.backend_source')
-        ? `${this.configService.get<number>('server.backend_source')}`
-        : `http://localhost:${this.configService.get<number>('server.port')}`;
+      const host = this.configService.get<number>('server.host');
 
       const link = `${host}/${this.configService.get<number>('server.prefix')}/auth/verify-email/?id=${emailverificationToken.id}&token=${token}`;
 
