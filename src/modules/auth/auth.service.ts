@@ -74,8 +74,6 @@ export class AuthService {
       userId: user.userId,
     });
 
-    console.log('userId: ', user.userId);
-
     let emailverificationToken: EmailVerificationToken;
 
     if (!existingToken) {
@@ -151,7 +149,7 @@ export class AuthService {
     user.emailVerifiedAt = new Date();
 
     await this.userService.update(user);
-    return 'Account Verified  Successfully';
+    return this.configService.get<string>('server.origin');
   }
 
   async forgotPasswordService(email: string) {
