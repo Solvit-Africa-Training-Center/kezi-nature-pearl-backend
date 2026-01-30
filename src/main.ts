@@ -9,8 +9,8 @@ async function bootstrap() {
 
   app.useGlobalPipes(
     new ValidationPipe({
-      transform: true, // Automatically transforms payloads to the appropriate DTO types
-      whitelist: true, // Strips any properties not defined in DTO
+      transform: true,
+      whitelist: true,
     }),
   );
 
@@ -40,25 +40,31 @@ async function bootstrap() {
   //   allowedHeaders: ['Content-Type', 'Authorization'],
   // });
 
+<<<<<<< HEAD
   app.enableCors({
     origin: true,
   });
 
   const config = new DocumentBuilder()
+=======
+  app.setGlobalPrefix('api/v1');
+
+  const swaggerConfig = new DocumentBuilder()
+>>>>>>> 1a4ad2e4bb23b5de087b39ce70e32bb506bba72d
     .setTitle('Kezi Natural Pearl')
     .setVersion('1.0')
     .addBearerAuth()
     .build();
 
-  const documentFactory = () => SwaggerModule.createDocument(app, config);
+  const documentFactory = () =>
+    SwaggerModule.createDocument(app, swaggerConfig);
   // if (process.env.NODE_ENV !== 'production') {
   SwaggerModule.setup(`/${prefix}/docs`, app, documentFactory);
   // }
 
-  app.setGlobalPrefix(prefix);
-
   await app.listen(port, () => {
     console.log(`Server running on port ${port}`);
+    console.log(`Swagger docs at http://localhost:${port}/${prefix}/docs`);
   });
 }
 bootstrap();
