@@ -3,41 +3,111 @@ import { OrdersService } from './orders.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Order } from './entities/order.entity';
 import { Repository } from 'typeorm';
+import { OrdersController } from './orders.controller';
 
-describe('OrdersService', () => {
-  let service: OrdersService;
-  let repo: jest.Mocked<Repository<Order>>;
+describe('OrdersController', () => {
+  let controller: OrdersController;
+  let service: jest.Mocked<OrdersService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      controllers: [OrdersController],
       providers: [
-        OrdersService,
         {
-          provide: getRepositoryToken(Order),
+          // We replace the real OrdersService with a fake one
+          provide: OrdersService,
           useValue: {
             create: jest.fn(),
-            save: jest.fn(),
-            find: jest.fn(),
+            findAll: jest.fn(),
             findOne: jest.fn(),
-            merge: jest.fn(),
-            softDelete: jest.fn(),
+            update: jest.fn(),
+            remove: jest.fn(),
           },
         },
       ],
     }).compile();
 
-    service = module.get<OrdersService>(OrdersService);
-    repo = module.get(getRepositoryToken(Order));
+    controller = module.get<OrdersController>(OrdersController);
+    service = module.get(OrdersService);
   });
 
+  it('should be defined', () => {
+    expect(controller).toBeDefined();
+  });
+
+  // ---------------- CREATE ----------------
+  it('should create an order', async () => {
+    const dto = {
+      user_id: '123',
+      total_amount: 100,
+    };
+
+    const result = { order_id: '1', ...dto };
+
+    // Fake what the service returns
+    service.create.mockResolvedValue(result as any);
+
+    const response = await controller.create(dto as any);
+
+    // Controller must call service.create with dto
+    expect(service.create).toHaveBeenCalledWith(dto);
+
+    // Controller must return service result
+    expect(response).toEqual(result);
+  });
+
+  // ---------------- FIND ALL ----------------
   it('should return all orders', async () => {
-    const orders = [{ order_id: '1' }] as Order[];
+    const result = [{ order_id: '1' }, { order_id: '2' }];
 
-    repo.find.mockResolvedValue(orders);
+    service.findAll.mockResolvedValue(result as any);
 
-    const result = await service.findAll();
+    const response = await controller.findAll();
 
-    expect(result).toEqual(orders);
-    expect(repo.find).toHaveBeenCalled();
+    expect(service.findAll).toHaveBeenCalled();
+    expect(response).toEqual(result);
+  });
+
+  // ---------------- FIND ONE ----------------
+  it('should return one order by id', async () => {
+    const order_id = '1';
+    const result = { order_id, total_amount: 100 };
+
+    service.findOne.mockResolvedValue(result as any);
+
+    const response = await controller.findOne(order_id);
+
+    expect(service.findOne).toHaveBeenCalledWith(order_id);
+    expect(response).toEqual(result);
+  });
+
+  // ---------------- UPDATE ----------------
+  it('should update an order', async () => {
+    const order_id = '1';
+    const dto = { total_amount: 200 };
+    const result = { order_id, ...dto };
+
+    service.update.mockResolvedValue(result as any);
+
+    const response = await controller.update(order_id, dto as any);
+
+    expect(service.update).toHaveBeenCalledWith(order_id, dto);
+    expect(response).toEqual(result);
+  });
+
+  // ---------------- DELETE ----------------
+  it('should delete an order', async () => {
+    const order_id = '1';
+    const result = {
+      message: 'Order deleted successfully',
+      order_id,
+    };
+
+    service.remove.mockResolvedValue(result as any);
+
+    const response = await controller.remove(order_id);
+
+    expect(service.remove).toHaveBeenCalledWith(order_id);
+    expect(response).toEqual(result);
   });
 });

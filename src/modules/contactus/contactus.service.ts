@@ -26,20 +26,8 @@ export class ContactusService {
     return contact;
   }
 
-  async update(id: string, dto: UpdateContactusDto): Promise<Contact> {
-    const contact = await this.contactRepo.findOne({ where: { id } });
-    if (!contact) {
-      throw new NotFoundException(`Contact with ID ${id} not found`);
-    }
-    const updated = this.contactRepo.merge(contact, dto);
-    return this.contactRepo.save(updated);
-  }
-
-  async remove(id: number) {
-    const result = await this.contactRepo.softDelete(id); 
-    if (result.affected === 0) {
-      return { message: 'Contact not found or already deleted' };
-    }
-    return { message: 'Contact deleted successfully', id };
+  async findAll(): Promise<Contact[]> {
+   
+    return this.contactRepo.find();
   }
 }
