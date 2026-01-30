@@ -8,8 +8,8 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(
     new ValidationPipe({
-      transform: true, // Automatically transforms payloads to the appropriate DTO types
-      whitelist: true, // Strips any properties not defined in DTO
+      transform: true,
+      whitelist: true,
     }),
   );
 
@@ -39,20 +39,22 @@ async function bootstrap() {
   //   allowedHeaders: ['Content-Type', 'Authorization'],
   // });
 
-  const config = new DocumentBuilder()
+  app.setGlobalPrefix('api/v1');
+
+  const swaggerConfig = new DocumentBuilder()
     .setTitle('Kezi Natural Pearl')
     .setVersion('1.0')
     .build();
 
-  const documentFactory = () => SwaggerModule.createDocument(app, config);
+  const documentFactory = () =>
+    SwaggerModule.createDocument(app, swaggerConfig);
   // if (process.env.NODE_ENV !== 'production') {
   SwaggerModule.setup(`/${prefix}/docs`, app, documentFactory);
   // }
 
-  app.setGlobalPrefix(prefix);
-
   await app.listen(port, () => {
     console.log(`Server running on port ${port}`);
+    console.log(`Swagger docs at http://localhost:${port}/${prefix}/docs`);
   });
 }
 bootstrap();

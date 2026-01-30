@@ -11,6 +11,8 @@ import mailConfig from './config/mail.config';
 import { EmailVerificationTokenModule } from './modules/emailVerificationToken/emailVerificationToken.module';
 import { PasswordResetTokenModule } from './modules/passwordResetToken/passwordResetToken.module';
 import { IngredientModule } from './modules/ingredient/ingredient.module';
+import { OrdersModule } from './modules/orders/orders.module';
+import { ContactusModule } from './modules/contactus/contactus.module';
 
 @Module({
   imports: [
@@ -26,8 +28,11 @@ import { IngredientModule } from './modules/ingredient/ingredient.module';
     EmailVerificationTokenModule,
     PasswordResetTokenModule,
     IngredientModule,
+    OrdersModule,
+    ContactusModule,
   ],
   providers: [],
   controllers: [],
+
 })
 export class AppModule {}
