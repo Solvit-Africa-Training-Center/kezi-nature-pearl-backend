@@ -31,17 +31,35 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   //me
-
   @Get('me')
   @ApiOperation({ summary: 'Get User Profile' })
-  async getMe(@User() user: Payload) {
-    const data = await this.userService.findOne({ userId: user.sub });
-    return {
-      fullName: data?.fullName,
-      email: data?.email,
-      phoneNumber: data?.phoneNumber,
-      role: data?.role,
-    };
+  async getMe(@User() logedUser: Payload) {
+    return await this.userService.findOne({ userId: logedUser.sub });
+  }
+
+  @Patch('me')
+  @ApiOperation({ summary: 'Update User Profile' })
+  async updateProfile(
+    @User() logedUser: Payload,
+    @Body() dto: UpdateUserProfile,
+  ) {
+    await this.userService.update(
+      {
+        userId: logedUser.sub,
+        email: dto.email,
+        fullName: dto.fullName,
+        phoneNumber: dto.phoneNumber,
+      },
+      { currentPassword: dto.currentPassword, newPassword: dto.newPassword },
+    );
+    return 'User Updated';
+  }
+
+  @Delete('/me')
+  @ApiOperation({ summary: 'Delete Me' })
+  async deleteUser(@User() logedUser: Payload) {
+    await this.userService.softDelete({ userId: logedUser.sub });
+    return 'User Deleted';
   }
 
   //admin
@@ -87,19 +105,19 @@ export class UserController {
   //   return 'User Created';
   // }
 
-  @Delete('/delete/:userId')
-  @UseGuards(RoleGuard)
-  @Roles(userRoleEnum.ADMIN)
-  @ApiOperation({ summary: 'Delete Admin' })
-  async deleteUser(@Param() params: UserIdDTO) {
-    await this.userService.softDelete(params);
-    return 'User Deleted';
-  }
+  // @Delete('/delete/:userId')
+  // @UseGuards(RoleGuard)
+  // @Roles(userRoleEnum.ADMIN)
+  // @ApiOperation({ summary: 'Delete Admin' })
+  // async deleteUser(@Param() params: UserIdDTO) {
+  //   await this.userService.softDelete(params);
+  //   return 'User Deleted';
+  // }
 
   @Delete('/remove/:userId')
   @UseGuards(RoleGuard)
   @Roles(userRoleEnum.ADMIN)
-  @ApiOperation({ summary: 'Remove Admin' })
+  @ApiOperation({ summary: 'Remove User' })
   async removeUser(@Param() params: UserIdDTO) {
     await this.userService.hardDelete(params);
     return 'User Removed';
