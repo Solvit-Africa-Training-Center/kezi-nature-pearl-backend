@@ -1,10 +1,9 @@
-import { Body, Controller, Get, Post, Query, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { ApiExcludeEndpoint, ApiOperation } from '@nestjs/swagger';
 import { EmailDTO, LoginDTO, RegisterDTO, ResetPasswordDTO } from './auth.dto';
 import { AuthService } from './auth.service';
 import { VerifyEmailDTO } from '../emailVerificationToken/emailVerification.dto';
 import { ResetPasswordTokenIdDTO } from '../passwordResetToken/passwordresettoken.dto';
-import type { Response } from 'express';
 
 @Controller('Auth')
 export class AuthController {
@@ -33,9 +32,9 @@ export class AuthController {
 
   @Get('/verify-email')
   @ApiExcludeEndpoint()
-  async verifyEmail(@Query() dto: VerifyEmailDTO, @Res() res: Response) {
-    const toSite = await this.authService.verifyEmail(dto);
-    res.redirect(toSite);
+  async verifyEmail(@Query() dto: VerifyEmailDTO) {
+    const message = await this.authService.verifyEmail(dto);
+    return message;
   }
 
   @Post('/forgot-password')

@@ -154,7 +154,7 @@ export class AuthService {
 
     const token = (await this.tokenService.generateToken(user)).accessToken;
 
-    return `${origin}/verification-successful?token=${token}`;
+    return { message: 'User Login Successfully', token };
   }
 
   async forgotPasswordService(email: string) {
