@@ -7,10 +7,12 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { QueryFailedError } from 'typeorm';
+import { LoggerService } from '../logger/logger.service';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
-  private readonly logger = new Logger(AllExceptionsFilter.name);
+  // private readonly logger = new Logger(AllExceptionsFilter.name);
+  constructor(private readonly logger: LoggerService) {}
 
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
@@ -39,19 +41,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
     this.logException(exception, request, status);
 
     response.status(status).json(errorResponse);
-  }
-
-  private getExceptionHandler(exception: unknown) {
-    if (exception instanceof HttpException) {
-      return this.handleHttpException;
-    }
-    if (exception instanceof QueryFailedError) {
-      return this.handleQueryFailedError;
-    }
-    if (exception instanceof Error) {
-      return this.handleGenericError;
-    }
-    return this.handleUnknownError;
   }
 
   private handleHttpException(exception: HttpException, request: Request) {

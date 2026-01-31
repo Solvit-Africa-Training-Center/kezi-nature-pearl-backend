@@ -24,18 +24,12 @@ export class MailService {
     text?: string;
     html?: string;
   }) {
-    try {
-      await sgMail.send({
-        to: options.to,
-        from: this.from,
-        subject: options.subject,
-        text: options.to ?? '',
-        html: options.html,
-      });
-    } catch (error) {
-      if (error.response) {
-        console.error(error.response.body);
-      }
-    }
+    await sgMail.send({
+      to: options.to,
+      from: this.from,
+      subject: options.subject,
+      text: options.to ?? '',
+      html: options.html,
+    });
   }
 }

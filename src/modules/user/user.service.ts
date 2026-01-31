@@ -24,9 +24,10 @@ export class UserService {
     return await this.userRepo.find({ where: filter });
   }
 
-  async findOne(filter: Partial<User>) {
+  async findOne(filter: Partial<User>, withDeleted?: boolean) {
     return await this.userRepo.findOne({
       where: filter,
+      withDeleted,
     });
   }
 

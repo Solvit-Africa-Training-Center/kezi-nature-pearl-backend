@@ -6,10 +6,11 @@ import { EmailVerificationTokenModule } from '../emailVerificationToken/emailVer
 import { MailService } from 'src/util/mail.service';
 import { PasswordResetTokenModule } from '../passwordResetToken/passwordResetToken.module';
 import { TokenService } from 'src/util/token.service';
+import { LoggerService } from 'src/common/logger/logger.service';
 
 @Module({
   imports: [UserModule, EmailVerificationTokenModule, PasswordResetTokenModule],
-  providers: [AuthService, MailService, TokenService],
+  providers: [AuthService, MailService, TokenService, LoggerService],
   controllers: [AuthController],
 })
 export class AuthModule {}

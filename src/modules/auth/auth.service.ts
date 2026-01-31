@@ -1,6 +1,6 @@
 import {
-  HttpException,
-  HttpStatus,
+  BadRequestException,
+  ForbiddenException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -35,12 +35,19 @@ export class AuthService {
     private readonly tokenService: TokenService,
   ) {}
   async register(user: RegisterDTO) {
+    const { password, ...query } = user;
+    const exist = await this.userService.findOne(query, true);
+
+    if (exist && exist.deletedAt != null) {
+      await this.userService.hardDelete({ userId: exist.userId });
+    }
+
     const newuser = await this.userService.create({
       ...user,
       password: hashContent(user.password),
     });
     await this.sendVerification(newuser.email);
-    return 'User Registered Successfully';
+    return { message: 'User Registered Successfully' };
   }
 
   async login(dto: LoginDTO) {
@@ -55,7 +62,8 @@ export class AuthService {
     if (!user || !comparehashContent(user.password, dto.password))
       throw new UnauthorizedException('Invalid Credentials');
 
-    if (!user.emailVerifiedAt) throw new Error('Account not verified');
+    if (!user.emailVerifiedAt)
+      throw new ForbiddenException('Account not verified');
 
     const token = (await this.tokenService.generateToken(user)).accessToken;
 
@@ -65,7 +73,7 @@ export class AuthService {
   async sendVerification(email: string) {
     const user = await this.userService.findOne({ email });
 
-    if (!user) throw new Error('User not found');
+    if (!user) return { message: 'Account Verification Link Sent' };
 
     const token = randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
@@ -123,7 +131,7 @@ export class AuthService {
       `,
       text: `Hello ${user.fullName}`,
     });
-    return 'Account Verification Link Sent';
+    return { message: 'Account Verification Link Sent' };
   }
 
   async verifyEmail(verifiyEmailDTO: VerifyEmailDTO) {
@@ -137,13 +145,13 @@ export class AuthService {
       emailVerificationToken.expiresAt < new Date() ||
       !comparehashContent(emailVerificationToken.token, verifiyEmailDTO.token)
     )
-      throw new Error('Invalid or expired Token');
+      throw new BadRequestException('Invalid or expired Token');
 
     const user = await this.userService.findOne({
       userId: emailVerificationToken.userId,
     });
 
-    if (!user) throw new Error('Invalid or expired Token');
+    if (!user) throw new BadRequestException('Invalid or expired Token');
 
     await this.emailVerificationTokenService.delete(emailVerificationToken.id);
     user.emailVerifiedAt = new Date();
@@ -157,10 +165,10 @@ export class AuthService {
     return { message: 'User Login Successfully', token };
   }
 
-  async forgotPasswordService(email: string) {
+  async forgotPassword(email: string) {
     const user = await this.userService.findOne({ email });
 
-    if (!user) throw new Error('User not found');
+    if (!user) return { message: 'Password Reset Link sent' };
 
     const token = randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
@@ -221,10 +229,10 @@ export class AuthService {
       `,
       text: `Hello ${user.fullName}`,
     });
-    return 'Password Reset Link sent';
+    return { message: 'Password Reset Link sent' };
   }
 
-  async resetPasswordService(
+  async resetPassword(
     passwordTokenId: ResetPasswordTokenIdDTO,
     passwordDTO: ResetPasswordDTO,
   ) {
@@ -237,13 +245,13 @@ export class AuthService {
       passwordResetToken.expiresAt < new Date() ||
       !comparehashContent(passwordResetToken.token, passwordTokenId.token)
     )
-      throw new Error('Invalid or expired Tokens');
+      throw new BadRequestException('Invalid or expired Tokens');
 
     const user = await this.userService.findOne({
       userId: passwordResetToken.userId,
     });
 
-    if (!user) throw new Error('Invalid or expired Token');
+    if (!user) throw new BadRequestException('Invalid or expired Token');
 
     user.password = hashContent(passwordDTO.password);
 
@@ -251,6 +259,6 @@ export class AuthService {
     user.emailVerifiedAt = new Date();
 
     await this.userService.update(user);
-    return 'Password Reset Successfully';
+    return { message: 'Password Reset Successfully' };
   }
 }

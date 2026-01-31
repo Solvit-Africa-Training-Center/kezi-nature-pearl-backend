@@ -1,4 +1,4 @@
-import { Module, UseFilters } from '@nestjs/common';
+import { MiddlewareConsumer, Module, UseFilters } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import serverConfig from './config/server.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -11,11 +11,13 @@ import mailConfig from './config/mail.config';
 import { EmailVerificationTokenModule } from './modules/emailVerificationToken/emailVerificationToken.module';
 import { PasswordResetTokenModule } from './modules/passwordResetToken/passwordResetToken.module';
 import { IngredientModule } from './modules/ingredient/ingredient.module';
-import { APP_FILTER } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { AllExceptionsFilter } from './common/filters/AllExceptionFilter';
 import { JwtModule } from '@nestjs/jwt';
 import { OrdersModule } from './modules/orders/orders.module';
 import { ContactusModule } from './modules/contactus/contactus.module';
+import { LoggerService } from './common/logger/logger.service';
+import { RequestLoggerMiddleware } from './common/middleware/request-logger.middleware';
 
 @Module({
   imports: [
@@ -38,11 +40,17 @@ import { ContactusModule } from './modules/contactus/contactus.module';
     ContactusModule,
   ],
   providers: [
+    LoggerService,
     {
       provide: APP_FILTER,
+
       useClass: AllExceptionsFilter,
     },
   ],
   controllers: [],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RequestLoggerMiddleware).forRoutes('*');
+  }
+}

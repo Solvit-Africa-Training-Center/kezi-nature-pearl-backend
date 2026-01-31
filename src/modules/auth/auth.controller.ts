@@ -4,43 +4,52 @@ import { EmailDTO, LoginDTO, RegisterDTO, ResetPasswordDTO } from './auth.dto';
 import { AuthService } from './auth.service';
 import { VerifyEmailDTO } from '../emailVerificationToken/emailVerification.dto';
 import { ResetPasswordTokenIdDTO } from '../passwordResetToken/passwordresettoken.dto';
+import { LoggerService } from 'src/common/logger/logger.service';
 
 @Controller('Auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    // private readonly logger: LoggerService,
+  ) {}
 
   @Post('/register')
   @ApiOperation({ summary: 'Register User' })
   async register(@Body() dto: RegisterDTO) {
-    const message = await this.authService.register(dto);
+    const { message } = await this.authService.register(dto);
+    // this.logger.log(message, 'AuthController');
     return { message };
   }
 
   @Post('/login')
   @ApiOperation({ summary: 'Login User' })
   async login(@Body() dto: LoginDTO) {
-    const message = await this.authService.login(dto);
-    return message;
+    const { message, token } = await this.authService.login(dto);
+    // this.logger.log(message, 'AuthController');
+    return { message, token };
   }
 
   @Post('/resend-verification')
   @ApiOperation({ summary: 'Send email verification link' })
   async sendVerification(@Body() dto: EmailDTO) {
-    const message = await this.authService.sendVerification(dto.email);
+    const { message } = await this.authService.sendVerification(dto.email);
+    // this.logger.log(message, 'AuthController');
     return { message };
   }
 
   @Get('/verify-email')
   @ApiExcludeEndpoint()
   async verifyEmail(@Query() dto: VerifyEmailDTO) {
-    const message = await this.authService.verifyEmail(dto);
-    return message;
+    const { message, token } = await this.authService.verifyEmail(dto);
+    // this.logger.log(message, 'AuthController');
+    return { message, token };
   }
 
   @Post('/forgot-password')
   @ApiOperation({ summary: 'Send password reset link' })
   async forgotpassword(@Body() dto: EmailDTO) {
-    const message = await this.authService.forgotPasswordService(dto.email);
+    const { message } = await this.authService.forgotPassword(dto.email);
+    // this.logger.log(message, 'AuthController');
     return { message };
   }
 
@@ -50,10 +59,11 @@ export class AuthController {
     @Query() passwordTokenId: ResetPasswordTokenIdDTO,
     @Body() dto: ResetPasswordDTO,
   ) {
-    const message = await this.authService.resetPasswordService(
+    const { message } = await this.authService.resetPassword(
       passwordTokenId,
       dto,
     );
+    // this.logger.log(message, 'AuthController');
     return { message };
   }
 }
