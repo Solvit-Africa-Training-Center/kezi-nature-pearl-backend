@@ -43,6 +43,7 @@ export class UserService {
     exist.email = user.email ?? exist.email;
     exist.fullName = user.fullName ?? exist.fullName;
     exist.phoneNumber = user.phoneNumber ?? exist.phoneNumber;
+    exist.password = user.password ?? exist.password;
     exist.emailVerifiedAt = user.emailVerifiedAt ?? exist.emailVerifiedAt;
 
     if (options) {
