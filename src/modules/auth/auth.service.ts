@@ -150,11 +150,11 @@ export class AuthService {
 
     await this.userService.update(user);
 
-    const host = this.configService.get<string>('server.host');
+    const origin = this.configService.get<string>('server.origin');
 
     const token = (await this.tokenService.generateToken(user)).accessToken;
 
-    return `${host}/verification-successful?token=${token}`;
+    return `${origin}/verification-successful?token=${token}`;
   }
 
   async forgotPasswordService(email: string) {
