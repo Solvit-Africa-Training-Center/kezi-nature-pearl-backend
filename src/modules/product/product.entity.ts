@@ -1,4 +1,4 @@
-import { productStatusEnum } from '../../common/enums/productStatus.enum';
+import { productStatusEnum } from '@/common/enums/productStatus.enum';
 import {
   Column,
   CreateDateColumn,

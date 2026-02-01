@@ -1,6 +1,6 @@
-import { IsUUID, IsNumber, IsString, IsEnum} from "class-validator";
-import { ApiProperty } from "@nestjs/swagger";
-import { ordersStatusEnum } from "src/common/enums/orders.enum";
+import { IsUUID, IsNumber, IsEnum } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { ordersStatusEnum } from '@/common/enums/orders.enum';
 
 export class CreateOrderDto {
   @ApiProperty({ format: 'uuid' })

@@ -1,21 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import nodemailer, { Transporter } from 'nodemailer';
-import SMTPTransport from 'nodemailer/lib/smtp-transport';
-import mailConfig from 'src/config/mail.config';
+import sgMail from '@sendgrid/mail';
 
 @Injectable()
 export class MailService {
-  private readonly transporter: Transporter;
+  private readonly apiKey: string;
+  private readonly from: string;
 
   constructor(private readonly configService: ConfigService) {
-    const mailconfig = this.configService.get<SMTPTransport.Options>('mail');
+    this.apiKey = String(this.configService.get<string>('mail.send_grid_api'));
+    this.from = String(this.configService.get<string>('mail.from'));
 
-    if (!mailconfig) {
-      throw new Error('Mail configuration is missing');
+    if (!this.apiKey) {
+      throw new Error('SendGrid API key is missing');
     }
 
-    this.transporter = nodemailer.createTransport(mailconfig);
+    sgMail.setApiKey(this.apiKey);
   }
 
   async sendMail(options: {
@@ -24,15 +24,12 @@ export class MailService {
     text?: string;
     html?: string;
   }) {
-    // await this.transporter.verify(); // DEBUG (remove later)
-
-    await this.transporter.sendMail({
-      from: 'KEZI Natural Pearl',
+    await sgMail.send({
       to: options.to,
+      from: this.from,
       subject: options.subject,
-      text: options.text,
+      text: options.to ?? '',
       html: options.html,
     });
-    console.log('Mail Sent');
   }
 }

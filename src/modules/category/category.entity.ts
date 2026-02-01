@@ -1,4 +1,4 @@
-import { productCategoryEnum } from '../../common/enums/productCategory.enum';
+import { productCategoryEnum } from '@/common/enums/productCategory.enum';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Product } from '../product/product.entity';
 

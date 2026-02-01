@@ -1,17 +1,24 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { LoginDTO, RegisterDTO, ResetPasswordDTO } from './auth.dto';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+
+import { randomBytes } from 'crypto';
+import { ConfigService } from '@nestjs/config';
 import { UserService } from '../user/user.service';
-import { comparehashContent, hashContent } from 'src/util/lib';
 import { EmailverificationTokenService } from '../emailVerificationToken/emailVerificationToken.service';
+import { PasswordResetTokenService } from '../passwordResetToken/passwordResetToken.service';
+import { MailService } from '@/util/mail.service';
+import { TokenService } from '@/util/token.service';
+import { LoginDTO, RegisterDTO, ResetPasswordDTO } from './auth.dto';
+import { comparehashContent, hashContent } from '@/util/lib';
 import {
   UpdateEmailVerificationTokenDTO,
   VerifyEmailDTO,
 } from '../emailVerificationToken/emailVerification.dto';
 import { EmailVerificationToken } from '../emailVerificationToken/emailVerification.entity';
-import { randomBytes } from 'crypto';
-import { ConfigService } from '@nestjs/config';
-import { MailService } from 'src/util/mail.service';
-import { PasswordResetTokenService } from '../passwordResetToken/passwordResetToken.service';
 import { PasswordResetToken } from '../passwordResetToken/passwordResetToken.entity';
 import {
   ResetPasswordTokenIdDTO,
@@ -26,14 +33,34 @@ export class AuthService {
     private readonly emailVerificationTokenService: EmailverificationTokenService,
     private readonly passwordResetTokenService: PasswordResetTokenService,
     private readonly mailService: MailService,
+    private readonly tokenService: TokenService,
   ) {}
   async register(user: RegisterDTO) {
+    const { password, ...query } = user;
+    const existEmail = await this.userService.findOne(
+      { email: user.email },
+      { withDeleted: true },
+    );
+
+    if (existEmail && existEmail.deletedAt != null) {
+      await this.userService.hardDelete({ userId: existEmail.userId });
+    }
+
+    const existPhoneNumber = await this.userService.findOne(
+      { phoneNumber: user.phoneNumber },
+      { withDeleted: true },
+    );
+
+    if (existPhoneNumber && existPhoneNumber.deletedAt != null) {
+      await this.userService.hardDelete({ userId: existPhoneNumber.userId });
+    }
+
     const newuser = await this.userService.create({
       ...user,
       password: hashContent(user.password),
     });
     await this.sendVerification(newuser.email);
-    return;
+    return { message: 'User Registered Successfully' };
   }
 
   async login(dto: LoginDTO) {
@@ -48,15 +75,18 @@ export class AuthService {
     if (!user || !comparehashContent(user.password, dto.password))
       throw new UnauthorizedException('Invalid Credentials');
 
-    if (!user.emailVerifiedAt) throw new Error('Account not verified');
+    if (!user.emailVerifiedAt)
+      throw new ForbiddenException('Account not verified');
 
-    return user;
+    const token = (await this.tokenService.generateToken(user)).accessToken;
+
+    return { message: 'User Login Successfully', token };
   }
 
   async sendVerification(email: string) {
     const user = await this.userService.findOne({ email });
 
-    if (!user) throw new Error('User not found');
+    if (!user) return { message: 'Account Verification Link Sent' };
 
     const token = randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
@@ -84,7 +114,9 @@ export class AuthService {
       );
     }
 
-    const link = `http://localhost:${this.configService.get<number>('server.port')}/${this.configService.get<number>('server.prefix')}/auth/verify-email/?id=${emailverificationToken.id}&token=${token}`;
+    const host = this.configService.get<string>('server.host');
+
+    const link = `${host}/${this.configService.get<number>('server.prefix')}/auth/verify-email/?id=${emailverificationToken.id}&token=${token}`;
 
     await this.mailService.sendMail({
       to: email,
@@ -112,6 +144,7 @@ export class AuthService {
       `,
       text: `Hello ${user.fullName}`,
     });
+    return { message: 'Account Verification Link Sent' };
   }
 
   async verifyEmail(verifiyEmailDTO: VerifyEmailDTO) {
@@ -125,24 +158,30 @@ export class AuthService {
       emailVerificationToken.expiresAt < new Date() ||
       !comparehashContent(emailVerificationToken.token, verifiyEmailDTO.token)
     )
-      throw new Error('Invalid or expired Token');
+      throw new BadRequestException('Invalid or expired Token');
 
     const user = await this.userService.findOne({
       userId: emailVerificationToken.userId,
     });
 
-    if (!user) throw new Error('Invalid or expired Token');
+    if (!user) throw new BadRequestException('Invalid or expired Token');
 
     await this.emailVerificationTokenService.delete(emailVerificationToken.id);
     user.emailVerifiedAt = new Date();
 
-    return await this.userService.update(user);
+    await this.userService.update(user);
+
+    const origin = this.configService.get<string>('server.origin');
+
+    const token = (await this.tokenService.generateToken(user)).accessToken;
+
+    return { message: 'User Login Successfully', token };
   }
 
-  async forgotPasswordService(email: string) {
+  async forgotPassword(email: string) {
     const user = await this.userService.findOne({ email });
 
-    if (!user) throw new Error('User not found');
+    if (!user) return { message: 'Password Reset Link sent' };
 
     const token = randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
@@ -170,7 +209,9 @@ export class AuthService {
       );
     }
 
-    const link = `http://localhost:${this.configService.get<number>('server.port')}/auth/verify-email/?id=${passwordResetToken.id}&token=${token}`;
+    const host = this.configService.get<string>('server.host');
+
+    const link = `${host}/${this.configService.get<number>('server.prefix')}/auth/verify-email/?id=${passwordResetToken.id}&token=${token}`;
 
     await this.mailService.sendMail({
       to: email,
@@ -201,9 +242,10 @@ export class AuthService {
       `,
       text: `Hello ${user.fullName}`,
     });
+    return { message: 'Password Reset Link sent' };
   }
 
-  async resetPasswordService(
+  async resetPassword(
     passwordTokenId: ResetPasswordTokenIdDTO,
     passwordDTO: ResetPasswordDTO,
   ) {
@@ -216,13 +258,13 @@ export class AuthService {
       passwordResetToken.expiresAt < new Date() ||
       !comparehashContent(passwordResetToken.token, passwordTokenId.token)
     )
-      throw new Error('Invalid or expired Tokens');
+      throw new BadRequestException('Invalid or expired Tokens');
 
     const user = await this.userService.findOne({
       userId: passwordResetToken.userId,
     });
 
-    if (!user) throw new Error('Invalid or expired Token');
+    if (!user) throw new BadRequestException('Invalid or expired Token');
 
     user.password = hashContent(passwordDTO.password);
 
@@ -230,6 +272,6 @@ export class AuthService {
     user.emailVerifiedAt = new Date();
 
     await this.userService.update(user);
-    return 'Password Change';
+    return { message: 'Password Reset Successfully' };
   }
 }

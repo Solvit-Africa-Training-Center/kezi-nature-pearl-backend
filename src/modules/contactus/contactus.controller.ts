@@ -28,6 +28,16 @@ export class ContactusController {
 
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<Contact> {
-    return await this.contactusService.findOne(id);
+    return await this.contactusService.findOne(id);}
+  
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() dto: UpdateContactusDto) {
+    return this.contactusService.update(id, dto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.contactusService.remove(+id);
   }
 }

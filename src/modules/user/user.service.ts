@@ -1,14 +1,21 @@
-import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
-import { User } from './user.entity';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { FindOneOptions, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateAdminDTO, UserIdDTO } from './user.dto';
+import { User } from './user.entity';
+import { FileService } from '../file/file.service';
+import { CreateAdminDTO, UserIdDTO } from './dto/user-request.dto';
+import { comparehashContent } from '@/util/lib';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
+    private readonly fileSerive: FileService,
   ) {}
 
   async create(user: CreateAdminDTO) {
@@ -19,12 +26,55 @@ export class UserService {
     return await this.userRepo.find({ where: filter });
   }
 
-  async findOne(filter: Partial<User>) {
-    return await this.userRepo.findOne({ where: filter });
+  async findOne(
+    filter: Partial<User>,
+    options?: Omit<FindOneOptions<User>, 'where'>,
+  ) {
+    const user = await this.userRepo.findOne({
+      where: filter,
+      ...options,
+    });
+
+    return user;
   }
 
-  async update(user: User) {
-    return await this.userRepo.save(user);
+  async update(
+    user: Partial<User>,
+    options?: {
+      profilePicture?: Express.Multer.File;
+      fileType?: string;
+      currentPassword?: string;
+      newPassword?: string;
+    },
+  ) {
+    const exist = await this.findOne({ userId: user.userId });
+    if (!exist) throw new NotFoundException('User not found.');
+
+    exist.email = user.email ?? exist.email;
+    exist.fullName = user.fullName ?? exist.fullName;
+    exist.phoneNumber = user.phoneNumber ?? exist.phoneNumber;
+    exist.password = user.password ?? exist.password;
+    exist.role = user.role ?? exist.role;
+    exist.emailVerifiedAt = user.emailVerifiedAt ?? exist.emailVerifiedAt;
+
+    if (options) {
+      if (options.currentPassword && options.newPassword) {
+        if (!comparehashContent(exist.password, options.currentPassword))
+          throw new BadRequestException('Current password is incorrect.');
+
+        exist.password = options.newPassword;
+      }
+
+      if (options.profilePicture && options.fileType) {
+        const newFile = await this.fileSerive.save(
+          options.profilePicture,
+          options.fileType,
+        );
+        exist.profile = newFile.fileId;
+      }
+    }
+
+    return await this.userRepo.save(exist);
   }
 
   async softDelete(params: UserIdDTO) {
