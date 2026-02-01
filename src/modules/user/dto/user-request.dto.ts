@@ -68,10 +68,11 @@ export class UpdateUserProfile extends PartialType(
 
   @ApiPropertyOptional({
     type: 'file',
+    format: 'binary',
     description: 'User Profile Picture',
   })
   @IsOptional()
-  profilePicture?: any;
+  profilePicture?: Express.Multer.File;
 }
 
 export class UpdateUserRole extends PickType(UserBaseDTO, ['role']) {}

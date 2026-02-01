@@ -34,7 +34,20 @@ export class FileUploadInterceptor implements NestInterceptor {
       },
     });
 
-    const upload = multer({ storage }).single(this.fieldName);
+    const fileFilter = (_req: Request, file: Express.Multer.File, cb: any) => {
+      if (!file.mimetype.startsWith('image/')) {
+        return cb(
+          new BadRequestException('Only image files are allowed!'),
+          false,
+        );
+      }
+      cb(null, true);
+    };
+
+    const upload = this.maxCount
+      ? multer({ storage, fileFilter }).array(this.fieldName, this.maxCount)
+      : multer({ storage, fileFilter }).single(this.fieldName);
+
     return new Promise((resolve, reject) => {
       upload(req, res, (err: any) => {
         if (err) {
