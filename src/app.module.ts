@@ -20,12 +20,13 @@ import { LoggerService } from './common/logger/logger.service';
 import { RequestLoggerMiddleware } from './common/middleware/request-logger.middleware';
 import { FileModule } from './modules/file/file.module';
 import cloudinaryConfig from './config/cloudinary.config';
+import swaggerConfig from './config/swagger.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [serverConfig, mailConfig, cloudinaryConfig],
+      load: [serverConfig, mailConfig, cloudinaryConfig, swaggerConfig],
     }),
     TypeOrmModule.forRootAsync(databaseConfig.asProvider()),
     JwtModule.register({

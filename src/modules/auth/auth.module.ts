@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { AuthController } from './auth.controller';
 import { UserModule } from '../user/user.module';
 import { EmailVerificationTokenModule } from '../emailVerificationToken/emailVerificationToken.module';
-import { MailService } from 'src/util/mail.service';
 import { PasswordResetTokenModule } from '../passwordResetToken/passwordResetToken.module';
-import { TokenService } from 'src/util/token.service';
-import { LoggerService } from 'src/common/logger/logger.service';
+import { AuthService } from './auth.service';
+import { MailService } from '@/util/mail.service';
+import { TokenService } from '@/util/token.service';
+import { LoggerService } from '@/common/logger/logger.service';
+import { AuthController } from './auth.controller';
 
 @Module({
   imports: [UserModule, EmailVerificationTokenModule, PasswordResetTokenModule],

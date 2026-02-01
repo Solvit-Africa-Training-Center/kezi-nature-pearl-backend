@@ -4,25 +4,26 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { LoginDTO, RegisterDTO, ResetPasswordDTO } from './auth.dto';
+
+import { randomBytes } from 'crypto';
+import { ConfigService } from '@nestjs/config';
 import { UserService } from '../user/user.service';
-import { comparehashContent, hashContent } from 'src/util/lib';
 import { EmailverificationTokenService } from '../emailVerificationToken/emailVerificationToken.service';
+import { PasswordResetTokenService } from '../passwordResetToken/passwordResetToken.service';
+import { MailService } from '@/util/mail.service';
+import { TokenService } from '@/util/token.service';
+import { LoginDTO, RegisterDTO, ResetPasswordDTO } from './auth.dto';
+import { comparehashContent, hashContent } from '@/util/lib';
 import {
   UpdateEmailVerificationTokenDTO,
   VerifyEmailDTO,
 } from '../emailVerificationToken/emailVerification.dto';
 import { EmailVerificationToken } from '../emailVerificationToken/emailVerification.entity';
-import { randomBytes } from 'crypto';
-import { ConfigService } from '@nestjs/config';
-import { MailService } from 'src/util/mail.service';
-import { PasswordResetTokenService } from '../passwordResetToken/passwordResetToken.service';
 import { PasswordResetToken } from '../passwordResetToken/passwordResetToken.entity';
 import {
   ResetPasswordTokenIdDTO,
   UpdatePasswordResetTokenDTO,
 } from '../passwordResetToken/passwordresettoken.dto';
-import { TokenService } from 'src/util/token.service';
 
 @Injectable()
 export class AuthService {

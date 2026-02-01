@@ -1,10 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Order } from './entities/order.entity';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
-import { ordersStatusEnum } from '../../common/enums/orders.enum';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Order } from './entities/order.entity';
-import { Repository } from 'typeorm';
 
 @Injectable()
 export class OrdersService {
@@ -32,7 +31,6 @@ export class OrdersService {
     });
   }
 
-  
   async update(order_id: string, dto: UpdateOrderDto): Promise<Order> {
     const order = await this.orderRepo.findOne({ where: { order_id } });
 
@@ -52,6 +50,5 @@ export class OrdersService {
     }
 
     return { message: 'Order deleted successfully', order_id };
-  };
-  
+  }
 }

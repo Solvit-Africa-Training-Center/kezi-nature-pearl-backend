@@ -1,8 +1,8 @@
+import { userRoleEnum } from '@/common/enums/userRole.enum';
+import { User } from '@/modules/user/user.entity';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { userRoleEnum } from 'src/common/enums/userRole.enum';
-import { User } from 'src/modules/user/user.entity';
 
 export interface Payload {
   sub: string;

@@ -1,3 +1,4 @@
+import { AuthGuard } from '@/common/guards/auth.guard';
 import {
   Body,
   Controller,
@@ -12,7 +13,13 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+
+import { ApiBearerAuth, ApiConsumes, ApiOperation } from '@nestjs/swagger';
 import { UserService } from './user.service';
+import type { Payload } from '@/util/token.service';
+import { User } from '@/common/decorator/user.decorator';
+import { UserProfileResponseDto } from './dto/user-response.dto';
+import { FileUploadInterceptor } from '@/common/interceptors/file-upload.interceptor';
 import {
   CreateAdminDTO,
   UpdateUserProfile,
@@ -20,21 +27,9 @@ import {
   UserDTO,
   UserIdDTO,
 } from './dto/user-request.dto';
-import {
-  ApiBearerAuth,
-  ApiBody,
-  ApiConsumes,
-  ApiOperation,
-} from '@nestjs/swagger';
-import { RoleGuard } from 'src/common/guards/role.guard';
-import { AuthGuard } from 'src/common/guards/auth.guard';
-import { userRoleEnum } from 'src/common/enums/userRole.enum';
-import { Roles } from 'src/common/decorator/roles.decorator';
-import { User } from 'src/common/decorator/user.decorator';
-import type { Payload } from 'src/util/token.service';
-import { FileUploadInterceptor } from 'src/common/interceptors/file-upload.interceptor';
-import { FileService } from '../file/file.service';
-import { UserProfileResponseDto } from './dto/user-response.dto';
+import { RoleGuard } from '@/common/guards/role.guard';
+import { userRoleEnum } from '@/common/enums/userRole.enum';
+import { Roles } from '@/common/decorator/roles.decorator';
 
 @Controller('user')
 @UseGuards(AuthGuard)

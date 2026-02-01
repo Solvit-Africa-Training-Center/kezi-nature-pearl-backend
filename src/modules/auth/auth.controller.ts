@@ -1,17 +1,13 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { ApiExcludeEndpoint, ApiOperation } from '@nestjs/swagger';
-import { EmailDTO, LoginDTO, RegisterDTO, ResetPasswordDTO } from './auth.dto';
 import { AuthService } from './auth.service';
+import { EmailDTO, LoginDTO, RegisterDTO, ResetPasswordDTO } from './auth.dto';
 import { VerifyEmailDTO } from '../emailVerificationToken/emailVerification.dto';
 import { ResetPasswordTokenIdDTO } from '../passwordResetToken/passwordresettoken.dto';
-import { LoggerService } from 'src/common/logger/logger.service';
 
 @Controller('Auth')
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    // private readonly logger: LoggerService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Post('/register')
   @ApiOperation({ summary: 'Register User' })

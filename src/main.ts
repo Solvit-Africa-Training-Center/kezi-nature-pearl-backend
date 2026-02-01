@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
+// import basicAuth from 'express-basic-auth';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -42,6 +43,18 @@ async function bootstrap() {
   });
 
   app.setGlobalPrefix(prefix);
+
+  // app.use(
+  //   [`/${prefix}/docs`],
+  //   basicAuth({
+  //     challenge: true,
+  //     users: {
+  //       [configService.get('swagger.swagger_user')!]: configService.get(
+  //         'swagger.swagger_pass',
+  //       )!,
+  //     },
+  //   }),
+  // );
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Kezi Natural Pearl')

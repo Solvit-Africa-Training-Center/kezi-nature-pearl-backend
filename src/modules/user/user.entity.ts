@@ -1,3 +1,5 @@
+import { userRoleEnum } from '@/common/enums/userRole.enum';
+import { userStatusEnum } from '@/common/enums/userStatus.enum';
 import {
   Column,
   CreateDateColumn,
@@ -8,10 +10,8 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { PasswordResetToken } from '../passwordResetToken/passwordResetToken.entity';
 import { EmailVerificationToken } from '../emailVerificationToken/emailVerification.entity';
-import { userRoleEnum } from '../../common/enums/userRole.enum';
-import { userStatusEnum } from '../../common/enums/userStatus.enum';
+import { PasswordResetToken } from '../passwordResetToken/passwordResetToken.entity';
 import { File } from '../file/entities/file.entity';
 
 @Entity('users')

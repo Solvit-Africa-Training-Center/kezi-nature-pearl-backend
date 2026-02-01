@@ -1,3 +1,4 @@
+import { ordersStatusEnum } from '@/common/enums/orders.enum';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -6,7 +7,6 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
 } from 'typeorm';
-import { ordersStatusEnum } from '../../../common/enums/orders.enum';
 
 @Entity('orders')
 export class Order {
