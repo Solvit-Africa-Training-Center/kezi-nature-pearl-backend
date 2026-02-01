@@ -36,10 +36,22 @@ export class AuthService {
   ) {}
   async register(user: RegisterDTO) {
     const { password, ...query } = user;
-    const exist = await this.userService.findOne(query, { withDeleted: true });
+    const existEmail = await this.userService.findOne(
+      { email: user.email },
+      { withDeleted: true },
+    );
 
-    if (exist && exist.deletedAt != null) {
-      await this.userService.hardDelete({ userId: exist.userId });
+    if (existEmail && existEmail.deletedAt != null) {
+      await this.userService.hardDelete({ userId: existEmail.userId });
+    }
+
+    const existPhoneNumber = await this.userService.findOne(
+      { phoneNumber: user.phoneNumber },
+      { withDeleted: true },
+    );
+
+    if (existPhoneNumber && existPhoneNumber.deletedAt != null) {
+      await this.userService.hardDelete({ userId: existPhoneNumber.userId });
     }
 
     const newuser = await this.userService.create({
