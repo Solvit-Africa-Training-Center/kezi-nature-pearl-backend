@@ -3,13 +3,13 @@ import { DataSource } from 'typeorm';
 import { config } from 'dotenv';
 config();
 
+import { envDetermine } from './config/database.config';
 import { User } from './modules/user/user.entity';
 import { Category } from './modules/category/category.entity';
 import { Product } from './modules/product/product.entity';
 import { Ingredient } from './modules/ingredient/entities/ingredient.entity';
 import { EmailVerificationToken } from './modules/emailVerificationToken/emailVerification.entity';
 import { PasswordResetToken } from './modules/passwordResetToken/passwordResetToken.entity';
-import { envDetermine } from './config/database.config';
 import { Order } from './modules/orders/entities/order.entity';
 import { Contact } from './modules/contactus/entities/contactus.entity';
 import { File } from './modules/file/entities/file.entity';
