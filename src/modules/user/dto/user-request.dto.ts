@@ -75,6 +75,6 @@ export class UpdateUserProfile extends PartialType(
   profilePicture?: Express.Multer.File;
 }
 
-export class UpdateUserRole extends PickType(UserBaseDTO, ['role']) {}
+export class UpdateUserRole extends PickType(UserBaseDTO, ['email', 'role']) {}
 
 export class UserIdDTO extends PickType(UserBaseDTO, ['userId']) {}

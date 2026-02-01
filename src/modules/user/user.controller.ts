@@ -16,6 +16,7 @@ import { UserService } from './user.service';
 import {
   CreateAdminDTO,
   UpdateUserProfile,
+  UpdateUserRole,
   UserDTO,
   UserIdDTO,
 } from './dto/user-request.dto';
@@ -122,14 +123,16 @@ export class UserController {
     return 'User Created';
   }
 
-  // @Patch()
-  // @UseGuards(RoleGuard)
-  // @Roles(userRoleEnum.ADMIN)
-  // @ApiOperation({ summary: 'Update User Profile' })
-  // async updateProfile(@Body() dto: UpdateUserProfile) {
-  //   await this.userService.update(dto);
-  //   return 'User Created';
-  // }
+  @Patch()
+  @UseGuards(RoleGuard)
+  @Roles(userRoleEnum.ADMIN)
+  @ApiOperation({ summary: 'Update User Role' })
+  async updateRole(@Body() dto: UpdateUserRole) {
+    const user = await this.userService.findOne({ email: dto.email });
+
+    await this.userService.update({ ...user, role: dto.role });
+    return 'User Role updated';
+  }
 
   // @Delete('/delete/:userId')
   // @UseGuards(RoleGuard)

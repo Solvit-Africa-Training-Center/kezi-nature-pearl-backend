@@ -54,6 +54,7 @@ export class UserService {
     exist.fullName = user.fullName ?? exist.fullName;
     exist.phoneNumber = user.phoneNumber ?? exist.phoneNumber;
     exist.password = user.password ?? exist.password;
+    exist.role = user.role ?? exist.role;
     exist.emailVerifiedAt = user.emailVerifiedAt ?? exist.emailVerifiedAt;
 
     if (options) {
