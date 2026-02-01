@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  NotFoundException,
   Param,
   Patch,
   Post,
@@ -48,6 +49,8 @@ export class UserController {
       { userId: logedUser.sub },
       { relations: ['file'] },
     );
+
+    if (!user) throw new NotFoundException('User not found');
 
     return new UserProfileResponseDto(user);
   }

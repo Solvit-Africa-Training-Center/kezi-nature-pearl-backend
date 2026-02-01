@@ -29,13 +29,12 @@ export class UserService {
   async findOne(
     filter: Partial<User>,
     options?: Omit<FindOneOptions<User>, 'where'>,
-  ): Promise<User> {
+  ) {
     const user = await this.userRepo.findOne({
       where: filter,
       ...options,
     });
 
-    if (!user) throw new NotFoundException('User not found');
     return user;
   }
 
