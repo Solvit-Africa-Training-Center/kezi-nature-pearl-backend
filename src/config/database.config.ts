@@ -8,6 +8,7 @@ import { Product } from '../modules/product/product.entity';
 import { User } from '../modules/user/user.entity';
 import { Order } from '../modules/orders/entities/order.entity';
 import { Contact } from '../modules/contactus/entities/contactus.entity';
+import { OrderItem } from 'src/modules/orderitem/entities/orderitem.entity';
 import { File } from '../modules/file/entities/file.entity';
 
 export function envDetermine(): string {
@@ -47,6 +48,7 @@ function connectDb(): TypeOrmModuleOptions {
       Ingredient,
       Order,
       Contact,
+      OrderItem,
       File,
     ],
     synchronize: false,

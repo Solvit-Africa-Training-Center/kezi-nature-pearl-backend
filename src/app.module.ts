@@ -16,6 +16,8 @@ import { AllExceptionsFilter } from './common/filters/AllExceptionFilter';
 import { JwtModule } from '@nestjs/jwt';
 import { OrdersModule } from './modules/orders/orders.module';
 import { ContactusModule } from './modules/contactus/contactus.module';
+import { OrderItemModule } from './modules/orderitem/orderitem.module';
+
 import { LoggerService } from './common/logger/logger.service';
 import { RequestLoggerMiddleware } from './common/middleware/request-logger.middleware';
 import { FileModule } from './modules/file/file.module';
@@ -41,6 +43,7 @@ import swaggerConfig from './config/swagger.config';
     IngredientModule,
     OrdersModule,
     ContactusModule,
+    OrderItemModule,
     FileModule,
   ],
   providers: [

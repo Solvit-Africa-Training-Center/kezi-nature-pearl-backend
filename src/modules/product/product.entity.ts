@@ -7,11 +7,13 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Category } from '../category/category.entity';
 import { Ingredient } from '../ingredient/entities/ingredient.entity';
+import { OrderItem } from '../orderitem/entities/orderitem.entity';
 
 @Entity('products')
 export class Product {
@@ -61,4 +63,7 @@ export class Product {
     },
   })
   ingredients: Ingredient[];
+
+  @OneToMany(()=> OrderItem, (orderitem)=>orderitem.product)
+  orderitems: OrderItem[];
 }

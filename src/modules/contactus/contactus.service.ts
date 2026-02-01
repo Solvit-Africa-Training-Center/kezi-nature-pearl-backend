@@ -24,6 +24,9 @@ export class ContactusService {
     return contact;
   }
 
+  async findAll(): Promise<Contact[]> {
+   
+    return this.contactRepo.find();}
   async update(id: string, dto: UpdateContactusDto): Promise<Contact> {
     const contact = await this.contactRepo.findOne({ where: { id } });
     if (!contact) {
