@@ -47,7 +47,7 @@ export class UserController {
   async getMe(@User() logedUser: Payload) {
     const user = await this.userService.findOne(
       { userId: logedUser.sub },
-      { relations: ['files'] },
+      { relations: ['file'] },
     );
 
     if (!user) throw new NotFoundException('User not found');
