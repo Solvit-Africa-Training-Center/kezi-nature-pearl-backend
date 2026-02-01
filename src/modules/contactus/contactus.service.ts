@@ -1,11 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Contact } from './entities/contactus.entity';
 import { CreateContactUsDto } from './dto/create-contactus.dto';
 import { UpdateContactusDto } from './dto/update-contactus.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Contact } from './entities/contactus.entity';
-import { Repository } from 'typeorm';
-import { NotFoundException } from '@nestjs/common';
-
 
 @Injectable()
 export class ContactusService {
@@ -36,7 +34,7 @@ export class ContactusService {
   }
 
   async remove(id: number) {
-    const result = await this.contactRepo.softDelete(id); 
+    const result = await this.contactRepo.softDelete(id);
     if (result.affected === 0) {
       return { message: 'Contact not found or already deleted' };
     }

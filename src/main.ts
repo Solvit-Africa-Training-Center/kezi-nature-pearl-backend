@@ -3,19 +3,18 @@ import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
+// import basicAuth from 'express-basic-auth';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.useGlobalPipes(
-    new ValidationPipe({
-      transform: true,
-      whitelist: true,
-    }),
-  );
+
+  app.useGlobalPipes(new ValidationPipe());
 
   const configService = app.get(ConfigService);
   const port: number = Number(configService.get<number>('server.port'));
   const prefix: string = String(configService.get<string>('server.prefix'));
+  const host: string = String(configService.get<string>('server.host'));
+
   // const origin: string = String(configService.get<string>('server.origin'));
 
   // if (!origin) {
@@ -39,11 +38,28 @@ async function bootstrap() {
   //   allowedHeaders: ['Content-Type', 'Authorization'],
   // });
 
-  app.setGlobalPrefix('api/v1');
+  app.enableCors({
+    origin: true,
+  });
+
+  app.setGlobalPrefix(prefix);
+
+  // app.use(
+  //   [`/${prefix}/docs`],
+  //   basicAuth({
+  //     challenge: true,
+  //     users: {
+  //       [configService.get('swagger.swagger_user')!]: configService.get(
+  //         'swagger.swagger_pass',
+  //       )!,
+  //     },
+  //   }),
+  // );
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Kezi Natural Pearl')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
 
   const documentFactory = () =>
@@ -54,7 +70,7 @@ async function bootstrap() {
 
   await app.listen(port, () => {
     console.log(`Server running on port ${port}`);
-    console.log(`Swagger docs at http://localhost:${port}/${prefix}/docs`);
+    console.log(`Swagger docs at ${host}/${prefix}/docs`);
   });
 }
 bootstrap();

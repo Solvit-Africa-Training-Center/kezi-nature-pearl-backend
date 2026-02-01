@@ -1,12 +1,12 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
-import { UserBaseDTO } from '../user/user.dto';
-import { userRoleEnum } from 'src/common/enums/userRole.enum';
 import {
   IsString,
   Validate,
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
+import { UserBaseDTO } from '../user/dto/user-request.dto';
+import { userRoleEnum } from '@/common/enums/userRole.enum';
 
 export class RegisterDTO extends PickType(UserBaseDTO, [
   'email',

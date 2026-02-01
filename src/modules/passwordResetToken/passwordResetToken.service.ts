@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { PasswordResetToken } from './passwordResetToken.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { PasswordResetToken } from './passwordResetToken.entity';
 import {
   CreatePasswordResetTokenDTO,
   UpdatePasswordResetTokenDTO,

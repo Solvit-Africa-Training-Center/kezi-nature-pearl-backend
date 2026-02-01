@@ -9,13 +9,13 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
+import { CategoryService } from './category.service';
 import {
   CategoryDTO,
   CreateCategoryDTO,
   IdCategoryDTO,
   UpdateCategoryDTO,
 } from './category.dto';
-import { CategoryService } from './category.service';
 
 @Controller('category')
 export class CategoryController {

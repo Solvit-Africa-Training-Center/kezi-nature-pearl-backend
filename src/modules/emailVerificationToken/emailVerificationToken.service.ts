@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { EmailVerificationToken } from './emailVerification.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { EmailVerificationToken } from './emailVerification.entity';
 import {
   CreateEmailVerificationTokenDTO,
   UpdateEmailVerificationTokenDTO,

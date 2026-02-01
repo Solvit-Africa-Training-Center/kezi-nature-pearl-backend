@@ -8,8 +8,8 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ProductService } from './product.service';
 import { ApiOperation } from '@nestjs/swagger';
+import { ProductService } from './product.service';
 import {
   CreateProductDTO,
   IdProductDTO,
