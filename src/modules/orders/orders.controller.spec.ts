@@ -14,7 +14,6 @@ describe('OrdersController', () => {
       controllers: [OrdersController],
       providers: [
         {
-          // We replace the real OrdersService with a fake one
           provide: OrdersService,
           useValue: {
             create: jest.fn(),
@@ -35,7 +34,7 @@ describe('OrdersController', () => {
     expect(controller).toBeDefined();
   });
 
-  // ---------------- CREATE ----------------
+  
   it('should create an order', async () => {
     const dto = {
       user_id: '123',
@@ -44,19 +43,16 @@ describe('OrdersController', () => {
 
     const result = { order_id: '1', ...dto };
 
-    // Fake what the service returns
+ 
     service.create.mockResolvedValue(result as any);
 
     const response = await controller.create(dto as any);
 
-    // Controller must call service.create with dto
     expect(service.create).toHaveBeenCalledWith(dto);
 
-    // Controller must return service result
     expect(response).toEqual(result);
   });
 
-  // ---------------- FIND ALL ----------------
   it('should return all orders', async () => {
     const result = [{ order_id: '1' }, { order_id: '2' }];
 
@@ -68,7 +64,6 @@ describe('OrdersController', () => {
     expect(response).toEqual(result);
   });
 
-  // ---------------- FIND ONE ----------------
   it('should return one order by id', async () => {
     const order_id = '1';
     const result = { order_id, total_amount: 100 };
@@ -81,7 +76,6 @@ describe('OrdersController', () => {
     expect(response).toEqual(result);
   });
 
-  // ---------------- UPDATE ----------------
   it('should update an order', async () => {
     const order_id = '1';
     const dto = { total_amount: 200 };
@@ -95,7 +89,6 @@ describe('OrdersController', () => {
     expect(response).toEqual(result);
   });
 
-  // ---------------- DELETE ----------------
   it('should delete an order', async () => {
     const order_id = '1';
     const result = {

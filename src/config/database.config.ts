@@ -47,7 +47,7 @@ function connectDb(): TypeOrmModuleOptions {
       Ingredient,
       Order,
       Contact,
-      OrderItem
+      OrderItem,
     ],
     synchronize: false,
     ssl: isProd ? { rejectUnauthorized: false } : false,
