@@ -12,6 +12,7 @@ import { PasswordResetToken } from './modules/passwordResetToken/passwordResetTo
 import { envDetermine } from './config/database.config';
 import { Order } from './modules/orders/entities/order.entity';
 import { Contact } from './modules/contactus/entities/contactus.entity';
+import { File } from './modules/file/entities/file.entity';
 
 const envi = envDetermine() || 'DEV';
 
@@ -36,6 +37,7 @@ export const AppDataSource = new DataSource({
     PasswordResetToken,
     Order,
     Contact,
+    File,
   ],
   migrations: ['src/migrations/*.{ts,js}'],
   synchronize: false,

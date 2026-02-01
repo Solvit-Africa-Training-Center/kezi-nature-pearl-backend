@@ -3,17 +3,19 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { FindOneOptions, Repository } from 'typeorm';
 import { User } from './user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateAdminDTO, UserIdDTO } from './user.dto';
+import { CreateAdminDTO, UserIdDTO } from './dto/user-request.dto';
 import { comparehashContent } from 'src/util/lib';
+import { FileService } from '../file/file.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
+    private readonly fileSerive: FileService,
   ) {}
 
   async create(user: CreateAdminDTO) {
@@ -24,16 +26,24 @@ export class UserService {
     return await this.userRepo.find({ where: filter });
   }
 
-  async findOne(filter: Partial<User>, withDeleted?: boolean) {
-    return await this.userRepo.findOne({
+  async findOne(
+    filter: Partial<User>,
+    options?: Omit<FindOneOptions<User>, 'where'>,
+  ): Promise<User> {
+    const user = await this.userRepo.findOne({
       where: filter,
-      withDeleted,
+      ...options,
     });
+
+    if (!user) throw new NotFoundException('User not found');
+    return user;
   }
 
   async update(
     user: Partial<User>,
     options?: {
+      profilePicture?: Express.Multer.File;
+      fileType?: string;
       currentPassword?: string;
       newPassword?: string;
     },
@@ -53,6 +63,14 @@ export class UserService {
           throw new BadRequestException('Current password is incorrect.');
 
         exist.password = options.newPassword;
+      }
+
+      if (options.profilePicture && options.fileType) {
+        const newFile = await this.fileSerive.save(
+          options.profilePicture,
+          options.fileType,
+        );
+        exist.profile = newFile.fileId;
       }
     }
 

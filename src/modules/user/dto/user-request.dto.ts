@@ -1,8 +1,13 @@
-import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
+import {
+  ApiProperty,
+  ApiPropertyOptional,
+  PartialType,
+  PickType,
+} from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsEmail, IsEnum, IsOptional, IsString, IsUUID } from 'class-validator';
-import { userRoleEnum } from '../../common/enums/userRole.enum';
-import { userStatusEnum } from '../../common/enums/userStatus.enum';
+import { userRoleEnum } from '../../../common/enums/userRole.enum';
+import { userStatusEnum } from '../../../common/enums/userStatus.enum';
 
 export class UserBaseDTO {
   @ApiProperty()
@@ -51,15 +56,22 @@ export class CreateAdminDTO extends PickType(UserBaseDTO, [
 export class UpdateUserProfile extends PartialType(
   PickType(UserBaseDTO, ['email', 'fullName', 'phoneNumber']),
 ) {
-  @ApiProperty()
-  @IsString()
+  @ApiPropertyOptional()
   @IsOptional()
-  currentPassword: string;
+  @IsString()
+  currentPassword?: string;
 
-  @ApiProperty()
-  @IsString()
+  @ApiPropertyOptional()
   @IsOptional()
-  newPassword: string;
+  @IsString()
+  newPassword?: string;
+
+  @ApiPropertyOptional({
+    type: 'file',
+    description: 'User Profile Picture',
+  })
+  @IsOptional()
+  profilePicture?: any;
 }
 
 export class UpdateUserRole extends PickType(UserBaseDTO, ['role']) {}

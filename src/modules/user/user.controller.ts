@@ -7,7 +7,9 @@ import {
   Patch,
   Post,
   Query,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import {
@@ -15,14 +17,22 @@ import {
   UpdateUserProfile,
   UserDTO,
   UserIdDTO,
-} from './user.dto';
-import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+} from './dto/user-request.dto';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+} from '@nestjs/swagger';
 import { RoleGuard } from 'src/common/guards/role.guard';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { userRoleEnum } from 'src/common/enums/userRole.enum';
 import { Roles } from 'src/common/decorator/roles.decorator';
 import { User } from 'src/common/decorator/user.decorator';
 import type { Payload } from 'src/util/token.service';
+import { FileUploadInterceptor } from 'src/common/interceptors/file-upload.interceptor';
+import { FileService } from '../file/file.service';
+import { UserProfileResponseDto } from './dto/user-response.dto';
 
 @Controller('user')
 @UseGuards(AuthGuard)
@@ -34,14 +44,22 @@ export class UserController {
   @Get('me')
   @ApiOperation({ summary: 'Get User Profile' })
   async getMe(@User() logedUser: Payload) {
-    return await this.userService.findOne({ userId: logedUser.sub });
+    const user = await this.userService.findOne(
+      { userId: logedUser.sub },
+      { relations: ['file'] },
+    );
+
+    return new UserProfileResponseDto(user);
   }
 
   @Patch('me')
+  @UseInterceptors(new FileUploadInterceptor('profilePicture', 1))
+  @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Update User Profile' })
   async updateProfile(
     @User() logedUser: Payload,
     @Body() dto: UpdateUserProfile,
+    @UploadedFile() profilePicture: Express.Multer.File,
   ) {
     await this.userService.update(
       {
@@ -50,12 +68,17 @@ export class UserController {
         fullName: dto.fullName,
         phoneNumber: dto.phoneNumber,
       },
-      { currentPassword: dto.currentPassword, newPassword: dto.newPassword },
+      {
+        profilePicture,
+        fileType: 'User Profile',
+        currentPassword: dto.currentPassword,
+        newPassword: dto.newPassword,
+      },
     );
     return 'User Updated';
   }
 
-  @Delete('/me')
+  @Delete('me')
   @ApiOperation({ summary: 'Delete Me' })
   async deleteUser(@User() logedUser: Payload) {
     await this.userService.softDelete({ userId: logedUser.sub });

@@ -36,7 +36,7 @@ export class AuthService {
   ) {}
   async register(user: RegisterDTO) {
     const { password, ...query } = user;
-    const exist = await this.userService.findOne(query, true);
+    const exist = await this.userService.findOne(query, { withDeleted: true });
 
     if (exist && exist.deletedAt != null) {
       await this.userService.hardDelete({ userId: exist.userId });

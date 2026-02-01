@@ -3,6 +3,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -11,6 +12,7 @@ import { PasswordResetToken } from '../passwordResetToken/passwordResetToken.ent
 import { EmailVerificationToken } from '../emailVerificationToken/emailVerification.entity';
 import { userRoleEnum } from '../../common/enums/userRole.enum';
 import { userStatusEnum } from '../../common/enums/userStatus.enum';
+import { File } from '../file/entities/file.entity';
 
 @Entity('users')
 export class User {
@@ -81,4 +83,8 @@ export class User {
     (emailverificationtoken) => emailverificationtoken.user,
   )
   emailverificationtoken: EmailVerificationToken;
+
+  @OneToOne(() => File, (file) => file.user)
+  @JoinColumn({ name: 'profile' })
+  file: File;
 }

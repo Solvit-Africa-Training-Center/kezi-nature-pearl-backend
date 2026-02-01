@@ -18,12 +18,14 @@ import { OrdersModule } from './modules/orders/orders.module';
 import { ContactusModule } from './modules/contactus/contactus.module';
 import { LoggerService } from './common/logger/logger.service';
 import { RequestLoggerMiddleware } from './common/middleware/request-logger.middleware';
+import { FileModule } from './modules/file/file.module';
+import cloudinaryConfig from './config/cloudinary.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [serverConfig, mailConfig],
+      load: [serverConfig, mailConfig, cloudinaryConfig],
     }),
     TypeOrmModule.forRootAsync(databaseConfig.asProvider()),
     JwtModule.register({
@@ -38,6 +40,7 @@ import { RequestLoggerMiddleware } from './common/middleware/request-logger.midd
     IngredientModule,
     OrdersModule,
     ContactusModule,
+    FileModule,
   ],
   providers: [
     LoggerService,
