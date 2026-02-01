@@ -8,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { FileService } from '../file/file.service';
 import { CreateAdminDTO, UserIdDTO } from './dto/user-request.dto';
-import { comparehashContent } from '@/util/lib';
+import { comparehashContent, hashContent } from '@/util/lib';
 
 @Injectable()
 export class UserService {
@@ -62,7 +62,7 @@ export class UserService {
         if (!comparehashContent(exist.password, options.currentPassword))
           throw new BadRequestException('Current password is incorrect.');
 
-        exist.password = options.newPassword;
+        exist.password = hashContent(options.newPassword);
       }
 
       if (options.profilePicture && options.fileType) {
