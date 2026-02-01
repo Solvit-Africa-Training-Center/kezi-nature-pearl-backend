@@ -13,6 +13,8 @@ import { PasswordResetTokenModule } from './modules/passwordResetToken/passwordR
 import { IngredientModule } from './modules/ingredient/ingredient.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { ContactusModule } from './modules/contactus/contactus.module';
+import { OrderItemModule } from './modules/order-item/order-item.module';
+import { OrderitemModule } from './modules/orderitem/orderitem.module';
 
 @Module({
   imports: [
@@ -30,6 +32,8 @@ import { ContactusModule } from './modules/contactus/contactus.module';
     IngredientModule,
     OrdersModule,
     ContactusModule,
+    OrderItemModule,
+    OrderitemModule,
   ],
   providers: [],
   controllers: [],
