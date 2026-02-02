@@ -53,17 +53,23 @@ export class Product {
   @ManyToMany(() => Ingredient, (ingredient) => ingredient.products)
   @JoinTable({
     name: 'productIngredient',
-    joinColumn: {
-      name: 'productId',
-      referencedColumnName: 'productId',
-    },
-    inverseJoinColumn: {
-      name: 'ingredientId',
-      referencedColumnName: 'ingredientId',
-    },
+    joinColumn: { name: 'productId', referencedColumnName: 'productId' },
+    inverseJoinColumn: { name: 'ingredientId', referencedColumnName: 'ingredientId' },
   })
   ingredients: Ingredient[];
 
-  @OneToMany(()=> OrderItem, (orderitem)=>orderitem.product)
-  orderitems: OrderItem[];
+  @OneToMany(() => OrderItem, (orderitem) => orderitem.product, { lazy: true })
+  orderitems: Promise<OrderItem[]>;
+
+  @Column('text', { array: true, nullable: true })
+  images: string[];
+
+  @Column('decimal', { precision: 10, scale: 2, nullable: true })
+  oldPrice: number;
+
+  @Column('decimal', { precision: 10, scale: 2 })
+  newPrice: number;
+
+  @Column({ type: 'int', default: 0 })
+  quantity: number;
 }
