@@ -22,16 +22,12 @@ export class UserService {
     return await this.userRepo.save(user);
   }
 
-  async find(filter?: Partial<User>) {
-    return await this.userRepo.find({ where: filter });
+  async find(options?: FindOneOptions<User>) {
+    return await this.userRepo.find({ ...options });
   }
 
-  async findOne(
-    filter: Partial<User>,
-    options?: Omit<FindOneOptions<User>, 'where'>,
-  ) {
+  async findOne(options: FindOneOptions<User>) {
     const user = await this.userRepo.findOne({
-      where: filter,
       ...options,
     });
 
@@ -47,7 +43,7 @@ export class UserService {
       newPassword?: string;
     },
   ) {
-    const exist = await this.findOne({ userId: user.userId });
+    const exist = await this.findOne({ where: { userId: user.userId } });
     if (!exist) throw new NotFoundException('User not found.');
 
     exist.email = user.email ?? exist.email;

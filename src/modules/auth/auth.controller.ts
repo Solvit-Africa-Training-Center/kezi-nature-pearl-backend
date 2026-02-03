@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Res } from '@nestjs/common';
 import { ApiExcludeEndpoint, ApiOperation } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { EmailDTO, LoginDTO, RegisterDTO, ResetPasswordDTO } from './auth.dto';
 import { VerifyEmailDTO } from '../emailVerificationToken/emailVerification.dto';
 import { ResetPasswordTokenIdDTO } from '../passwordResetToken/passwordresettoken.dto';
+import type { Response } from 'express';
 
 @Controller('Auth')
 export class AuthController {
@@ -27,10 +28,10 @@ export class AuthController {
 
   @Post('/resend-verification')
   @ApiOperation({ summary: 'Send email verification link' })
-  async sendVerification(@Body() dto: EmailDTO) {
-    const { message } = await this.authService.sendVerification(dto.email);
-    // this.logger.log(message, 'AuthController');
-    return { message };
+  async sendVerification(@Body() dto: EmailDTO, @Res() res: Response) {
+    const link = await this.authService.sendVerification(dto.email);
+
+    res.send(link);
   }
 
   @Get('/verify-email')

@@ -37,19 +37,19 @@ export class AuthService {
   ) {}
   async register(user: RegisterDTO) {
     const { password, ...query } = user;
-    const existEmail = await this.userService.findOne(
-      { email: user.email },
-      { withDeleted: true },
-    );
+    const existEmail = await this.userService.findOne({
+      where: { email: user.email },
+      withDeleted: true,
+    });
 
     if (existEmail && existEmail.deletedAt != null) {
       await this.userService.hardDelete({ userId: existEmail.userId });
     }
 
-    const existPhoneNumber = await this.userService.findOne(
-      { phoneNumber: user.phoneNumber },
-      { withDeleted: true },
-    );
+    const existPhoneNumber = await this.userService.findOne({
+      where: { phoneNumber: user.phoneNumber },
+      withDeleted: true,
+    });
 
     if (existPhoneNumber && existPhoneNumber.deletedAt != null) {
       await this.userService.hardDelete({ userId: existPhoneNumber.userId });
@@ -69,8 +69,8 @@ export class AuthService {
     const isEmail = identifier.includes('@');
 
     const user = isEmail
-      ? await this.userService.findOne({ email: identifier })
-      : await this.userService.findOne({ phoneNumber: identifier });
+      ? await this.userService.findOne({ where: { email: identifier } })
+      : await this.userService.findOne({ where: { phoneNumber: identifier } });
 
     if (!user || !comparehashContent(user.password, dto.password))
       throw new UnauthorizedException('Invalid Credentials');
@@ -84,7 +84,7 @@ export class AuthService {
   }
 
   async sendVerification(email: string) {
-    const user = await this.userService.findOne({ email });
+    const user = await this.userService.findOne({ where: { email } });
 
     if (!user) return { message: 'Account Verification Link Sent' };
 
@@ -114,9 +114,9 @@ export class AuthService {
       );
     }
 
-    const host = this.configService.get<string>('server.host');
+    const host = this.configService.get<string>('server.origin');
 
-    const link = `${host}/${this.configService.get<number>('server.prefix')}/auth/verify-email/?id=${emailverificationToken.id}&token=${token}`;
+    const link = `${host}/?id=${emailverificationToken.id}&token=${token}`;
 
     await this.mailService.sendMail({
       to: email,
@@ -144,7 +144,7 @@ export class AuthService {
       `,
       text: `Hello ${user.fullName}`,
     });
-    return { message: 'Account Verification Link Sent' };
+    return link;
   }
 
   async verifyEmail(verifiyEmailDTO: VerifyEmailDTO) {
@@ -161,7 +161,7 @@ export class AuthService {
       throw new BadRequestException('Invalid or expired Token');
 
     const user = await this.userService.findOne({
-      userId: emailVerificationToken.userId,
+      where: { userId: emailVerificationToken.userId },
     });
 
     if (!user) throw new BadRequestException('Invalid or expired Token');
@@ -179,7 +179,7 @@ export class AuthService {
   }
 
   async forgotPassword(email: string) {
-    const user = await this.userService.findOne({ email });
+    const user = await this.userService.findOne({ where: { email } });
 
     if (!user) return { message: 'Password Reset Link sent' };
 
@@ -261,7 +261,7 @@ export class AuthService {
       throw new BadRequestException('Invalid or expired Tokens');
 
     const user = await this.userService.findOne({
-      userId: passwordResetToken.userId,
+      where: { userId: passwordResetToken.userId },
     });
 
     if (!user) throw new BadRequestException('Invalid or expired Token');

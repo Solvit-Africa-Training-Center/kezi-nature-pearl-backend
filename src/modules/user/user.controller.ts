@@ -41,10 +41,10 @@ export class UserController {
   @Get('me')
   @ApiOperation({ summary: 'Get User Profile' })
   async getMe(@User() logedUser: Payload) {
-    const user = await this.userService.findOne(
-      { userId: logedUser.sub },
-      { relations: ['file'] },
-    );
+    const user = await this.userService.findOne({
+      where: { userId: logedUser.sub },
+      relations: ['file'],
+    });
 
     if (!user) throw new NotFoundException('User not found');
 
@@ -90,7 +90,9 @@ export class UserController {
   @Roles(userRoleEnum.ADMIN)
   @ApiOperation({ summary: 'List Users' })
   async find() {
-    return await this.userService.find();
+    return (await this.userService.find()).map((user) => {
+      return new UserProfileResponseDto(user);
+    });
   }
 
   @Get('/:id')
@@ -98,7 +100,7 @@ export class UserController {
   @Roles(userRoleEnum.ADMIN)
   @ApiOperation({ summary: 'Find User By Id' })
   async findById(@Param() param: UserIdDTO) {
-    return await this.userService.findOne({ userId: param.userId });
+    return await this.userService.findOne({ where: { userId: param.userId } });
   }
 
   @Get('/search')
@@ -106,7 +108,7 @@ export class UserController {
   @Roles(userRoleEnum.ADMIN)
   @ApiOperation({ summary: 'Search User' })
   async searchUser(@Query() queries: UserDTO) {
-    return await this.userService.find(queries);
+    return await this.userService.find({ where: queries });
   }
 
   @Post()
@@ -123,7 +125,9 @@ export class UserController {
   @Roles(userRoleEnum.ADMIN)
   @ApiOperation({ summary: 'Update User Role' })
   async updateRole(@Body() dto: UpdateUserRole) {
-    const user = await this.userService.findOne({ email: dto.email });
+    const user = await this.userService.findOne({
+      where: { email: dto.email },
+    });
 
     await this.userService.update({ ...user, role: dto.role });
     return 'User Role updated';
