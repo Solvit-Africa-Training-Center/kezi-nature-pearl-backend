@@ -84,7 +84,7 @@ export class User {
   )
   emailverificationtoken: EmailVerificationToken;
 
-  @OneToOne(() => File, (file) => file.user)
+  @OneToOne(() => File, (file) => file.user, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'profile' })
   file: File;
 }
