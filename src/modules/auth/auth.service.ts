@@ -100,12 +100,12 @@ export class AuthService {
     if (!existingToken) {
       emailverificationToken = await this.emailVerificationTokenService.create({
         userId: user.userId,
-        token: hashContent(token),
+        token,
         expiresAt,
       });
     } else {
       const updateToken: UpdateEmailVerificationTokenDTO = {
-        token: hashContent(token),
+        token,
         expiresAt,
       };
       emailverificationToken = await this.emailVerificationTokenService.update(
@@ -116,7 +116,7 @@ export class AuthService {
 
     const host = this.configService.get<string>('server.origin');
 
-    const link = `${host}/verification-successful/?id=${emailverificationToken.id}&token=${token}`;
+    const link = `${host}/verification-successful/?id=${emailverificationToken.id}&token=${hashContent(token)}`;
 
     await this.mailService.sendMail({
       to: email,
@@ -156,7 +156,7 @@ export class AuthService {
     if (
       !emailVerificationToken ||
       emailVerificationToken.expiresAt < new Date() ||
-      !comparehashContent(emailVerificationToken.token, verifiyEmailDTO.token)
+      !comparehashContent(verifiyEmailDTO.token, emailVerificationToken.token)
     )
       throw new BadRequestException('Invalid or expired Token');
 
@@ -195,12 +195,12 @@ export class AuthService {
     if (!existingToken) {
       passwordResetToken = await this.passwordResetTokenService.create({
         userId: user.userId,
-        token: hashContent(token),
+        token,
         expiresAt,
       });
     } else {
       const updateToken: UpdatePasswordResetTokenDTO = {
-        token: hashContent(token),
+        token,
         expiresAt,
       };
       passwordResetToken = await this.passwordResetTokenService.update(
@@ -211,7 +211,7 @@ export class AuthService {
 
     const host = this.configService.get<string>('server.host');
 
-    const link = `${host}/${this.configService.get<number>('server.prefix')}/auth/verify-email/?id=${passwordResetToken.id}&token=${token}`;
+    const link = `${host}/${this.configService.get<number>('server.prefix')}/auth/verify-email/?id=${passwordResetToken.id}&token=${hashContent(token)}`;
 
     await this.mailService.sendMail({
       to: email,
@@ -256,7 +256,7 @@ export class AuthService {
     if (
       !passwordResetToken ||
       passwordResetToken.expiresAt < new Date() ||
-      !comparehashContent(passwordResetToken.token, passwordTokenId.token)
+      !comparehashContent(passwordTokenId.token, passwordResetToken.token)
     )
       throw new BadRequestException('Invalid or expired Tokens');
 

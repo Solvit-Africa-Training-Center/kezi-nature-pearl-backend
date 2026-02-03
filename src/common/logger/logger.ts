@@ -3,8 +3,8 @@ import DailyRotateFile from 'winston-daily-rotate-file';
 
 const baseFormat = format.combine(
   format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-  format.errors({ stack: true }), // include stack trace in errors
-  format.splat(), // allow printf-style formatting
+  format.errors({ stack: true }),
+  format.splat(),
 );
 
 const consoleFormat = format.combine(

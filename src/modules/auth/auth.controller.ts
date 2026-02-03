@@ -14,7 +14,6 @@ export class AuthController {
   @ApiOperation({ summary: 'Register User' })
   async register(@Body() dto: RegisterDTO) {
     const { message } = await this.authService.register(dto);
-    // this.logger.log(message, 'AuthController');
     return { message };
   }
 
@@ -22,7 +21,6 @@ export class AuthController {
   @ApiOperation({ summary: 'Login User' })
   async login(@Body() dto: LoginDTO) {
     const { message, token } = await this.authService.login(dto);
-    // this.logger.log(message, 'AuthController');
     return { message, token };
   }
 
@@ -37,7 +35,6 @@ export class AuthController {
   @ApiExcludeEndpoint()
   async verifyEmail(@Query() dto: VerifyEmailDTO) {
     const { message, token } = await this.authService.verifyEmail(dto);
-    // this.logger.log(message, 'AuthController');
     return { message, token };
   }
 
@@ -45,7 +42,6 @@ export class AuthController {
   @ApiOperation({ summary: 'Send password reset link' })
   async forgotpassword(@Body() dto: EmailDTO) {
     const { message } = await this.authService.forgotPassword(dto.email);
-    // this.logger.log(message, 'AuthController');
     return { message };
   }
 
@@ -59,7 +55,6 @@ export class AuthController {
       passwordTokenId,
       dto,
     );
-    // this.logger.log(message, 'AuthController');
     return { message };
   }
 }
