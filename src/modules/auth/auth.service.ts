@@ -116,7 +116,7 @@ export class AuthService {
 
     const host = this.configService.get<string>('server.origin');
 
-    const link = `${host}/?id=${emailverificationToken.id}&token=${token}`;
+    const link = `${host}/verification-successful/?id=${emailverificationToken.id}&token=${token}`;
 
     await this.mailService.sendMail({
       to: email,
@@ -144,7 +144,7 @@ export class AuthService {
       `,
       text: `Hello ${user.fullName}`,
     });
-    return link;
+    return { message: 'Account Verification Link sent' };
   }
 
   async verifyEmail(verifiyEmailDTO: VerifyEmailDTO) {
