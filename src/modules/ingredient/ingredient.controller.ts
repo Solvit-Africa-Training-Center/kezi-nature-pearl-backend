@@ -21,13 +21,13 @@ export class IngredientController {
   }
 
   @Get()
-  findAll() {
-    return this.ingredientService.findAll();
+  async findAll() {
+    return await this.ingredientService.findAll();
   }
 
   @Get(':ingredientId')
   findOne(@Param('ingredientId') ingredientId: string) {
-    return this.ingredientService.findOne({ ingredientId });
+    return this.ingredientService.findOne({ where: { ingredientId } });
   }
 
   @Patch(':ingredientId')

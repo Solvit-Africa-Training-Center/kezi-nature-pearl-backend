@@ -15,7 +15,7 @@ import {
   IdProductDTO,
   ProductDTO,
   UpdateProductDTO,
-} from './product.dto';
+} from './dto/product-request.dto';
 
 @Controller('product')
 export class ProductController {

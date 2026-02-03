@@ -48,11 +48,11 @@ import swaggerConfig from './config/swagger.config';
   ],
   providers: [
     LoggerService,
-    {
-      provide: APP_FILTER,
+    // {
+    //   provide: APP_FILTER,
 
-      useClass: AllExceptionsFilter,
-    },
+    //   useClass: AllExceptionsFilter,
+    // },
   ],
   controllers: [],
 })

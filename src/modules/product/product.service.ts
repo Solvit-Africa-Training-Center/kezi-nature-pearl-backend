@@ -7,7 +7,7 @@ import {
   CreateProductDTO,
   IdProductDTO,
   UpdateProductDTO,
-} from './product.dto';
+} from './dto/product-request.dto';
 
 @Injectable()
 export class ProductService {
@@ -26,7 +26,7 @@ export class ProductService {
 
     return this.productRepo.find({
       where,
-      relations: ['category', 'ingredients'], 
+      relations: ['category', 'ingredients'],
     });
   }
 
@@ -48,20 +48,23 @@ export class ProductService {
     return product;
   }
 
- async create(productDto: CreateProductDTO) {
- 
-  const ingredients = productDto.ingredientsIds?.map((id) => ({ ingredientId: id }));
+  async create(productDto: CreateProductDTO) {
+    const ingredients = productDto.ingredientsIds?.map((id) => ({
+      ingredientId: id,
+    }));
 
-  const product = this.productRepo.create({
-    ...productDto,
-    ingredients, 
-  });
+    const product = this.productRepo.create({
+      ...productDto,
+      ingredients,
+    });
 
-  return await this.productRepo.save(product);
-}
+    return await this.productRepo.save(product);
+  }
 
-
-  async update(idParm: IdProductDTO, product: UpdateProductDTO & { ingredientsIds?: string[] }) {
+  async update(
+    idParm: IdProductDTO,
+    product: UpdateProductDTO & { ingredientsIds?: string[] },
+  ) {
     const exists = await this.findOne({ productId: idParm.productId });
     if (!exists) throw new NotFoundException();
 
@@ -71,7 +74,7 @@ export class ProductService {
     exists.oldPrice = product.oldPrice ?? exists.oldPrice;
     exists.newPrice = product.newPrice ?? exists.newPrice;
     exists.quantity = product.quantity ?? exists.quantity;
-    exists.imageId = product.imageId ?? exists.imageId;
+    exists.images = product.images ?? exists.images;
     exists.images = product.images ?? exists.images;
 
     if (product.categoryId) {
@@ -79,7 +82,9 @@ export class ProductService {
     }
 
     if (product.ingredientsIds) {
-      exists.ingredients = product.ingredientsIds.map(id => ({ ingredientId: id } as Ingredient));
+      exists.ingredients = product.ingredientsIds.map(
+        (id) => ({ ingredientId: id }) as Ingredient,
+      );
     }
 
     return await this.productRepo.save(exists);
