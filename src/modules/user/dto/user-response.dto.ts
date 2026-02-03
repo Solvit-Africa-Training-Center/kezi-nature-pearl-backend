@@ -15,7 +15,7 @@ export class UserProfileResponseDto {
 
   constructor(user: User) {
     this.id = user.userId;
-    this.profile = user.file?.url ? user.file.url : null;
+    this.profile = user.file.url;
     this.fullName = user.fullName;
     this.email = user.email;
     this.role = user.role;

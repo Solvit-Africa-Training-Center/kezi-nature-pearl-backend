@@ -90,9 +90,11 @@ export class UserController {
   @Roles(userRoleEnum.ADMIN)
   @ApiOperation({ summary: 'List Users' })
   async find() {
-    return (await this.userService.find()).map((user) => {
-      return new UserProfileResponseDto(user);
-    });
+    return (await this.userService.find({ relations: ['file'] })).map(
+      (user) => {
+        return new UserProfileResponseDto(user);
+      },
+    );
   }
 
   @Get('/:id')
