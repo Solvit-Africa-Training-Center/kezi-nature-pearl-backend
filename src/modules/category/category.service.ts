@@ -1,6 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, FindOptionsWhere } from 'typeorm';
+import {
+  Repository,
+  FindManyOptions,
+  FindOneOptions,
+  FindOptionsWhere,
+} from 'typeorm';
 import { Category } from './category.entity';
 import {
   CreateCategoryDTO,
@@ -15,50 +20,34 @@ export class CategoryService {
     private readonly categoryRepo: Repository<Category>,
   ) {}
 
-  // ✅ FIXED
-  async find(filters?: Partial<Category>) {
-    const where: FindOptionsWhere<Category> = {};
-
-    // Only scalar fields are allowed in WHERE
-    if (filters?.categoryId) where.categoryId = filters.categoryId;
-    if (filters?.name) where.name = filters.name;
-
-    return await this.categoryRepo.find({
-      where,
-      relations: ['products'], // relations go here
-    });
+ 
+  async findAll(filter?: FindManyOptions<Category>) {
+    return await this.categoryRepo.find({ ...filter });
   }
 
   async create(category: CreateCategoryDTO) {
     return await this.categoryRepo.save(category);
   }
 
-  // ✅ FIXED
+  async findOne(filter: FindOneOptions<Category>) {
+    return await this.categoryRepo.findOne(filter);
+  }
+
   async update(id: IdCategoryDTO, category: UpdateCategoryDTO) {
-    const exists = await this.findOne({ categoryId: id.categoryId });
+    const exists = await this.findOne({ where: { categoryId: id.categoryId } });
     if (!exists) throw new NotFoundException('Category not found');
 
     exists.name = category.name ?? exists.name;
     exists.description = category.description ?? exists.description;
 
-    // ❗ IMPORTANT: save `exists`, not `category`
     return await this.categoryRepo.save(exists);
   }
 
-  // ✅ FIXED
-  async findOne(filter: Partial<Category>) {
-    const where: FindOptionsWhere<Category> = {};
-
-    if (filter?.categoryId) where.categoryId = filter.categoryId;
-    if (filter?.name) where.name = filter.name;
-
-    return await this.categoryRepo.findOne({
-      where,
-      relations: ['products'],
-    });
-  }
-
   async hardDelete(id: string) {
+    const exists = await this.findOne({ where: { categoryId: id } });
+    if (!exists) throw new NotFoundException('Category not found');
+
     await this.categoryRepo.delete(id);
+    return { message: 'Category deleted successfully' };
   }
 }

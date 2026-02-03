@@ -1,6 +1,13 @@
 import { productStatusEnum } from 'src/common/enums/productStatus.enum';
-import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
-import { IsEnum, IsString, IsUUID, IsOptional, IsArray, IsNumber } from 'class-validator';
+import { ApiProperty, OmitType, PartialType, PickType } from '@nestjs/swagger';
+import {
+  IsEnum,
+  IsString,
+  IsUUID,
+  IsOptional,
+  IsArray,
+  IsNumber,
+} from 'class-validator';
 
 class ProductBaseDTO {
   @ApiProperty()
@@ -20,55 +27,34 @@ class ProductBaseDTO {
   status: productStatusEnum;
 
   @ApiProperty()
-  @IsString()
+  @IsUUID()
   categoryId: string;
 
-  @ApiProperty({ type: [String], required: false })
+  @ApiProperty()
   @IsArray()
   @IsString({ each: true })
-  @IsOptional()
-  images?: string[];
+  images: string[];
 
-  @ApiProperty({ required: false })
-  @IsString()
-  @IsOptional()
-  imageId?: string;
-
-  @ApiProperty({ required: false })
+  @ApiProperty()
   @IsNumber()
-  @IsOptional()
-  oldPrice?: number;
+  oldPrice: number;
 
   @ApiProperty()
   @IsNumber()
   newPrice: number;
 
-  @ApiProperty({ required: false })
+  @ApiProperty()
   @IsNumber()
-  @IsOptional()
-  quantity?: number;
+  quantity: number;
 
-  @ApiProperty({ type: [String], required: false })
+  @ApiProperty({ type: [String] })
   @IsArray()
   @IsUUID('all', { each: true })
-  @IsOptional()
-  ingredientsIds?: string[];
+  ingredientId: string[];
 }
 
 export class ProductDTO extends PartialType(
-  PickType(ProductBaseDTO, [
-    'productId',
-    'name',
-    'description',
-    'status',
-    'categoryId',
-    'images',
-    'imageId',
-    'oldPrice',
-    'newPrice',
-    'quantity',
-    'ingredientsIds',
-  ]),
+  OmitType(ProductBaseDTO, ['images','ingredientId']),
 ) {}
 
 export class CreateProductDTO extends PickType(ProductBaseDTO, [
@@ -76,11 +62,10 @@ export class CreateProductDTO extends PickType(ProductBaseDTO, [
   'description',
   'categoryId',
   'images',
-  'imageId',
   'oldPrice',
   'newPrice',
   'quantity',
-  'ingredientsIds',
+  'ingredientId',
 ]) {}
 
 export class UpdateProductDTO extends PartialType(
@@ -90,11 +75,10 @@ export class UpdateProductDTO extends PartialType(
     'categoryId',
     'status',
     'images',
-    'imageId',
     'oldPrice',
     'newPrice',
     'quantity',
-    'ingredientsIds',
+    'ingredientId',
   ]),
 ) {}
 

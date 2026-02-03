@@ -16,6 +16,7 @@ import {
   ProductDTO,
   UpdateProductDTO,
 } from './dto/product-request.dto';
+import { Product } from './product.entity';
 
 @Controller('product')
 export class ProductController {
@@ -24,14 +25,15 @@ export class ProductController {
   @ApiOperation({ summary: 'List Products' })
   @Get()
   async listProduct(@Query() dto: ProductDTO) {
-    return await this.productService.find(dto);
+    return await this.productService.find({ where: dto });
   }
 
   @ApiOperation({ summary: 'Add new Product' })
   @Post()
+  @Post()
   async addProduct(@Body() dto: CreateProductDTO) {
-    await this.productService.create(dto);
-    return 'Product added';
+    const product = await this.productService.create(dto); 
+    return product; 
   }
 
   @ApiOperation({ summary: 'Update Product' })

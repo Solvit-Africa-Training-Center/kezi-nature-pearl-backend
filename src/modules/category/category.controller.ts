@@ -21,17 +21,16 @@ import {
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
-  @ApiOperation({ summary: 'List Categories' })
+  
   @Get()
-  async listCategory(@Query() dto: CategoryDTO) {
-    return await this.categoryService.find(dto);
+  async findAll() {
+    return await this.categoryService.findAll();
   }
 
-  @ApiOperation({ summary: 'Add new Category' })
   @Post()
   async addCategory(@Body() dto: CreateCategoryDTO) {
-    await this.categoryService.create(dto);
-    return 'Product category added';
+    const category = await this.categoryService.create(dto);
+    return category; 
   }
 
   @ApiOperation({ summary: 'Update new Category' })

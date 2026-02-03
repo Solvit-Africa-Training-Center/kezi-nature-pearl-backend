@@ -19,7 +19,7 @@ export class ProductResponseDTO {
     this.name = product.name;
     this.description = product.description;
     this.status = product.status;
-    this.categoryId = product.categoryId;
+    this.categoryId = product.category.categoryId;
     this.createdAt = product.createdAt;
   }
 }

@@ -20,10 +20,10 @@ export class Product {
   @PrimaryGeneratedColumn('uuid')
   productId: string;
 
-  @Column('uuid', { array: true, nullable: true })
+  @Column({ type: 'json', nullable: true })
   images: string[];
 
-  @Column()
+  @Column({ unique: true })
   name: string;
 
   @Column()
@@ -37,8 +37,20 @@ export class Product {
   })
   status: productStatusEnum;
 
+  @Column('decimal', { precision: 10, scale: 2, nullable: true })
+  oldPrice: number;
+
+  @Column('decimal', { precision: 10, scale: 2 })
+  newPrice: number;
+
+  @Column({ type: 'int', default: 0 })
+  quantity: number;
+
   @Column()
   categoryId: string;
+
+  @Column({ type: 'json', nullable: true })
+  ingredientId: string[];
 
   @CreateDateColumn()
   createdAt: Date;
@@ -46,14 +58,16 @@ export class Product {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne(() => Category, (category) => category.categoryId)
+  @ManyToOne(() => Category, (category) => category.categoryId, {
+    onDelete: 'SET NULL',
+  })
   @JoinColumn({ name: 'categoryId' })
   category: Category;
 
   @ManyToMany(() => Ingredient, (ingredient) => ingredient.products)
   @JoinTable({
     name: 'productIngredient',
-    joinColumn: { name: 'productId', referencedColumnName: 'productId' },
+    joinColumn: { name: 'ingredientId', referencedColumnName: 'productId' },
     inverseJoinColumn: {
       name: 'ingredientId',
       referencedColumnName: 'ingredientId',
@@ -63,13 +77,4 @@ export class Product {
 
   @OneToMany(() => OrderItem, (orderitem) => orderitem.product, { lazy: true })
   orderitems: Promise<OrderItem[]>;
-
-  @Column('decimal', { precision: 10, scale: 2, nullable: true })
-  oldPrice: number;
-
-  @Column('decimal', { precision: 10, scale: 2 })
-  newPrice: number;
-
-  @Column({ type: 'int', default: 0 })
-  quantity: number;
 }
