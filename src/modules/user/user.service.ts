@@ -47,6 +47,7 @@ export class UserService {
     if (!exist) throw new NotFoundException('User not found.');
 
     exist.email = user.email ?? exist.email;
+    exist.profile = user.profile ?? exist.profile;
     exist.fullName = user.fullName ?? exist.fullName;
     exist.phoneNumber = user.phoneNumber ?? exist.phoneNumber;
     exist.password = user.password ?? exist.password;
