@@ -3,6 +3,7 @@ import { User } from '../user.entity';
 
 // me
 export class UserProfileResponseDto {
+  id: string;
   profile: string | null;
   fullName: string;
   email: string;
@@ -13,6 +14,7 @@ export class UserProfileResponseDto {
   createdAt: Date;
 
   constructor(user: User) {
+    this.id = user.id;
     this.profile = user.file?.url ? user.file.url : null;
     this.fullName = user.fullName;
     this.email = user.email;
