@@ -11,12 +11,16 @@ import { User } from '../user/user.entity';
 export class EmailVerificationToken {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
   @Column()
   userId: string;
+
   @Column()
   token: string;
+
   @Column()
   expiresAt: Date;
+
   @CreateDateColumn()
   createdAt: Date;
 

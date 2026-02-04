@@ -24,7 +24,7 @@ import {
   CreateAdminDTO,
   UpdateUserProfile,
   UpdateUserRole,
-  UserDTO,
+  SearchUserDTO,
   UserIdDTO,
 } from './dto/user-request.dto';
 import { RoleGuard } from '@/common/guards/role.guard';
@@ -109,7 +109,7 @@ export class UserController {
   @UseGuards(RoleGuard)
   @Roles(userRoleEnum.ADMIN)
   @ApiOperation({ summary: 'Search User' })
-  async searchUser(@Query() queries: UserDTO) {
+  async searchUser(@Query() queries: SearchUserDTO) {
     return await this.userService.find({ where: queries });
   }
 

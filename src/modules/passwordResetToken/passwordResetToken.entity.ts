@@ -6,6 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { User } from '../user/user.entity';
+import { tokenTypeEnum } from '@/common/enums/tokenType.enum';
 
 @Entity('passwordresettoken')
 export class PasswordResetToken {
@@ -20,6 +21,9 @@ export class PasswordResetToken {
 
   @Column()
   expiresAt: Date;
+
+  @Column()
+  type: tokenTypeEnum;
 
   @CreateDateColumn()
   createdAt: Date;

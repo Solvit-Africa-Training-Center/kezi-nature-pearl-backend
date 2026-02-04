@@ -1,6 +1,7 @@
 import {
   ApiProperty,
   ApiPropertyOptional,
+  OmitType,
   PartialType,
   PickType,
 } from '@nestjs/swagger';
@@ -43,7 +44,9 @@ export class UserBaseDTO {
   status: userStatusEnum;
 }
 
-export class UserDTO extends PartialType(UserBaseDTO) {}
+export class SearchUserDTO extends PartialType(
+  OmitType(UserBaseDTO, ['password', 'userId']),
+) {}
 
 export class CreateAdminDTO extends PickType(UserBaseDTO, [
   'email',
@@ -76,5 +79,6 @@ export class UpdateUserProfile extends PartialType(
 }
 
 export class UpdateUserRole extends PickType(UserBaseDTO, ['email', 'role']) {}
+export class UpdateUsersRole {}
 
 export class UserIdDTO extends PickType(UserBaseDTO, ['userId']) {}
