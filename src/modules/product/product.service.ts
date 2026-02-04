@@ -48,25 +48,6 @@ export class ProductService {
     });
     if (!exists) throw new NotFoundException();
 
-    // exists.name = product.name ?? exists.name;
-    // exists.description = product.description ?? exists.description;
-    // exists.status = product.status ?? exists.status;
-    // exists.oldPrice = product.oldPrice ?? exists.oldPrice;
-    // exists.newPrice = product.newPrice ?? exists.newPrice;
-    // exists.quantity = product.quantity ?? exists.quantity;
-    // exists.images = product.images ?? exists.images;
-    // exists.images = product.images ?? exists.images;
-
-    // if (product.categoryId) {
-    //   exists.categoryId = product.categoryId;
-    // }
-
-    // if (product.ingredientsIds) {
-    //   exists.ingredients = product.ingredientsIds.map(
-    //     (id) => ({ ingredientId: id }) as Ingredient,
-    //   );
-    // }
-
     return await this.productRepo.update(idParm, ProductDTO);
   }
 

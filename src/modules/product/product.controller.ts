@@ -33,7 +33,7 @@ export class ProductController {
   @Post()
   async addProduct(@Body() dto: CreateProductDTO) {
     const product = await this.productService.create(dto); 
-    return product; 
+    return {message:'product created successfully'}; 
   }
 
   @ApiOperation({ summary: 'Update Product' })
@@ -43,13 +43,13 @@ export class ProductController {
     @Body() dto: UpdateProductDTO,
   ) {
     await this.productService.update(params, dto);
-    return 'Product Updated ';
+    return {message:'Product Updated '};
   }
 
   @ApiOperation({ summary: 'Delete Product' })
   @Delete(':productId')
   async deleteProduct(@Param() id: IdProductDTO) {
     await this.productService.hardDelete(id.productId);
-    return 'Product Deleted';
+    return {message:'Product Deleted'};
   }
 }
