@@ -1,8 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { Ingredient } from './entities/ingredient.entity';
 import { CreateIngredientDto, UpdateIngredientDto } from './dto/ingredient.dto';
+import { FindOptionsWhere } from 'typeorm';
 
 @Injectable()
 export class IngredientService {
@@ -10,20 +11,25 @@ export class IngredientService {
     @InjectRepository(Ingredient)
     private readonly ingredientRepo: Repository<Ingredient>,
   ) {}
+
   async create(ingredient: CreateIngredientDto) {
     return await this.ingredientRepo.save(ingredient);
   }
 
-  async findAll(filter?: Partial<Ingredient>) {
-    return await this.ingredientRepo.find({ where: filter });
+  async findAll(filter?: FindManyOptions<Ingredient>) {
+    return await this.ingredientRepo.find({ ...filter });
   }
 
-  async findOne(filter: Partial<Ingredient>) {
-    return await this.ingredientRepo.findOne({ where: filter });
+  async findOne(filter: FindOneOptions<Ingredient>) {
+    const where: FindOptionsWhere<Ingredient> = {};
+
+    return await this.ingredientRepo.findOne({
+      where,
+    });
   }
 
   async update(ingredientId: string, updateIngredientDto: UpdateIngredientDto) {
-    const ingredient = await this.findOne({ ingredientId });
+    const ingredient = await this.findOne({ where: { ingredientId } });
     if (!ingredient) throw new NotFoundException('Ingredient not found');
 
     ingredient.name = updateIngredientDto.name ?? ingredient.name;
@@ -32,9 +38,10 @@ export class IngredientService {
   }
 
   async remove(ingredientId: string) {
-    const ingredient = await this.findOne({ ingredientId });
+    const ingredient = await this.findOne({ where: { ingredientId } });
     if (!ingredient) throw new NotFoundException('Ingredient Not Found');
 
-    return await this.ingredientRepo.delete({ ingredientId });
+    await this.ingredientRepo.delete({ ingredientId });
+    return { message: 'Ingredient deleted successfully' };
   }
 }

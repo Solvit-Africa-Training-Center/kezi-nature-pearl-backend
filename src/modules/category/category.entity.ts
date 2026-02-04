@@ -1,4 +1,3 @@
-import { productCategoryEnum } from '@/common/enums/productCategory.enum';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Product } from '../product/product.entity';
 
@@ -8,12 +7,10 @@ export class Category {
   categoryId: string;
 
   @Column({
-    type: 'enum',
-    enum: productCategoryEnum,
-    default: productCategoryEnum.ADULTS,
-    nullable: false,
+    
+    unique: true,
   })
-  name: productCategoryEnum;
+  name: string;
 
   @Column({ type: 'text' })
   description: string;

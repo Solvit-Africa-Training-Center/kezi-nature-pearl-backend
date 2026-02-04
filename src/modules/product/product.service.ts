@@ -1,12 +1,19 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import {
+  Repository,
+  FindOptionsWhere,
+  FindManyOptions,
+  FindOneOptions,
+} from 'typeorm';
 import { Product } from './product.entity';
+import { Ingredient } from '../ingredient/entities/ingredient.entity';
 import {
   CreateProductDTO,
   IdProductDTO,
+  ProductDTO,
   UpdateProductDTO,
-} from './product.dto';
+} from './dto/product-request.dto';
 
 @Injectable()
 export class ProductService {
@@ -15,26 +22,33 @@ export class ProductService {
     private readonly productRepo: Repository<Product>,
   ) {}
 
-  async find(filters?: Partial<Product>) {
-    return await this.productRepo.find({ where: filters });
+  async find(filters?: FindOneOptions<Product>) {
+    return this.productRepo.find({
+      ...filters,
+    });
   }
 
-  async create(product: CreateProductDTO) {
-    return await this.productRepo.save(product);
+  async findOne(filter: FindOneOptions<Product>) {
+    const product = await this.productRepo.findOne({
+      ...filter,
+    });
+
+    if (!product) return null;
+
+    return product;
+  }
+
+  async create(productDto: CreateProductDTO) {
+    return await this.productRepo.save(productDto);
   }
 
   async update(idParm: IdProductDTO, product: UpdateProductDTO) {
-    const exists = await this.findOne({ productId: idParm.productId });
+    const exists = await this.findOne({
+      where: { productId: idParm.productId },
+    });
     if (!exists) throw new NotFoundException();
-    exists.name = product.name ?? exists.name;
-    exists.description = product.description ?? exists.description;
-    exists.status = product.status ?? exists.status;
 
-    return await this.productRepo.save(exists);
-  }
-
-  async findOne(filter: Partial<Product>) {
-    return await this.productRepo.findOne({ where: filter });
+    return await this.productRepo.update(idParm, ProductDTO);
   }
 
   async hardDelete(id: string) {

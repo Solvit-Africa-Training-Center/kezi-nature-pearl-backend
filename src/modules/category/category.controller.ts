@@ -21,17 +21,16 @@ import {
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
-  @ApiOperation({ summary: 'List Categories' })
+  @ApiOperation({summary: 'List all categories'})
   @Get()
-  async listCategory(@Query() dto: CategoryDTO) {
-    return await this.categoryService.find(dto);
+  async findAll() {
+    return await this.categoryService.findAll();
   }
-
-  @ApiOperation({ summary: 'Add new Category' })
+@ApiOperation({summary: 'Create Category'})
   @Post()
   async addCategory(@Body() dto: CreateCategoryDTO) {
-    await this.categoryService.create(dto);
-    return 'Product category added';
+    const category = await this.categoryService.create(dto);
+    return {message: 'category created successfully'}; 
   }
 
   @ApiOperation({ summary: 'Update new Category' })
@@ -41,12 +40,13 @@ export class CategoryController {
     @Body() dto: UpdateCategoryDTO,
   ) {
     await this.categoryService.update(id, dto);
-    return 'Product Category Updated ';
+    return { message:'Product Category Updated'};
   }
 
   @ApiOperation({ summary: 'Delete Category' })
   @Delete(':categoryId')
   async deleteCategory(@Param() id: IdCategoryDTO) {
     await this.categoryService.hardDelete(id.categoryId);
+     return { message: 'category deleted successfully' };
   }
 }

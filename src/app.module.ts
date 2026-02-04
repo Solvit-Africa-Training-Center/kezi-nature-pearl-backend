@@ -21,6 +21,7 @@ import { OrderItemModule } from './modules/orderitem/orderitem.module';
 import { LoggerService } from './common/logger/logger.service';
 import { RequestLoggerMiddleware } from './common/middleware/request-logger.middleware';
 import { FileModule } from './modules/file/file.module';
+import { CartModule } from './module/cart/cart.module';
 import cloudinaryConfig from './config/cloudinary.config';
 import swaggerConfig from './config/swagger.config';
 
@@ -45,14 +46,15 @@ import swaggerConfig from './config/swagger.config';
     ContactusModule,
     OrderItemModule,
     FileModule,
+    CartModule,
   ],
   providers: [
     LoggerService,
-    {
-      provide: APP_FILTER,
+    // {
+    //   provide: APP_FILTER,
 
-      useClass: AllExceptionsFilter,
-    },
+    //   useClass: AllExceptionsFilter,
+    // },
   ],
   controllers: [],
 })
