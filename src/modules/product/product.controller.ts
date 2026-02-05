@@ -1,55 +1,34 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Query,
-} from '@nestjs/common';
-import { ApiOperation } from '@nestjs/swagger';
+import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { ProductService } from './product.service';
-import {
-  CreateProductDTO,
-  IdProductDTO,
-  ProductDTO,
-  UpdateProductDTO,
-} from './dto/product-request.dto';
-import { Product } from './product.entity';
+import { CreateProductDto } from './dto/create-product.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
 
 @Controller('product')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
-  @ApiOperation({ summary: 'List Products' })
+  @Post()
+  create(@Body() createProductDto: CreateProductDto) {
+    return this.productService.create(createProductDto);
+  }
+
   @Get()
-  async listProduct(@Query() dto: ProductDTO) {
-    return await this.productService.find({ where: dto });
+  findAll() {
+    return this.productService.findAll();
   }
 
-  @ApiOperation({ summary: 'Add new Product' })
-  @Post()
-  @Post()
-  async addProduct(@Body() dto: CreateProductDTO) {
-    const product = await this.productService.create(dto); 
-    return {message:'product created successfully'}; 
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.productService.findOne(+id);
   }
 
-  @ApiOperation({ summary: 'Update Product' })
-  @Patch(':productId')
-  async updateProduct(
-    @Param() params: IdProductDTO,
-    @Body() dto: UpdateProductDTO,
-  ) {
-    await this.productService.update(params, dto);
-    return {message:'Product Updated '};
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
+    return this.productService.update(+id, updateProductDto);
   }
 
-  @ApiOperation({ summary: 'Delete Product' })
-  @Delete(':productId')
-  async deleteProduct(@Param() id: IdProductDTO) {
-    await this.productService.hardDelete(id.productId);
-    return {message:'Product Deleted'};
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.productService.remove(+id);
   }
 }

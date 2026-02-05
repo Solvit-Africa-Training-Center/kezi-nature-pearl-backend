@@ -5,7 +5,7 @@ export const hashContent = (content: string) => {
   return hashedContent;
 };
 
-export const comparehashContent = (hashedContent: string, content: string) => {
+export const comparehashContent = (content: string, hashedContent: string) => {
   const result = bcrypt.compareSync(content, hashedContent);
   return result;
 };

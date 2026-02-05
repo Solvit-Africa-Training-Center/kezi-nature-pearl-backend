@@ -1,1 +1,1 @@
-export class FileUploadDTO {}
+export class CreateFileDto {}
