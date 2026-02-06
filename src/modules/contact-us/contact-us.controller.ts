@@ -1,34 +1,54 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Patch,
+  BadRequestException,
+} from '@nestjs/common';
 import { ContactUsService } from './contact-us.service';
 import { CreateContactUsDto } from './dto/create-contact-us.dto';
-import { UpdateContactUsDto } from './dto/update-contact-us.dto';
+import { RespondContactUsDto } from './dto/create-contact-us.dto';
 
-@Controller('contact-us')
+@Controller('public-contact')
 export class ContactUsController {
   constructor(private readonly contactUsService: ContactUsService) {}
 
   @Post()
-  create(@Body() createContactUsDto: CreateContactUsDto) {
-    return this.contactUsService.create(createContactUsDto);
+  async submitMessage(@Body() dto: CreateContactUsDto) {
+    if (!dto.name || !dto.email || !dto.subject || !dto.message) {
+      throw new BadRequestException(
+        'name, email, subject, and message are required',
+      );
+    }
+
+    return this.contactUsService.createPublicContactMessage(dto);
   }
 
-  @Get()
-  findAll() {
-    return this.contactUsService.findAll();
+  @Get('public')
+  getAllPublicMessages() {
+    return this.contactUsService.getAllPublicMessages();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.contactUsService.findOne(+id);
+  getPublicMessageById(@Param('id') id: string) {
+    return this.contactUsService.getPublicMessageById({ where: { id } });
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateContactUsDto: UpdateContactUsDto) {
-    return this.contactUsService.update(+id, updateContactUsDto);
+  @Get('registered')
+  getAllMessages() {
+    return this.contactUsService.getAllRegisteredMessages();
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.contactUsService.remove(+id);
+  @Patch(':id/respond')
+  respondToContact(@Param('id') id: string, @Body() dto: RespondContactUsDto) {
+    const adminUserId = 'adminid'; 
+    return this.contactUsService.respondToMessage(
+      id,
+      dto.response,
+      adminUserId,                
+      
+    );
   }
 }

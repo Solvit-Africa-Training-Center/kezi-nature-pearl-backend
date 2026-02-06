@@ -69,7 +69,7 @@ import { AuthModule } from './modules/auth/auth.module';
     InventoryLogModule,
     NotificationModule,
     ContactUsModule,
-    AuthModuleOptions,
+    // AuthModuleOptions,
     UserModule,
   ],
   providers: [
