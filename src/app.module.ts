@@ -48,7 +48,7 @@ import { AuthModule } from './modules/auth/auth.module';
     JwtModule.register({
       global: true,
     }),
-    // AuthModule,
+    AuthModule,
     FileModule,
     AddressModule,
     UserPreferencesModule,
@@ -71,7 +71,6 @@ import { AuthModule } from './modules/auth/auth.module';
     ContactUsModule,
     AuthModuleOptions,
     UserModule,
-    AuthModule,
   ],
   providers: [
     LoggerService,

@@ -12,8 +12,8 @@ export class UserService {
     private readonly userRepo: Repository<User>,
   ) {}
 
-  create(dto: CreateUserDto) {
-    return 'This action adds a new user';
+  async create(dto: Partial<User>) {
+    return await this.userRepo.save(dto);
   }
 
   findAll() {
