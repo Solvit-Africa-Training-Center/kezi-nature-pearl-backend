@@ -8,8 +8,7 @@ import {
   BeforeUpdate,
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
-import { IsEmail, IsEnum, IsOptional, Length } from 'class-validator';
-import * as bcrypt from 'bcrypt';
+import { IsEmail, IsEnum, IsOptional, IsString, Length } from 'class-validator';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { UserRole, UserStatus } from '../../../common/enums/user.enum';
 import { UserPreferences } from '../../../modules/user-preferences/entities/user-preference.entity';
@@ -18,10 +17,11 @@ import { Cart } from '../../../modules/cart/entities/cart.entity';
 import { Order } from '../../../modules/order/entities/order.entity';
 import { Review } from '../../../modules/review/entities/review.entity';
 import { Wishlist } from '../../../modules/wishlist/entities/wishlist.entity';
+import { Notification } from '../../../modules/notification/entities/notification.entity';
 import { InventoryLog } from '../../../modules/inventory-log/entities/inventory-log.entity';
 import { ContactUs } from '../../../modules/contact-us/entities/contact-us.entity';
 import { File } from '../../../modules/file/entities/file.entity';
-import { Notification } from '../../../modules/notification/entities/notification.entity';
+import { comparehashContent, hashContent } from '../../../util/lib';
 
 @Entity('users')
 export class User extends BaseEntity {
@@ -38,15 +38,18 @@ export class User extends BaseEntity {
 
   @Column()
   @Exclude()
+  @IsString()
   @Length(6, 100)
   password: string;
 
   @Column({ name: 'full_name', nullable: true })
   @IsOptional()
+  @IsString()
   fullName?: string;
 
   @Column({ name: 'phone_number', nullable: true })
   @IsOptional()
+  @IsString()
   phoneNumber?: string;
 
   @Column({ type: 'enum', enum: UserRole, default: UserRole.CUSTOMER })
@@ -57,8 +60,8 @@ export class User extends BaseEntity {
   @IsEnum(UserStatus)
   status: UserStatus;
 
-  @Column({ name: 'email_verified_at', type: 'timestamptz', nullable: true })
-  emailVerifiedAt?: Date;
+  @Column({ name: 'verified_at', type: 'timestamptz', nullable: true })
+  verifiedAt?: Date;
 
   @Column({ name: 'last_login_at', type: 'timestamptz', nullable: true })
   lastLoginAt?: Date;
@@ -101,11 +104,11 @@ export class User extends BaseEntity {
   @BeforeUpdate()
   async hashPassword() {
     if (this.password) {
-      this.password = await bcrypt.hash(this.password, 10);
+      this.password = hashContent(this.password, 10);
     }
   }
 
   async validatePassword(password: string): Promise<boolean> {
-    return bcrypt.compare(password, this.password);
+    return comparehashContent(password, this.password);
   }
 }

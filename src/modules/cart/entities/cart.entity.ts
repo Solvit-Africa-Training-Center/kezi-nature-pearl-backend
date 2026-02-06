@@ -41,4 +41,8 @@ export class Cart extends BaseEntity {
   get subtotal(): number {
     return this.items?.reduce((sum, item) => sum + item.totalPrice, 0) || 0;
   }
+
+  get isEmpty(): boolean {
+    return !this.items || this.items.length === 0;
+  }
 }

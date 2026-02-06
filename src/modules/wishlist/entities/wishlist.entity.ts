@@ -1,10 +1,11 @@
-import { Entity, Column, ManyToOne, JoinColumn, Unique } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn, Unique, Index } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { User } from '../../../modules/user/entities/user.entity';
 import { Product } from '../../../modules/product/entities/product.entity';
 
 @Entity('wishlist')
 @Unique(['userId', 'productId'])
+@Index(['userId', 'createdAt'])
 export class Wishlist extends BaseEntity {
   @Column()
   userId: string;

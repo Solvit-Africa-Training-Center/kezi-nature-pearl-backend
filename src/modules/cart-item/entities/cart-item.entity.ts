@@ -6,7 +6,7 @@ import {
   BeforeInsert,
   BeforeUpdate,
 } from 'typeorm';
-import { IsInt, IsNumber, Min } from 'class-validator';
+import { IsInt, IsNumber, IsOptional, Min } from 'class-validator';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { Cart } from '../../../modules/cart/entities/cart.entity';
 import { Product } from '../../../modules/product/entities/product.entity';
@@ -25,14 +25,15 @@ export class CartItem extends BaseEntity {
   @Column()
   productId: string;
 
-  @ManyToOne(() => Product)
+  @ManyToOne(() => Product, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'productId' })
   product: Product;
 
   @Column({ type: 'uuid', nullable: true })
+  @IsOptional()
   variantId?: string;
 
-  @ManyToOne(() => ProductVariant, { nullable: true })
+  @ManyToOne(() => ProductVariant, { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'variantId' })
   variant?: ProductVariant;
 

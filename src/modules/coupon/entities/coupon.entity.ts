@@ -1,13 +1,14 @@
-import { Entity, Column, OneToMany } from 'typeorm';
+import { Entity, Column, OneToMany, Index } from 'typeorm';
 import {
   IsBoolean,
   IsDate,
   IsEnum,
   IsInt,
   IsNumber,
-  IsOptional,
   IsString,
   Min,
+  IsArray,
+  IsOptional,
 } from 'class-validator';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { DiscountType } from '../../../common/enums/product.enum';
@@ -15,12 +16,14 @@ import { DecimalColumn } from '../../../common/decorator/decimal-column.decorato
 import { OrderCoupon } from '../../../modules/order-coupon/entities/order-coupon.entity';
 
 @Entity('coupons')
+@Index(['code'], { unique: true })
 export class Coupon extends BaseEntity {
   @Column({ unique: true })
   @IsString()
   code: string;
 
   @Column({
+    name: 'discount_type',
     type: 'enum',
     enum: DiscountType,
   })
@@ -67,7 +70,13 @@ export class Coupon extends BaseEntity {
   @IsBoolean()
   isActive: boolean;
 
-  @Column('uuid', { array: true, nullable: true })
+  @Column('uuid', {
+    name: 'applicable_categories',
+    array: true,
+    nullable: true,
+  })
+  @IsOptional()
+  @IsArray()
   applicableCategories?: string[];
 
   // Relations
@@ -104,5 +113,16 @@ export class Coupon extends BaseEntity {
     }
 
     return Math.min(discount, amount);
+  }
+
+  incrementUsage(): void {
+    this.usedCount += 1;
+  }
+
+  canBeApplied(totalAmount: number): boolean {
+    if (!this.isActiveNow) return false;
+    if (this.minOrderAmount && totalAmount < this.minOrderAmount) return false;
+    if (this.usageLimit && this.usedCount >= this.usageLimit) return false;
+    return true;
   }
 }

@@ -1,4 +1,4 @@
-import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
 import { IsEnum, IsInt, IsOptional, IsString } from 'class-validator';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { InventoryChangeType } from '../../../common/enums/product.enum';
@@ -7,6 +7,8 @@ import { ProductVariant } from '../../../modules/product-variant/entities/produc
 import { User } from '../../../modules/user/entities/user.entity';
 
 @Entity('inventory_log')
+@Index(['productId', 'createdAt'])
+@Index(['referenceId'])
 export class InventoryLog extends BaseEntity {
   @Column()
   productId: string;
@@ -18,6 +20,7 @@ export class InventoryLog extends BaseEntity {
   product: Product;
 
   @Column({ type: 'uuid', nullable: true })
+  @IsOptional()
   variantId?: string;
 
   @ManyToOne(() => ProductVariant, { nullable: true })
@@ -25,6 +28,7 @@ export class InventoryLog extends BaseEntity {
   variant?: ProductVariant;
 
   @Column({
+    name: 'change_type',
     type: 'enum',
     enum: InventoryChangeType,
   })

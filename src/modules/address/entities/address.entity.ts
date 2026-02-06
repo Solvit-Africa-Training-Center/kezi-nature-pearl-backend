@@ -52,6 +52,7 @@ export class Address extends BaseEntity {
   @IsEnum(AddressLabel)
   label: AddressLabel;
 
+  // Relations
   @OneToMany(() => Order, (order) => order.shippingAddress)
   shippingOrders?: Order[];
 

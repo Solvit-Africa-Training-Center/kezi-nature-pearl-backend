@@ -1,10 +1,11 @@
-import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
 import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { NotificationType } from '../../../common/enums/product.enum';
 import { User } from '../../../modules/user/entities/user.entity';
 
 @Entity('notifications')
+@Index(['userId', 'isRead', 'createdAt'])
 export class Notification extends BaseEntity {
   @Column()
   userId: string;

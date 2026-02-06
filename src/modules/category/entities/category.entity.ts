@@ -7,14 +7,16 @@ import {
   Tree,
   TreeChildren,
   TreeParent,
+  Index,
 } from 'typeorm';
-import { IsBoolean, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsInt, IsOptional, IsString, Min } from 'class-validator';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { File } from '../../../modules/file/entities/file.entity';
 import { Product } from '../../../modules/product/entities/product.entity';
 
 @Entity('categories')
 @Tree('closure-table')
+@Index(['slug'], { unique: true })
 export class Category extends BaseEntity {
   @Column({ type: 'uuid', nullable: true })
   imageId?: string;
@@ -47,6 +49,8 @@ export class Category extends BaseEntity {
   isActive: boolean;
 
   @Column({ name: 'display_order', default: 0 })
+  @IsInt()
+  @Min(0)
   displayOrder: number;
 
   // Relations

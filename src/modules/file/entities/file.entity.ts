@@ -1,5 +1,5 @@
 import { Entity, Column, OneToMany } from 'typeorm';
-import { IsEnum } from 'class-validator';
+import { IsEnum, IsInt, IsOptional, IsString, Min } from 'class-validator';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { FileType } from '../../../common/enums/product.enum';
 import { User } from '../../../modules/user/entities/user.entity';
@@ -12,6 +12,7 @@ import { ProductImage } from '../../../modules/product-image/entities/product-im
 @Entity('files')
 export class File extends BaseEntity {
   @Column()
+  @IsString()
   url: string;
 
   @Column({ type: 'enum', enum: FileType })
@@ -19,9 +20,12 @@ export class File extends BaseEntity {
   type: FileType;
 
   @Column({ name: 'mime_type' })
+  @IsString()
   mimeType: string;
 
   @Column('int')
+  @IsInt()
+  @Min(0)
   size: number;
 
   // Relations

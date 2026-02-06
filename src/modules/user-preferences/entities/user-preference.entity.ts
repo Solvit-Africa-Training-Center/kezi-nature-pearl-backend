@@ -1,5 +1,5 @@
 import { Entity, Column, OneToOne, JoinColumn } from 'typeorm';
-import { IsEnum, IsOptional, IsArray } from 'class-validator';
+import { IsEnum, IsOptional, IsArray, IsString } from 'class-validator';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { SkinType } from '../../../common/enums/user.enum';
 import { User } from '../../../modules/user/entities/user.entity';
@@ -9,11 +9,12 @@ export class UserPreferences extends BaseEntity {
   @Column({ unique: true })
   userId: string;
 
-  @OneToOne(() => User, (user) => user.preferences)
+  @OneToOne(() => User, (user) => user.preferences, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user: User;
 
   @Column({
+    name: 'skin_type',
     type: 'enum',
     enum: SkinType,
     nullable: true,
@@ -24,6 +25,7 @@ export class UserPreferences extends BaseEntity {
 
   @Column({ name: 'skin_tone', nullable: true })
   @IsOptional()
+  @IsString()
   skinTone?: string;
 
   @Column('jsonb', { nullable: true })
@@ -31,7 +33,7 @@ export class UserPreferences extends BaseEntity {
   @IsArray()
   allergies?: string[];
 
-  @Column('uuid', { array: true, nullable: true })
+  @Column('uuid', { name: 'preferred_categories', array: true, nullable: true })
   @IsOptional()
   @IsArray()
   preferredCategories?: string[];

@@ -5,6 +5,7 @@ import {
   OneToMany,
   JoinColumn,
   BeforeInsert,
+  Index,
 } from 'typeorm';
 import {
   IsEnum,
@@ -25,6 +26,7 @@ import { OrderCoupon } from '../../../modules/order-coupon/entities/order-coupon
 import { Review } from '../../../modules/review/entities/review.entity';
 
 @Entity('orders')
+@Index(['orderNumber'], { unique: true })
 export class Order extends BaseEntity {
   @Column({ name: 'order_number', unique: true })
   @IsString()
@@ -131,11 +133,14 @@ export class Order extends BaseEntity {
   generateOrderNumber() {
     if (!this.orderNumber) {
       const timestamp = Date.now();
-      const random = Math.floor(Math.random() * 1000);
-      this.orderNumber = `ORD-${timestamp}-${random}`;
+      const random = Math.floor(Math.random() * 10000)
+        .toString()
+        .padStart(4, '0');
+      this.orderNumber = `ORD${timestamp}${random}`;
     }
   }
 
+  // Helper methods
   get isPaid(): boolean {
     return this.paymentStatus === PaymentStatus.PAID;
   }
@@ -146,5 +151,17 @@ export class Order extends BaseEntity {
 
   get isCancelled(): boolean {
     return this.orderStatus === OrderStatus.CANCELLED;
+  }
+
+  get isRefunded(): boolean {
+    return this.paymentStatus === PaymentStatus.REFUNDED;
+  }
+
+  get isProcessing(): boolean {
+    return [
+      OrderStatus.CONFIRMED,
+      OrderStatus.PROCESSING,
+      OrderStatus.SHIPPED,
+    ].includes(this.orderStatus);
   }
 }

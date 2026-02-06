@@ -23,6 +23,7 @@ export class OrderItem extends BaseEntity {
   product: Product;
 
   @Column({ type: 'uuid', nullable: true })
+  @IsOptional()
   variantId?: string;
 
   @ManyToOne(() => ProductVariant, { nullable: true })

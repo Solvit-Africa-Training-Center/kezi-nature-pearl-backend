@@ -1,4 +1,4 @@
-import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
 import {
   IsBoolean,
   IsEnum,
@@ -16,6 +16,8 @@ import { Product } from '../../../modules/product/entities/product.entity';
 import { Order } from '../../../modules/order/entities/order.entity';
 
 @Entity('reviews')
+@Index(['productId', 'status'])
+@Index(['userId', 'productId'], { unique: true })
 export class Review extends BaseEntity {
   @Column()
   userId: string;
@@ -34,6 +36,7 @@ export class Review extends BaseEntity {
   product: Product;
 
   @Column({ type: 'uuid', nullable: true })
+  @IsOptional()
   orderId?: string;
 
   @ManyToOne(() => Order, { nullable: true })
@@ -61,6 +64,7 @@ export class Review extends BaseEntity {
   isVerifiedPurchase: boolean;
 
   @Column({
+    name: 'skin_type',
     type: 'enum',
     enum: SkinType,
     nullable: true,
@@ -81,4 +85,17 @@ export class Review extends BaseEntity {
   })
   @IsEnum(ReviewStatus)
   status: ReviewStatus;
+
+  // Helper methods
+  get isApproved(): boolean {
+    return this.status === ReviewStatus.APPROVED;
+  }
+
+  get isPending(): boolean {
+    return this.status === ReviewStatus.PENDING;
+  }
+
+  get isRejected(): boolean {
+    return this.status === ReviewStatus.REJECTED;
+  }
 }

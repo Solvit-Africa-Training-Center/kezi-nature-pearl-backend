@@ -1,6 +1,6 @@
 import * as bcrypt from 'bcrypt';
 
-export const hashContent = (content: string) => {
+export const hashContent = (content: string, saltOrRounds: number) => {
   const hashedContent = bcrypt.hashSync(content, 10);
   return hashedContent;
 };

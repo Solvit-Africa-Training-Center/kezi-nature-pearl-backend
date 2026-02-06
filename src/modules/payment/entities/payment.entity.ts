@@ -1,14 +1,15 @@
-import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
 import { IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 import { BaseEntity } from '../../../common/entities/base.entity';
-import { Order } from '../../../modules/order/entities/order.entity';
 import {
   PaymentMethod,
   PaymentStatus,
 } from '../../../common/enums/product.enum';
+import { Order } from '../../../modules/order/entities/order.entity';
 import { DecimalColumn } from '../../../common/decorator/decimal-column.decorator';
 
 @Entity('payments')
+@Index(['transactionId'], { unique: true })
 export class Payment extends BaseEntity {
   @Column()
   orderId: string;
@@ -18,6 +19,7 @@ export class Payment extends BaseEntity {
   order: Order;
 
   @Column({
+    name: 'payment_method',
     type: 'enum',
     enum: PaymentMethod,
   })
@@ -25,6 +27,7 @@ export class Payment extends BaseEntity {
   paymentMethod: PaymentMethod;
 
   @Column({
+    name: 'payment_status',
     type: 'enum',
     enum: PaymentStatus,
     default: PaymentStatus.PENDING,

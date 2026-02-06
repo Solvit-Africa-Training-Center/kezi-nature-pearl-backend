@@ -5,9 +5,9 @@ import {
   OneToMany,
   JoinColumn,
   Index,
+  BeforeUpdate,
 } from 'typeorm';
 import {
-  IsDecimal,
   IsEnum,
   IsInt,
   IsNumber,
@@ -15,11 +15,13 @@ import {
   IsString,
   IsArray,
   Min,
+  IsDecimal,
 } from 'class-validator';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { ProductStatus } from '../../../common/enums/product.enum';
 import { Brand } from '../../../modules/brand/entities/brand.entity';
 import { Category } from '../../../modules/category/entities/category.entity';
+import { DecimalColumn } from '../../../common/decorator/decimal-column.decorator';
 import { ProductVariant } from '../../../modules/product-variant/entities/product-variant.entity';
 import { ProductImage } from '../../../modules/product-image/entities/product-image.entity';
 import { CartItem } from '../../../modules/cart-item/entities/cart-item.entity';
@@ -27,7 +29,6 @@ import { OrderItem } from '../../../modules/order-item/entities/order-item.entit
 import { Wishlist } from '../../../modules/wishlist/entities/wishlist.entity';
 import { Review } from '../../../modules/review/entities/review.entity';
 import { InventoryLog } from '../../../modules/inventory-log/entities/inventory-log.entity';
-import { DecimalColumn } from '../../../common/decorator/decimal-column.decorator';
 import { File } from '../../../modules/file/entities/file.entity';
 
 @Entity('products')
@@ -82,7 +83,7 @@ export class Product extends BaseEntity {
   @Min(0)
   price: number;
 
-  @DecimalColumn({ nullable: true })
+  @DecimalColumn({ name: 'sale_price', nullable: true })
   @IsOptional()
   @IsNumber()
   @Min(0)
@@ -172,6 +173,16 @@ export class Product extends BaseEntity {
   @OneToMany(() => InventoryLog, (log) => log.product)
   inventoryLogs?: InventoryLog[];
 
+  @BeforeUpdate()
+  updateStatusBasedOnStock() {
+    if (
+      this.stockQuantity === 0 &&
+      this.status !== ProductStatus.DISCONTINUED
+    ) {
+      this.status = ProductStatus.OUT_OF_STOCK;
+    }
+  }
+
   // Helper methods
   get isLowStock(): boolean {
     return this.stockQuantity <= this.lowStockThreshold;
@@ -183,5 +194,9 @@ export class Product extends BaseEntity {
 
   get currentPrice(): number {
     return this.salePrice || this.price;
+  }
+
+  get hasActiveVariants(): boolean {
+    return this.variants?.some((v) => v.isActive) || false;
   }
 }

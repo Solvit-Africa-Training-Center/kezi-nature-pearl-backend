@@ -9,10 +9,10 @@ import {
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { Product } from '../../../modules/product/entities/product.entity';
 import { DecimalColumn } from '../../../common/decorator/decimal-column.decorator';
+import { File } from '../../../modules/file/entities/file.entity';
 import { CartItem } from '../../../modules/cart-item/entities/cart-item.entity';
 import { OrderItem } from '../../../modules/order-item/entities/order-item.entity';
 import { InventoryLog } from '../../../modules/inventory-log/entities/inventory-log.entity';
-import { File } from '../../../modules/file/entities/file.entity';
 
 @Entity('product_variants')
 export class ProductVariant extends BaseEntity {
@@ -65,6 +65,7 @@ export class ProductVariant extends BaseEntity {
   @IsBoolean()
   isActive: boolean;
 
+  // Relations
   @OneToMany(() => CartItem, (cartItem) => cartItem.variant)
   cartItems?: CartItem[];
 
@@ -73,4 +74,13 @@ export class ProductVariant extends BaseEntity {
 
   @OneToMany(() => InventoryLog, (log) => log.variant)
   inventoryLogs?: InventoryLog[];
+
+  // Helper methods
+  get currentPrice(): number {
+    return this.salePrice || this.price || this.product?.currentPrice || 0;
+  }
+
+  get isOutOfStock(): boolean {
+    return this.stockQuantity === 0;
+  }
 }

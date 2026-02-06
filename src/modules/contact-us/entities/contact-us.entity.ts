@@ -1,12 +1,14 @@
-import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { ContactUsStatus } from '../../../common/enums/product.enum';
 import { User } from '../../../modules/user/entities/user.entity';
 
 @Entity('contact_us')
+@Index(['status', 'createdAt'])
 export class ContactUs extends BaseEntity {
   @Column({ type: 'uuid', nullable: true })
+  @IsOptional()
   userId?: string;
 
   @ManyToOne(() => User, (user) => user.contactSubmissions, {
@@ -50,6 +52,7 @@ export class ContactUs extends BaseEntity {
   response?: string;
 
   @Column({ type: 'uuid', nullable: true })
+  @IsOptional()
   respondedBy?: string;
 
   @ManyToOne(() => User, { nullable: true })
