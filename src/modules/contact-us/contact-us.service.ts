@@ -68,26 +68,32 @@ export class ContactUsService {
   }
 
   async respondToMessage(
-  id: string,
-  responseText: string,
-  adminUserId: string,
-): Promise<{ message: string }> {
-  const contact = await this.contactRepo.findOne({ where: { id } });
+    id: string,
+    responseText: string,
+    adminUserId: string,
+  ): Promise<{ message: string }> {
+    const contact = await this.contactRepo.findOne({ where: { id } });
 
-  if (!contact) {
-    throw new NotFoundException('Contact message not found');
+    if (!contact) {
+      throw new NotFoundException('Contact message not found');
+    }
+
+    contact.response = responseText;
+
+    contact.status = ContactUsStatus.RESOLVED;
+
+    contact.respondedBy = adminUserId;
+    contact.respondedAt = new Date();
+
+    await this.contactRepo.save(contact);
+
+    return { message: 'Contact message resolved successfully' };
   }
 
-  contact.response = responseText;
-
-  contact.status = ContactUsStatus.RESOLVED;
-
-  contact.respondedBy = adminUserId;
-  contact.respondedAt = new Date();
-
-  await this.contactRepo.save(contact);
-
-  return { message: 'Contact message resolved successfully' };
-}
-
+  async getMessagesByUser(userId: string): Promise<ContactUs[]> {
+    return this.contactRepo.find({
+      where: { userId }, 
+      order: { createdAt: 'ASC' },
+    });
+  }
 }
