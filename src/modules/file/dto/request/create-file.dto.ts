@@ -6,6 +6,16 @@ export class CreateFileDto {
     type: 'file',
     format: 'binary',
   })
-  @IsNotEmpty()
   picture: Express.Multer.File;
+}
+
+export class CreateFilesDto {
+  @ApiProperty({
+    type: 'array',
+    items: {
+      type: 'string',
+      format: 'binary',
+    },
+  })
+  pictures: Express.Multer.File[];
 }

@@ -18,9 +18,7 @@ import { FileModule } from './modules/file/file.module';
 import { AddressModule } from './modules/address/address.module';
 import { UserPreferencesModule } from './modules/user-preferences/user-preferences.module';
 import { CategoryModule } from './modules/category/category.module';
-import { BrandModule } from './modules/brand/brand.module';
 import { ProductModule } from './modules/product/product.module';
-import { ProductVariantModule } from './modules/product-variant/product-variant.module';
 import { ProductImageModule } from './modules/product-image/product-image.module';
 import { CartModule } from './modules/cart/cart.module';
 import { CartItemModule } from './modules/cart-item/cart-item.module';
@@ -50,14 +48,12 @@ import { RedisModule } from './shared/redis/redis.module';
 
     AuthModule,
     UserModule,
+    FileModule,
     CategoryModule,
     ProductModule,
-    FileModule,
+    ProductImageModule,
     AddressModule,
     UserPreferencesModule,
-    BrandModule,
-    ProductVariantModule,
-    ProductImageModule,
     CartModule,
     CartItemModule,
     OrderModule,
