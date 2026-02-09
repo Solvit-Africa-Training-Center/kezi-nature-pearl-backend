@@ -1,42 +1,64 @@
 import {
+  Body,
   Controller,
   Get,
-  Post,
-  Body,
+  NotFoundException,
   Patch,
-  Param,
-  Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { AuthGuard, RolesGuard } from 'src/common/guards';
+import { CurrentUser, Roles } from 'src/common/decorator';
+import { Payload } from 'src/util/token.service';
+import { ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
+import { UserRole } from 'src/common/enums/user.enum';
+import { UpdateUserDto, UpdateUserProfile } from './dto/request';
 
 @Controller('user')
+@UseGuards(AuthGuard, RolesGuard)
+@ApiBearerAuth()
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+  @Get('profile')
+  @Roles(UserRole.CUSTOMER, UserRole.ADMIN)
+  async getUserProfile(@CurrentUser() user: Payload) {
+    return await this.userService.getUserProfile({
+      where: { id: user.sub },
+    });
   }
 
-  @Get()
-  findAll() {
-    return this.userService.findAll();
+  @Patch('update')
+  @Roles(UserRole.CUSTOMER, UserRole.ADMIN)
+  @ApiConsumes('multipart/form-data')
+  async updateUserProfile(
+    @CurrentUser() user: Payload,
+    @Body() dto: UpdateUserProfile,
+  ) {
+    // await this.userService.update(user.sub, dto);
+    console.log(dto.currentPassword);
+    return await this.userService.getUserProfile({
+      where: { id: user.sub },
+    });
   }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.userService.findOne(id);
+  // @Post()
+  // create(@Body() createUserDto: CreateUserDto) {
+  //   return this.userService.create(createUserDto);
   // }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
-  }
+  // @Get()
+  // findAll() {
+  //   return this.userService.findAll();
+  // }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
-  }
+  // @Patch(':id')
+  // update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  //   return this.userService.update(+id, updateUserDto);
+  // }
+
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.userService.remove(+id);
+  // }
 }

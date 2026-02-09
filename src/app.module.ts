@@ -1,13 +1,13 @@
 import { MiddlewareConsumer, Module, UseFilters } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { JwtModule } from '@nestjs/jwt';
 
 import serverConfig from './config/server.config';
 import databaseConfig from './config/database.config';
 import mailConfig from './config/mail.config';
 import cloudinaryConfig from './config/cloudinary.config';
 import swaggerConfig from './config/swagger.config';
+import redisConfig from './config/redis.config';
 
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { AllExceptionsFilter } from './common/filters/AllExceptionFilter';
@@ -34,9 +34,9 @@ import { OrderCouponModule } from './modules/order-coupon/order-coupon.module';
 import { InventoryLogModule } from './modules/inventory-log/inventory-log.module';
 import { NotificationModule } from './modules/notification/notification.module';
 import { ContactUsModule } from './modules/contact-us/contact-us.module';
-import { AuthModuleOptions } from '@nestjs/passport';
 import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { RedisModule } from './shared/redis/redis.module';
 
 @Module({
   imports: [
@@ -45,16 +45,17 @@ import { AuthModule } from './modules/auth/auth.module';
       load: [serverConfig, mailConfig, cloudinaryConfig, swaggerConfig],
     }),
     TypeOrmModule.forRootAsync(databaseConfig.asProvider()),
-    JwtModule.register({
-      global: true,
-    }),
+
+    RedisModule,
+
     AuthModule,
+    UserModule,
+    CategoryModule,
+    ProductModule,
     FileModule,
     AddressModule,
     UserPreferencesModule,
-    CategoryModule,
     BrandModule,
-    ProductModule,
     ProductVariantModule,
     ProductImageModule,
     CartModule,
@@ -69,21 +70,18 @@ import { AuthModule } from './modules/auth/auth.module';
     InventoryLogModule,
     NotificationModule,
     ContactUsModule,
-    AuthModuleOptions,
-    UserModule,
   ],
   providers: [
-    LoggerService,
+    // LoggerService,
     // {
     //   provide: APP_FILTER,
-
     //   useClass: AllExceptionsFilter,
     // },
   ],
   controllers: [],
 })
 export class AppModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(RequestLoggerMiddleware).forRoutes('*');
-  }
+  // configure(consumer: MiddlewareConsumer) {
+  //   consumer.apply(RequestLoggerMiddleware).forRoutes('*');
+  // }
 }
