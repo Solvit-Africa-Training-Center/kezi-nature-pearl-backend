@@ -6,15 +6,17 @@ import {
   Param,
   Patch,
   BadRequestException,
-  UseGuards
+  UseGuards,
 } from '@nestjs/common';
 import { ContactUsService } from './contact-us.service';
 import { CreateContactUsDto } from './dto/create-contact-us.dto';
 import { RespondContactUsDto } from './dto/create-contact-us.dto';
-import { Request } from 'express';
-import { AuthGuard } from '@nestjs/passport';
 import { User } from 'src/common/decorator/user.decorator';
-
+import { AuthGuard, RolesGuard } from 'src/common/guards';
+import { Roles } from 'src/common/decorator';
+import { UserRole } from 'src/common/enums/user.enum';
+import { Exclude } from 'class-transformer';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('public-contact')
 export class ContactUsController {
@@ -32,7 +34,9 @@ export class ContactUsController {
   }
 
   @Post('registered')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(UserRole.CUSTOMER)
+  @ApiBearerAuth()
   async submitRegisteredMessage(
     @Body() dto: CreateContactUsDto,
     @User('id') userId: string,
@@ -73,8 +77,4 @@ export class ContactUsController {
       adminUserId,
     );
   }
-
- 
 }
-
-

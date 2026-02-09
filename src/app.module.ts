@@ -44,7 +44,7 @@ import { RedisModule } from './shared/redis/redis.module';
     }),
     TypeOrmModule.forRootAsync(databaseConfig.asProvider()),
 
-    RedisModule,
+    // RedisModule,
 
     AuthModule,
     UserModule,
