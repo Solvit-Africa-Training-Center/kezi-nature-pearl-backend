@@ -3,7 +3,6 @@ import { IsInt, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { Order } from '../../../modules/order/entities/order.entity';
 import { Product } from '../../../modules/product/entities/product.entity';
-import { ProductVariant } from '../../../modules/product-variant/entities/product-variant.entity';
 import { DecimalColumn } from '../../../common/decorator/decimal-column.decorator';
 
 @Entity('order_items')
@@ -21,14 +20,6 @@ export class OrderItem extends BaseEntity {
   @ManyToOne(() => Product)
   @JoinColumn({ name: 'productId' })
   product: Product;
-
-  @Column({ type: 'uuid', nullable: true })
-  @IsOptional()
-  variantId?: string;
-
-  @ManyToOne(() => ProductVariant, { nullable: true })
-  @JoinColumn({ name: 'variantId' })
-  variant?: ProductVariant;
 
   @Column({ name: 'product_name' })
   @IsString()

@@ -1,14 +1,5 @@
-import {
-  Entity,
-  Column,
-  OneToOne,
-  OneToMany,
-  JoinColumn,
-  BeforeInsert,
-  BeforeUpdate,
-} from 'typeorm';
+import { Entity, Column, OneToOne, OneToMany, JoinColumn } from 'typeorm';
 import { Exclude } from 'class-transformer';
-import { IsEmail, IsEnum, IsOptional, IsString, Length } from 'class-validator';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { UserRole, UserStatus } from '../../../common/enums/user.enum';
 import { UserPreferences } from '../../../modules/user-preferences/entities/user-preference.entity';
@@ -21,7 +12,6 @@ import { Notification } from '../../../modules/notification/entities/notificatio
 import { InventoryLog } from '../../../modules/inventory-log/entities/inventory-log.entity';
 import { ContactUs } from '../../../modules/contact-us/entities/contact-us.entity';
 import { File } from '../../../modules/file/entities/file.entity';
-import { comparehashContent, hashContent } from '../../../util/lib';
 
 @Entity('users')
 export class User extends BaseEntity {
@@ -33,31 +23,22 @@ export class User extends BaseEntity {
   profile?: File;
 
   @Column({ unique: true })
-  @IsEmail()
   email: string;
 
   @Column()
   @Exclude()
-  @IsString()
-  @Length(6, 100)
   password: string;
 
   @Column({ name: 'full_name', nullable: true })
-  @IsOptional()
-  @IsString()
   fullName?: string;
 
   @Column({ name: 'phone_number', nullable: true })
-  @IsOptional()
-  @IsString()
-  phoneNumber?: string;
+  phoneNumber: string;
 
   @Column({ type: 'enum', enum: UserRole, default: UserRole.CUSTOMER })
-  @IsEnum(UserRole)
   role: UserRole;
 
   @Column({ type: 'enum', enum: UserStatus, default: UserStatus.ACTIVE })
-  @IsEnum(UserStatus)
   status: UserStatus;
 
   @Column({ name: 'verified_at', type: 'timestamptz', nullable: true })
@@ -98,17 +79,4 @@ export class User extends BaseEntity {
 
   @OneToMany(() => ContactUs, (contact) => contact.respondedByUser)
   respondedContacts?: ContactUs[];
-
-  // Hooks
-  @BeforeInsert()
-  @BeforeUpdate()
-  async hashPassword() {
-    if (this.password) {
-      this.password = hashContent(this.password, 10);
-    }
-  }
-
-  async validatePassword(password: string): Promise<boolean> {
-    return comparehashContent(password, this.password);
-  }
 }

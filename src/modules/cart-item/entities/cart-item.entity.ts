@@ -10,7 +10,6 @@ import { IsInt, IsNumber, IsOptional, Min } from 'class-validator';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { Cart } from '../../../modules/cart/entities/cart.entity';
 import { Product } from '../../../modules/product/entities/product.entity';
-import { ProductVariant } from '../../../modules/product-variant/entities/product-variant.entity';
 import { DecimalColumn } from '../../../common/decorator/decimal-column.decorator';
 
 @Entity('cart_items')
@@ -28,14 +27,6 @@ export class CartItem extends BaseEntity {
   @ManyToOne(() => Product, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'productId' })
   product: Product;
-
-  @Column({ type: 'uuid', nullable: true })
-  @IsOptional()
-  variantId?: string;
-
-  @ManyToOne(() => ProductVariant, { nullable: true, onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'variantId' })
-  variant?: ProductVariant;
 
   @Column('int')
   @IsInt()

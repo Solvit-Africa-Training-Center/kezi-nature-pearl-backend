@@ -1,11 +1,14 @@
 import * as bcrypt from 'bcrypt';
 
-export const hashContent = (content: string, saltOrRounds: number) => {
-  const hashedContent = bcrypt.hashSync(content, 10);
+export const hashContent = async (content: string) => {
+  const hashedContent = await bcrypt.hash(content, 10);
   return hashedContent;
 };
 
-export const comparehashContent = (content: string, hashedContent: string) => {
-  const result = bcrypt.compareSync(content, hashedContent);
+export const comparehashContent = async (
+  content: string,
+  hashedContent: string,
+) => {
+  const result = await bcrypt.compare(content, hashedContent);
   return result;
 };

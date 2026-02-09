@@ -3,7 +3,6 @@ import { IsEnum, IsInt, IsOptional, IsString } from 'class-validator';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { InventoryChangeType } from '../../../common/enums/product.enum';
 import { Product } from '../../../modules/product/entities/product.entity';
-import { ProductVariant } from '../../../modules/product-variant/entities/product-variant.entity';
 import { User } from '../../../modules/user/entities/user.entity';
 
 @Entity('inventory_log')
@@ -18,14 +17,6 @@ export class InventoryLog extends BaseEntity {
   })
   @JoinColumn({ name: 'productId' })
   product: Product;
-
-  @Column({ type: 'uuid', nullable: true })
-  @IsOptional()
-  variantId?: string;
-
-  @ManyToOne(() => ProductVariant, { nullable: true })
-  @JoinColumn({ name: 'variantId' })
-  variant?: ProductVariant;
 
   @Column({
     name: 'change_type',

@@ -1,26 +1,41 @@
 import { Injectable } from '@nestjs/common';
-import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
+import { CreateProductDto } from './dto/request/create-product.dto';
+import { UpdateProductDto } from './dto/request/update-product.dto';
+import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
+import { Product } from './entities/product.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { ProductImageService } from '../product-image/product-image.service';
 
 @Injectable()
 export class ProductService {
-  create(createProductDto: CreateProductDto) {
-    return 'This action adds a new product';
+  constructor(
+    @InjectRepository(Product)
+    private readonly productRepo: Repository<Product>,
+    private readonly productImageService: ProductImageService,
+  ) {}
+  async create(dto: CreateProductDto, pictures: Express.Multer.File[]) {
+    const product = await this.productRepo.save(dto);
+    this.productImageService.create({
+      files: pictures,
+      productId: product.id,
+    });
+    return { message: 'Product added' };
   }
 
-  findAll() {
-    return `This action returns all product`;
+  async findAll(options?: FindManyOptions<Product>) {
+    return await this.productRepo.find(options);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} product`;
+  async findOne(option: FindOneOptions<Product>) {
+    return await this.productRepo.findOne(option);
   }
 
-  update(id: number, updateProductDto: UpdateProductDto) {
+  update(id: string, updateProductDto: UpdateProductDto) {
     return `This action updates a #${id} product`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} product`;
+  async remove(id: string) {
+    await this.productRepo.delete(id);
+    return { message: 'Product delete' };
   }
 }
