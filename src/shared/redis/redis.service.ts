@@ -19,30 +19,26 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   async connect() {
     try {
       const config = this.configService.get('redis');
+      const redisUrl = new URL(config.url);
 
-      this.client = new Redis({
-        host: config.host,
-        port: config.port,
-        password: config.password,
-        db: config.db,
+      this.client = new Redis(config.url, {
         retryStrategy: config.retryStrategy,
         maxRetriesPerRequest: config.maxRetriesPerRequest,
         enableReadyCheck: config.enableReadyCheck,
         lazyConnect: true, // Connect on first command
       });
 
-      this.subscriber = new Redis({
-        host: config.host,
-        port: config.port,
-        password: config.password,
-        db: config.db,
+      this.subscriber = new Redis(config.url, {
         retryStrategy: config.retryStrategy,
         lazyConnect: true,
       });
 
       // Event listeners for main client
+      const host = redisUrl.hostname;
+      const port = redisUrl.port;
+
       this.client.on('connect', () => {
-        console.log(`Redis connected on ${config.host}:${config.port}`);
+        console.log(`Redis connected on ${host}:${port}`);
         this.isConnected = true;
       });
 
