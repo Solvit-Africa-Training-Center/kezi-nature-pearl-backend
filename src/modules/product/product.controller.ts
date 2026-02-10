@@ -9,15 +9,27 @@ import {
   UseInterceptors,
   UploadedFiles,
   NotFoundException,
+  UseGuards,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/request/create-product.dto';
 import { UpdateProductDto } from './dto/request/update-product.dto';
 import { FileUploadInterceptor } from 'src/common/interceptors/file-upload.interceptor';
-import { ApiConsumes, ApiOperation, ApiProperty } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiConsumes,
+  ApiOperation,
+  ApiProperty,
+} from '@nestjs/swagger';
 import { ProductResponseDto } from './dto/response/product-response.dto';
+import { AuthGuard, RolesGuard } from 'src/common/guards';
+import { Roles } from 'src/common/decorator';
+import { UserRole } from 'src/common/enums/user.enum';
 
 @Controller('product')
+@UseGuards(AuthGuard, RolesGuard)
+@Roles(UserRole.ADMIN)
+@ApiBearerAuth()
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
@@ -56,10 +68,13 @@ export class ProductController {
     return new ProductResponseDto(product);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateProductDto) {
-    return this.productService.update(id, dto);
-  }
+  // @Patch(':id')
+  // @ApiOperation({ summary: 'Add Product' })
+  // @UseInterceptors(new FileUploadInterceptor('pictures', 5))
+  // @ApiConsumes('multipart/form-data')
+  // update(@Param('id') id: string, @Body() dto: UpdateProductDto) {
+  //   return this.productService.update(id, dto);
+  // }
 
   @Delete(':id')
   remove(@Param('id') id: string) {

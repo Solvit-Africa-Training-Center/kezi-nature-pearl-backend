@@ -6,7 +6,6 @@ import {
   BeforeInsert,
   BeforeUpdate,
 } from 'typeorm';
-import { IsInt, IsNumber, IsOptional, Min } from 'class-validator';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { Cart } from '../../../modules/cart/entities/cart.entity';
 import { Product } from '../../../modules/product/entities/product.entity';
@@ -29,18 +28,12 @@ export class CartItem extends BaseEntity {
   product: Product;
 
   @Column('int')
-  @IsInt()
-  @Min(1)
   quantity: number;
 
   @DecimalColumn({ name: 'unit_price' })
-  @IsNumber()
-  @Min(0)
   unitPrice: number;
 
   @DecimalColumn({ name: 'total_price' })
-  @IsNumber()
-  @Min(0)
   totalPrice: number;
 
   @BeforeInsert()

@@ -29,7 +29,7 @@ export class AuthController {
   }
 
   @Post('login')
-  @ApiOperation({ summary: 'User Registration' })
+  @ApiOperation({ summary: 'User Login' })
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
   }
