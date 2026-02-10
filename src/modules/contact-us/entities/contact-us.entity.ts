@@ -17,9 +17,9 @@ export class ContactUs extends BaseEntity {
   @JoinColumn({ name: 'userId' })
   user?: User;
 
-  @Column()
+  @Column({ nullable: true })
   @IsString()
-  name: string;
+  name?: string;
 
   @Column()
   @IsString()

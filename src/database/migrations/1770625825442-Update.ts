@@ -1,162 +1,397 @@
-import { MigrationInterface, QueryRunner } from "typeorm";
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class Update1770625825442 implements MigrationInterface {
-    name = 'Update1770625825442'
+  name = 'Update1770625825442';
 
-    public async up(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`CREATE TYPE "public"."user_preferences_skin_type_enum" AS ENUM('dry', 'oily', 'combination', 'sensitive', 'normal')`);
-        await queryRunner.query(`CREATE TABLE "user_preferences" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "userId" uuid NOT NULL, "skin_type" "public"."user_preferences_skin_type_enum", "skin_tone" character varying, "allergies" jsonb, "preferred_categories" uuid array, CONSTRAINT "UQ_b6202d1cacc63a0b9c8dac2abd4" UNIQUE ("userId"), CONSTRAINT "REL_b6202d1cacc63a0b9c8dac2abd" UNIQUE ("userId"), CONSTRAINT "PK_e8cfb5b31af61cd363a6b6d7c25" PRIMARY KEY ("id"))`);
-        await queryRunner.query(`CREATE TABLE "product_images" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "productId" uuid NOT NULL, "fileId" uuid NOT NULL, CONSTRAINT "PK_1974264ea7265989af8392f63a1" PRIMARY KEY ("id"))`);
-        await queryRunner.query(`CREATE TYPE "public"."files_type_enum" AS ENUM('image', 'video', 'raw', 'auto')`);
-        await queryRunner.query(`CREATE TABLE "files" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "name" character varying NOT NULL, "url" character varying NOT NULL, "type" "public"."files_type_enum" NOT NULL, "mime_type" character varying NOT NULL, "size" integer NOT NULL, CONSTRAINT "PK_6c16b9093a142e0e7613b04a3d9" PRIMARY KEY ("id"))`);
-        await queryRunner.query(`CREATE TABLE "categories" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "imageId" uuid, "name" character varying NOT NULL, "description" text, "is_active" boolean NOT NULL DEFAULT true, CONSTRAINT "UQ_8b0be371d28245da6e4f4b61878" UNIQUE ("name"), CONSTRAINT "PK_24dbc6126a28ff948da33e97d3b" PRIMARY KEY ("id"))`);
-        await queryRunner.query(`CREATE TYPE "public"."carts_status_enum" AS ENUM('active', 'abandoned', 'converted')`);
-        await queryRunner.query(`CREATE TABLE "carts" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "userId" uuid NOT NULL, "session_id" character varying, "status" "public"."carts_status_enum" NOT NULL DEFAULT 'active', CONSTRAINT "PK_b5f695a59f5ebb50af3c8160816" PRIMARY KEY ("id"))`);
-        await queryRunner.query(`CREATE TABLE "cart_items" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "cartId" uuid NOT NULL, "productId" uuid NOT NULL, "quantity" integer NOT NULL, "unit_price" numeric(10,2) NOT NULL, "total_price" numeric(10,2) NOT NULL, CONSTRAINT "PK_6fccf5ec03c172d27a28a82928b" PRIMARY KEY ("id"))`);
-        await queryRunner.query(`CREATE TYPE "public"."reviews_skin_type_enum" AS ENUM('dry', 'oily', 'combination', 'sensitive', 'normal')`);
-        await queryRunner.query(`CREATE TYPE "public"."reviews_status_enum" AS ENUM('pending', 'approved', 'rejected')`);
-        await queryRunner.query(`CREATE TABLE "reviews" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "userId" uuid NOT NULL, "productId" uuid NOT NULL, "orderId" uuid, "rating" integer NOT NULL, "title" character varying, "comment" text, "is_verified_purchase" boolean NOT NULL DEFAULT false, "skin_type" "public"."reviews_skin_type_enum", "helpful_count" integer NOT NULL DEFAULT '0', "status" "public"."reviews_status_enum" NOT NULL DEFAULT 'pending', CONSTRAINT "PK_231ae565c273ee700b283f15c1d" PRIMARY KEY ("id"))`);
-        await queryRunner.query(`CREATE UNIQUE INDEX "IDX_9007ffba411fd471dfe233dabf" ON "reviews" ("userId", "productId") `);
-        await queryRunner.query(`CREATE INDEX "IDX_19bcf7bbb9c2beec008ecd811e" ON "reviews" ("productId", "status") `);
-        await queryRunner.query(`CREATE TYPE "public"."inventory_log_change_type_enum" AS ENUM('purchase', 'return', 'adjustment', 'restock')`);
-        await queryRunner.query(`CREATE TABLE "inventory_log" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "productId" uuid NOT NULL, "change_type" "public"."inventory_log_change_type_enum" NOT NULL, "quantity_change" integer NOT NULL, "new_stock_quantity" integer NOT NULL, "reference_id" uuid, "notes" text, "created_by" character varying NOT NULL, "createdBy" uuid, CONSTRAINT "PK_92195bfa4eaa5c9e798021900f7" PRIMARY KEY ("id"))`);
-        await queryRunner.query(`CREATE INDEX "IDX_57c0d82cb1cd93f5932ebfe992" ON "inventory_log" ("reference_id") `);
-        await queryRunner.query(`CREATE INDEX "IDX_ff30e298489819beac7cb034fc" ON "inventory_log" ("productId", "createdAt") `);
-        await queryRunner.query(`CREATE TYPE "public"."products_status_enum" AS ENUM('draft', 'active', 'inactive', 'discontinued', 'out_of_stock')`);
-        await queryRunner.query(`CREATE TABLE "products" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "imageId" uuid, "name" character varying NOT NULL, "description" text, "categoryId" uuid NOT NULL, "price" numeric(10,2) NOT NULL, "sale_price" numeric(10,2), "cost_price" numeric(10,2), "stock_quantity" integer NOT NULL DEFAULT '0', "low_stock_threshold" integer NOT NULL DEFAULT '10', "weight" numeric(10,2), "expiry_duration" integer, "ingredients" text, "benefits" text array, "how_to_use" text, "status" "public"."products_status_enum" NOT NULL DEFAULT 'draft', CONSTRAINT "PK_0806c755e0aca124e67c0cf6d7d" PRIMARY KEY ("id"))`);
-        await queryRunner.query(`CREATE TABLE "order_items" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "orderId" uuid NOT NULL, "productId" uuid NOT NULL, "product_name" character varying NOT NULL, "variant_name" character varying, "quantity" integer NOT NULL, "unit_price" numeric(10,2) NOT NULL, "total_price" numeric(10,2) NOT NULL, CONSTRAINT "PK_005269d8574e6fac0493715c308" PRIMARY KEY ("id"))`);
-        await queryRunner.query(`CREATE TYPE "public"."payments_payment_method_enum" AS ENUM('card', 'upi', 'cod', 'bank_transfer')`);
-        await queryRunner.query(`CREATE TYPE "public"."payments_payment_status_enum" AS ENUM('pending', 'paid', 'failed', 'refunded')`);
-        await queryRunner.query(`CREATE TABLE "payments" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "orderId" uuid NOT NULL, "payment_method" "public"."payments_payment_method_enum" NOT NULL, "payment_status" "public"."payments_payment_status_enum" NOT NULL DEFAULT 'pending', "amount" numeric(10,2) NOT NULL, "transaction_id" character varying NOT NULL, "payment_gateway" character varying NOT NULL, "gateway_response" jsonb, "paid_at" TIMESTAMP WITH TIME ZONE, "refunded_at" TIMESTAMP WITH TIME ZONE, CONSTRAINT "UQ_3c324ca49dabde7ffc0ef64675d" UNIQUE ("transaction_id"), CONSTRAINT "PK_197ab7af18c93fbb0c9b28b4a59" PRIMARY KEY ("id"))`);
-        await queryRunner.query(`CREATE UNIQUE INDEX "IDX_3c324ca49dabde7ffc0ef64675" ON "payments" ("transaction_id") `);
-        await queryRunner.query(`CREATE TYPE "public"."coupons_discount_type_enum" AS ENUM('percentage', 'fixed')`);
-        await queryRunner.query(`CREATE TABLE "coupons" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "code" character varying NOT NULL, "discount_type" "public"."coupons_discount_type_enum" NOT NULL, "discount_value" numeric(10,2) NOT NULL, "min_order_amount" numeric(10,2), "max_discount_amount" numeric(10,2), "usage_limit" integer, "used_count" integer NOT NULL DEFAULT '0', "valid_from" TIMESTAMP WITH TIME ZONE NOT NULL, "valid_until" TIMESTAMP WITH TIME ZONE NOT NULL, "is_active" boolean NOT NULL DEFAULT true, "applicable_categories" uuid array, CONSTRAINT "UQ_e025109230e82925843f2a14c48" UNIQUE ("code"), CONSTRAINT "PK_d7ea8864a0150183770f3e9a8cb" PRIMARY KEY ("id"))`);
-        await queryRunner.query(`CREATE UNIQUE INDEX "IDX_e025109230e82925843f2a14c4" ON "coupons" ("code") `);
-        await queryRunner.query(`CREATE TABLE "order_coupon" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "orderId" uuid NOT NULL, "couponId" uuid NOT NULL, "discount_amount" numeric(10,2) NOT NULL, CONSTRAINT "PK_baced9282892a60354aaa789fb4" PRIMARY KEY ("id"))`);
-        await queryRunner.query(`CREATE TYPE "public"."orders_orderstatus_enum" AS ENUM('pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded')`);
-        await queryRunner.query(`CREATE TYPE "public"."orders_paymentstatus_enum" AS ENUM('pending', 'paid', 'failed', 'refunded')`);
-        await queryRunner.query(`CREATE TABLE "orders" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "order_number" character varying NOT NULL, "userId" uuid NOT NULL, "shippingAddressId" uuid NOT NULL, "billingAddressId" uuid NOT NULL, "orderStatus" "public"."orders_orderstatus_enum" NOT NULL DEFAULT 'pending', "paymentStatus" "public"."orders_paymentstatus_enum" NOT NULL DEFAULT 'pending', "total_amount" numeric(10,2) NOT NULL, "shipping_cost" numeric(10,2) NOT NULL DEFAULT '0', "tax_amount" numeric(10,2) NOT NULL DEFAULT '0', "discount_amount" numeric(10,2) NOT NULL DEFAULT '0', "final_amount" numeric(10,2) NOT NULL, "notes" text, "tracking_number" character varying, "estimated_delivery" date, "delivered_at" TIMESTAMP WITH TIME ZONE, CONSTRAINT "UQ_75eba1c6b1a66b09f2a97e6927b" UNIQUE ("order_number"), CONSTRAINT "PK_710e2d4957aa5878dfe94e4ac2f" PRIMARY KEY ("id"))`);
-        await queryRunner.query(`CREATE UNIQUE INDEX "IDX_75eba1c6b1a66b09f2a97e6927" ON "orders" ("order_number") `);
-        await queryRunner.query(`CREATE TYPE "public"."addresses_label_enum" AS ENUM('home', 'work', 'other')`);
-        await queryRunner.query(`CREATE TABLE "addresses" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "userId" uuid NOT NULL, "address_line1" character varying NOT NULL, "address_line2" character varying, "city" character varying NOT NULL, "state" character varying NOT NULL, "country" character varying NOT NULL, "postal_code" character varying NOT NULL, "phone_number" character varying, "is_default" boolean NOT NULL DEFAULT false, "label" "public"."addresses_label_enum" NOT NULL DEFAULT 'home', CONSTRAINT "PK_745d8f43d3af10ab8247465e450" PRIMARY KEY ("id"))`);
-        await queryRunner.query(`CREATE TYPE "public"."notifications_type_enum" AS ENUM('order', 'shipping', 'promotion', 'system')`);
-        await queryRunner.query(`CREATE TABLE "notifications" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "userId" uuid NOT NULL, "type" "public"."notifications_type_enum" NOT NULL, "title" character varying NOT NULL, "message" text NOT NULL, "data" jsonb, "is_read" boolean NOT NULL DEFAULT false, CONSTRAINT "PK_6a72c3c0f683f6462415e653c3a" PRIMARY KEY ("id"))`);
-        await queryRunner.query(`CREATE INDEX "IDX_3c5b542e4143cf5012eb649645" ON "notifications" ("userId", "is_read", "createdAt") `);
-        await queryRunner.query(`CREATE TYPE "public"."contact_us_status_enum" AS ENUM('new', 'in_progress', 'resolved')`);
-        await queryRunner.query(`CREATE TABLE "contact_us" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "userId" uuid, "name" character varying NOT NULL, "email" character varying NOT NULL, "phone" character varying, "subject" character varying NOT NULL, "message" text NOT NULL, "status" "public"."contact_us_status_enum" NOT NULL DEFAULT 'new', "response" text, "respondedBy" uuid, "responded_at" TIMESTAMP WITH TIME ZONE, CONSTRAINT "PK_b61766a4d93470109266b976cfe" PRIMARY KEY ("id"))`);
-        await queryRunner.query(`CREATE INDEX "IDX_c2ee054d3192a9fed2f685c120" ON "contact_us" ("status", "createdAt") `);
-        await queryRunner.query(`CREATE TYPE "public"."users_role_enum" AS ENUM('customer', 'admin')`);
-        await queryRunner.query(`CREATE TYPE "public"."users_status_enum" AS ENUM('active', 'inactive', 'suspended')`);
-        await queryRunner.query(`CREATE TABLE "users" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "profileId" uuid, "email" character varying NOT NULL, "password" character varying NOT NULL, "full_name" character varying, "phone_number" character varying, "role" "public"."users_role_enum" NOT NULL DEFAULT 'customer', "status" "public"."users_status_enum" NOT NULL DEFAULT 'active', "verified_at" TIMESTAMP WITH TIME ZONE, "last_login_at" TIMESTAMP WITH TIME ZONE, CONSTRAINT "UQ_97672ac88f789774dd47f7c8be3" UNIQUE ("email"), CONSTRAINT "REL_b1bda35cdb9a2c1b777f5541d8" UNIQUE ("profileId"), CONSTRAINT "PK_a3ffb1c0c8416b9fc6f907b7433" PRIMARY KEY ("id"))`);
-        await queryRunner.query(`CREATE TABLE "wishlist" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "userId" uuid NOT NULL, "productId" uuid NOT NULL, CONSTRAINT "UQ_2ca6e3d0bd9835eabd2668d5151" UNIQUE ("userId", "productId"), CONSTRAINT "PK_620bff4a240d66c357b5d820eaa" PRIMARY KEY ("id"))`);
-        await queryRunner.query(`CREATE INDEX "IDX_348b1d0f5ab891d71c445b888b" ON "wishlist" ("userId", "createdAt") `);
-        await queryRunner.query(`ALTER TABLE "user_preferences" ADD CONSTRAINT "FK_b6202d1cacc63a0b9c8dac2abd4" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "product_images" ADD CONSTRAINT "FK_b367708bf720c8dd62fc6833161" FOREIGN KEY ("productId") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "product_images" ADD CONSTRAINT "FK_195c571baada405f19e8a18466f" FOREIGN KEY ("fileId") REFERENCES "files"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "categories" ADD CONSTRAINT "FK_fcb2e05575ea73809a8ff82fa1d" FOREIGN KEY ("imageId") REFERENCES "files"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "carts" ADD CONSTRAINT "FK_69828a178f152f157dcf2f70a89" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "cart_items" ADD CONSTRAINT "FK_edd714311619a5ad09525045838" FOREIGN KEY ("cartId") REFERENCES "carts"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "cart_items" ADD CONSTRAINT "FK_72679d98b31c737937b8932ebe6" FOREIGN KEY ("productId") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "reviews" ADD CONSTRAINT "FK_7ed5659e7139fc8bc039198cc1f" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "reviews" ADD CONSTRAINT "FK_a6b3c434392f5d10ec171043666" FOREIGN KEY ("productId") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "reviews" ADD CONSTRAINT "FK_53a68dc905777554b7f702791fa" FOREIGN KEY ("orderId") REFERENCES "orders"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "inventory_log" ADD CONSTRAINT "FK_7878b93342d306307315e2acfdb" FOREIGN KEY ("productId") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "inventory_log" ADD CONSTRAINT "FK_dddbfd50ecb737f7f1b719baac8" FOREIGN KEY ("createdBy") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "products" ADD CONSTRAINT "FK_e8c788030f2c88cbccf6965328c" FOREIGN KEY ("imageId") REFERENCES "files"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "products" ADD CONSTRAINT "FK_ff56834e735fa78a15d0cf21926" FOREIGN KEY ("categoryId") REFERENCES "categories"("id") ON DELETE SET NULL ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "order_items" ADD CONSTRAINT "FK_f1d359a55923bb45b057fbdab0d" FOREIGN KEY ("orderId") REFERENCES "orders"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "order_items" ADD CONSTRAINT "FK_cdb99c05982d5191ac8465ac010" FOREIGN KEY ("productId") REFERENCES "products"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "payments" ADD CONSTRAINT "FK_af929a5f2a400fdb6913b4967e1" FOREIGN KEY ("orderId") REFERENCES "orders"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "order_coupon" ADD CONSTRAINT "FK_3dbe70de5d53c0491d3970d20c0" FOREIGN KEY ("orderId") REFERENCES "orders"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "order_coupon" ADD CONSTRAINT "FK_b677a3586d2ae8ac87e2a1f3ab6" FOREIGN KEY ("couponId") REFERENCES "coupons"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "orders" ADD CONSTRAINT "FK_151b79a83ba240b0cb31b2302d1" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "orders" ADD CONSTRAINT "FK_cc4e4adab232e8c05026b2f345d" FOREIGN KEY ("shippingAddressId") REFERENCES "addresses"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "orders" ADD CONSTRAINT "FK_820a4c09ddad44884a97378d336" FOREIGN KEY ("billingAddressId") REFERENCES "addresses"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "addresses" ADD CONSTRAINT "FK_95c93a584de49f0b0e13f753630" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "notifications" ADD CONSTRAINT "FK_692a909ee0fa9383e7859f9b406" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "contact_us" ADD CONSTRAINT "FK_fdc3449ff4d12de09343c2a54fb" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "contact_us" ADD CONSTRAINT "FK_af435964834e1879ccbe1a14b29" FOREIGN KEY ("respondedBy") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "users" ADD CONSTRAINT "FK_b1bda35cdb9a2c1b777f5541d87" FOREIGN KEY ("profileId") REFERENCES "files"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "wishlist" ADD CONSTRAINT "FK_f6eeb74a295e2aad03b76b0ba87" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "wishlist" ADD CONSTRAINT "FK_17e00e49d77ccaf7ff0e14de37b" FOREIGN KEY ("productId") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
-    }
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(
+      `CREATE TYPE "public"."user_preferences_skin_type_enum" AS ENUM('dry', 'oily', 'combination', 'sensitive', 'normal')`,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "user_preferences" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "userId" uuid NOT NULL, "skin_type" "public"."user_preferences_skin_type_enum", "skin_tone" character varying, "allergies" jsonb, "preferred_categories" uuid array, CONSTRAINT "UQ_b6202d1cacc63a0b9c8dac2abd4" UNIQUE ("userId"), CONSTRAINT "REL_b6202d1cacc63a0b9c8dac2abd" UNIQUE ("userId"), CONSTRAINT "PK_e8cfb5b31af61cd363a6b6d7c25" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "product_images" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "productId" uuid NOT NULL, "fileId" uuid NOT NULL, CONSTRAINT "PK_1974264ea7265989af8392f63a1" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE TYPE "public"."files_type_enum" AS ENUM('image', 'video', 'raw', 'auto')`,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "files" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "name" character varying NOT NULL, "url" character varying NOT NULL, "type" "public"."files_type_enum" NOT NULL, "mime_type" character varying NOT NULL, "size" integer NOT NULL, CONSTRAINT "PK_6c16b9093a142e0e7613b04a3d9" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "categories" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "imageId" uuid, "name" character varying NOT NULL, "description" text, "is_active" boolean NOT NULL DEFAULT true, CONSTRAINT "UQ_8b0be371d28245da6e4f4b61878" UNIQUE ("name"), CONSTRAINT "PK_24dbc6126a28ff948da33e97d3b" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE TYPE "public"."carts_status_enum" AS ENUM('active', 'abandoned', 'converted')`,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "carts" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "userId" uuid NOT NULL, "session_id" character varying, "status" "public"."carts_status_enum" NOT NULL DEFAULT 'active', CONSTRAINT "PK_b5f695a59f5ebb50af3c8160816" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "cart_items" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "cartId" uuid NOT NULL, "productId" uuid NOT NULL, "quantity" integer NOT NULL, "unit_price" numeric(10,2) NOT NULL, "total_price" numeric(10,2) NOT NULL, CONSTRAINT "PK_6fccf5ec03c172d27a28a82928b" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE TYPE "public"."reviews_skin_type_enum" AS ENUM('dry', 'oily', 'combination', 'sensitive', 'normal')`,
+    );
+    await queryRunner.query(
+      `CREATE TYPE "public"."reviews_status_enum" AS ENUM('pending', 'approved', 'rejected')`,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "reviews" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "userId" uuid NOT NULL, "productId" uuid NOT NULL, "orderId" uuid, "rating" integer NOT NULL, "title" character varying, "comment" text, "is_verified_purchase" boolean NOT NULL DEFAULT false, "skin_type" "public"."reviews_skin_type_enum", "helpful_count" integer NOT NULL DEFAULT '0', "status" "public"."reviews_status_enum" NOT NULL DEFAULT 'pending', CONSTRAINT "PK_231ae565c273ee700b283f15c1d" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE UNIQUE INDEX "IDX_9007ffba411fd471dfe233dabf" ON "reviews" ("userId", "productId") `,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_19bcf7bbb9c2beec008ecd811e" ON "reviews" ("productId", "status") `,
+    );
+    await queryRunner.query(
+      `CREATE TYPE "public"."inventory_log_change_type_enum" AS ENUM('purchase', 'return', 'adjustment', 'restock')`,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "inventory_log" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "productId" uuid NOT NULL, "change_type" "public"."inventory_log_change_type_enum" NOT NULL, "quantity_change" integer NOT NULL, "new_stock_quantity" integer NOT NULL, "reference_id" uuid, "notes" text, "created_by" character varying NOT NULL, "createdBy" uuid, CONSTRAINT "PK_92195bfa4eaa5c9e798021900f7" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_57c0d82cb1cd93f5932ebfe992" ON "inventory_log" ("reference_id") `,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_ff30e298489819beac7cb034fc" ON "inventory_log" ("productId", "createdAt") `,
+    );
+    await queryRunner.query(
+      `CREATE TYPE "public"."products_status_enum" AS ENUM('draft', 'active', 'inactive', 'discontinued', 'out_of_stock')`,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "products" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "imageId" uuid, "name" character varying NOT NULL, "description" text, "categoryId" uuid NOT NULL, "price" numeric(10,2) NOT NULL, "sale_price" numeric(10,2), "cost_price" numeric(10,2), "stock_quantity" integer NOT NULL DEFAULT '0', "low_stock_threshold" integer NOT NULL DEFAULT '10', "weight" numeric(10,2), "expiry_duration" integer, "ingredients" text, "benefits" text array, "how_to_use" text, "status" "public"."products_status_enum" NOT NULL DEFAULT 'draft', CONSTRAINT "PK_0806c755e0aca124e67c0cf6d7d" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "order_items" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "orderId" uuid NOT NULL, "productId" uuid NOT NULL, "product_name" character varying NOT NULL, "variant_name" character varying, "quantity" integer NOT NULL, "unit_price" numeric(10,2) NOT NULL, "total_price" numeric(10,2) NOT NULL, CONSTRAINT "PK_005269d8574e6fac0493715c308" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE TYPE "public"."payments_payment_method_enum" AS ENUM('card', 'upi', 'cod', 'bank_transfer')`,
+    );
+    await queryRunner.query(
+      `CREATE TYPE "public"."payments_payment_status_enum" AS ENUM('pending', 'paid', 'failed', 'refunded')`,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "payments" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "orderId" uuid NOT NULL, "payment_method" "public"."payments_payment_method_enum" NOT NULL, "payment_status" "public"."payments_payment_status_enum" NOT NULL DEFAULT 'pending', "amount" numeric(10,2) NOT NULL, "transaction_id" character varying NOT NULL, "payment_gateway" character varying NOT NULL, "gateway_response" jsonb, "paid_at" TIMESTAMP WITH TIME ZONE, "refunded_at" TIMESTAMP WITH TIME ZONE, CONSTRAINT "UQ_3c324ca49dabde7ffc0ef64675d" UNIQUE ("transaction_id"), CONSTRAINT "PK_197ab7af18c93fbb0c9b28b4a59" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE UNIQUE INDEX "IDX_3c324ca49dabde7ffc0ef64675" ON "payments" ("transaction_id") `,
+    );
+    await queryRunner.query(
+      `CREATE TYPE "public"."coupons_discount_type_enum" AS ENUM('percentage', 'fixed')`,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "coupons" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "code" character varying NOT NULL, "discount_type" "public"."coupons_discount_type_enum" NOT NULL, "discount_value" numeric(10,2) NOT NULL, "min_order_amount" numeric(10,2), "max_discount_amount" numeric(10,2), "usage_limit" integer, "used_count" integer NOT NULL DEFAULT '0', "valid_from" TIMESTAMP WITH TIME ZONE NOT NULL, "valid_until" TIMESTAMP WITH TIME ZONE NOT NULL, "is_active" boolean NOT NULL DEFAULT true, "applicable_categories" uuid array, CONSTRAINT "UQ_e025109230e82925843f2a14c48" UNIQUE ("code"), CONSTRAINT "PK_d7ea8864a0150183770f3e9a8cb" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE UNIQUE INDEX "IDX_e025109230e82925843f2a14c4" ON "coupons" ("code") `,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "order_coupon" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "orderId" uuid NOT NULL, "couponId" uuid NOT NULL, "discount_amount" numeric(10,2) NOT NULL, CONSTRAINT "PK_baced9282892a60354aaa789fb4" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE TYPE "public"."orders_orderstatus_enum" AS ENUM('pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded')`,
+    );
+    await queryRunner.query(
+      `CREATE TYPE "public"."orders_paymentstatus_enum" AS ENUM('pending', 'paid', 'failed', 'refunded')`,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "orders" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "order_number" character varying NOT NULL, "userId" uuid NOT NULL, "shippingAddressId" uuid NOT NULL, "billingAddressId" uuid NOT NULL, "orderStatus" "public"."orders_orderstatus_enum" NOT NULL DEFAULT 'pending', "paymentStatus" "public"."orders_paymentstatus_enum" NOT NULL DEFAULT 'pending', "total_amount" numeric(10,2) NOT NULL, "shipping_cost" numeric(10,2) NOT NULL DEFAULT '0', "tax_amount" numeric(10,2) NOT NULL DEFAULT '0', "discount_amount" numeric(10,2) NOT NULL DEFAULT '0', "final_amount" numeric(10,2) NOT NULL, "notes" text, "tracking_number" character varying, "estimated_delivery" date, "delivered_at" TIMESTAMP WITH TIME ZONE, CONSTRAINT "UQ_75eba1c6b1a66b09f2a97e6927b" UNIQUE ("order_number"), CONSTRAINT "PK_710e2d4957aa5878dfe94e4ac2f" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE UNIQUE INDEX "IDX_75eba1c6b1a66b09f2a97e6927" ON "orders" ("order_number") `,
+    );
+    await queryRunner.query(
+      `CREATE TYPE "public"."addresses_label_enum" AS ENUM('home', 'work', 'other')`,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "addresses" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "userId" uuid NOT NULL, "address_line1" character varying NOT NULL, "address_line2" character varying, "city" character varying NOT NULL, "state" character varying NOT NULL, "country" character varying NOT NULL, "postal_code" character varying NOT NULL, "phone_number" character varying, "is_default" boolean NOT NULL DEFAULT false, "label" "public"."addresses_label_enum" NOT NULL DEFAULT 'home', CONSTRAINT "PK_745d8f43d3af10ab8247465e450" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE TYPE "public"."notifications_type_enum" AS ENUM('order', 'shipping', 'promotion', 'system')`,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "notifications" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "userId" uuid NOT NULL, "type" "public"."notifications_type_enum" NOT NULL, "title" character varying NOT NULL, "message" text NOT NULL, "data" jsonb, "is_read" boolean NOT NULL DEFAULT false, CONSTRAINT "PK_6a72c3c0f683f6462415e653c3a" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_3c5b542e4143cf5012eb649645" ON "notifications" ("userId", "is_read", "createdAt") `,
+    );
+    await queryRunner.query(
+      `CREATE TYPE "public"."contact_us_status_enum" AS ENUM('new', 'in_progress', 'resolved')`,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "contact_us" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "userId" uuid, "name" character varying NOT NULL, "email" character varying NOT NULL, "phone" character varying, "subject" character varying NOT NULL, "message" text NOT NULL, "status" "public"."contact_us_status_enum" NOT NULL DEFAULT 'new', "response" text, "respondedBy" uuid, "responded_at" TIMESTAMP WITH TIME ZONE, CONSTRAINT "PK_b61766a4d93470109266b976cfe" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_c2ee054d3192a9fed2f685c120" ON "contact_us" ("status", "createdAt") `,
+    );
+    await queryRunner.query(
+      `CREATE TYPE "public"."users_role_enum" AS ENUM('customer', 'admin')`,
+    );
+    await queryRunner.query(
+      `CREATE TYPE "public"."users_status_enum" AS ENUM('active', 'inactive', 'suspended')`,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "users" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "profileId" uuid, "email" character varying NOT NULL, "password" character varying NOT NULL, "full_name" character varying, "phone_number" character varying, "role" "public"."users_role_enum" NOT NULL DEFAULT 'customer', "status" "public"."users_status_enum" NOT NULL DEFAULT 'active', "verified_at" TIMESTAMP WITH TIME ZONE, "last_login_at" TIMESTAMP WITH TIME ZONE, CONSTRAINT "UQ_97672ac88f789774dd47f7c8be3" UNIQUE ("email"), CONSTRAINT "REL_b1bda35cdb9a2c1b777f5541d8" UNIQUE ("profileId"), CONSTRAINT "PK_a3ffb1c0c8416b9fc6f907b7433" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "wishlist" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "userId" uuid NOT NULL, "productId" uuid NOT NULL, CONSTRAINT "UQ_2ca6e3d0bd9835eabd2668d5151" UNIQUE ("userId", "productId"), CONSTRAINT "PK_620bff4a240d66c357b5d820eaa" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_348b1d0f5ab891d71c445b888b" ON "wishlist" ("userId", "createdAt") `,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "user_preferences" ADD CONSTRAINT "FK_b6202d1cacc63a0b9c8dac2abd4" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "product_images" ADD CONSTRAINT "FK_b367708bf720c8dd62fc6833161" FOREIGN KEY ("productId") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "product_images" ADD CONSTRAINT "FK_195c571baada405f19e8a18466f" FOREIGN KEY ("fileId") REFERENCES "files"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "categories" ADD CONSTRAINT "FK_fcb2e05575ea73809a8ff82fa1d" FOREIGN KEY ("imageId") REFERENCES "files"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "carts" ADD CONSTRAINT "FK_69828a178f152f157dcf2f70a89" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "cart_items" ADD CONSTRAINT "FK_edd714311619a5ad09525045838" FOREIGN KEY ("cartId") REFERENCES "carts"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "cart_items" ADD CONSTRAINT "FK_72679d98b31c737937b8932ebe6" FOREIGN KEY ("productId") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "reviews" ADD CONSTRAINT "FK_7ed5659e7139fc8bc039198cc1f" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "reviews" ADD CONSTRAINT "FK_a6b3c434392f5d10ec171043666" FOREIGN KEY ("productId") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "reviews" ADD CONSTRAINT "FK_53a68dc905777554b7f702791fa" FOREIGN KEY ("orderId") REFERENCES "orders"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "inventory_log" ADD CONSTRAINT "FK_7878b93342d306307315e2acfdb" FOREIGN KEY ("productId") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "inventory_log" ADD CONSTRAINT "FK_dddbfd50ecb737f7f1b719baac8" FOREIGN KEY ("createdBy") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "products" ADD CONSTRAINT "FK_e8c788030f2c88cbccf6965328c" FOREIGN KEY ("imageId") REFERENCES "files"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "products" ADD CONSTRAINT "FK_ff56834e735fa78a15d0cf21926" FOREIGN KEY ("categoryId") REFERENCES "categories"("id") ON DELETE SET NULL ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "order_items" ADD CONSTRAINT "FK_f1d359a55923bb45b057fbdab0d" FOREIGN KEY ("orderId") REFERENCES "orders"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "order_items" ADD CONSTRAINT "FK_cdb99c05982d5191ac8465ac010" FOREIGN KEY ("productId") REFERENCES "products"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "payments" ADD CONSTRAINT "FK_af929a5f2a400fdb6913b4967e1" FOREIGN KEY ("orderId") REFERENCES "orders"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "order_coupon" ADD CONSTRAINT "FK_3dbe70de5d53c0491d3970d20c0" FOREIGN KEY ("orderId") REFERENCES "orders"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "order_coupon" ADD CONSTRAINT "FK_b677a3586d2ae8ac87e2a1f3ab6" FOREIGN KEY ("couponId") REFERENCES "coupons"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "orders" ADD CONSTRAINT "FK_151b79a83ba240b0cb31b2302d1" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "orders" ADD CONSTRAINT "FK_cc4e4adab232e8c05026b2f345d" FOREIGN KEY ("shippingAddressId") REFERENCES "addresses"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "orders" ADD CONSTRAINT "FK_820a4c09ddad44884a97378d336" FOREIGN KEY ("billingAddressId") REFERENCES "addresses"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "addresses" ADD CONSTRAINT "FK_95c93a584de49f0b0e13f753630" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "notifications" ADD CONSTRAINT "FK_692a909ee0fa9383e7859f9b406" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "contact_us" ADD CONSTRAINT "FK_fdc3449ff4d12de09343c2a54fb" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "contact_us" ADD CONSTRAINT "FK_af435964834e1879ccbe1a14b29" FOREIGN KEY ("respondedBy") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "users" ADD CONSTRAINT "FK_b1bda35cdb9a2c1b777f5541d87" FOREIGN KEY ("profileId") REFERENCES "files"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "wishlist" ADD CONSTRAINT "FK_f6eeb74a295e2aad03b76b0ba87" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "wishlist" ADD CONSTRAINT "FK_17e00e49d77ccaf7ff0e14de37b" FOREIGN KEY ("productId") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
+    );
+  }
 
-    public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`ALTER TABLE "wishlist" DROP CONSTRAINT "FK_17e00e49d77ccaf7ff0e14de37b"`);
-        await queryRunner.query(`ALTER TABLE "wishlist" DROP CONSTRAINT "FK_f6eeb74a295e2aad03b76b0ba87"`);
-        await queryRunner.query(`ALTER TABLE "users" DROP CONSTRAINT "FK_b1bda35cdb9a2c1b777f5541d87"`);
-        await queryRunner.query(`ALTER TABLE "contact_us" DROP CONSTRAINT "FK_af435964834e1879ccbe1a14b29"`);
-        await queryRunner.query(`ALTER TABLE "contact_us" DROP CONSTRAINT "FK_fdc3449ff4d12de09343c2a54fb"`);
-        await queryRunner.query(`ALTER TABLE "notifications" DROP CONSTRAINT "FK_692a909ee0fa9383e7859f9b406"`);
-        await queryRunner.query(`ALTER TABLE "addresses" DROP CONSTRAINT "FK_95c93a584de49f0b0e13f753630"`);
-        await queryRunner.query(`ALTER TABLE "orders" DROP CONSTRAINT "FK_820a4c09ddad44884a97378d336"`);
-        await queryRunner.query(`ALTER TABLE "orders" DROP CONSTRAINT "FK_cc4e4adab232e8c05026b2f345d"`);
-        await queryRunner.query(`ALTER TABLE "orders" DROP CONSTRAINT "FK_151b79a83ba240b0cb31b2302d1"`);
-        await queryRunner.query(`ALTER TABLE "order_coupon" DROP CONSTRAINT "FK_b677a3586d2ae8ac87e2a1f3ab6"`);
-        await queryRunner.query(`ALTER TABLE "order_coupon" DROP CONSTRAINT "FK_3dbe70de5d53c0491d3970d20c0"`);
-        await queryRunner.query(`ALTER TABLE "payments" DROP CONSTRAINT "FK_af929a5f2a400fdb6913b4967e1"`);
-        await queryRunner.query(`ALTER TABLE "order_items" DROP CONSTRAINT "FK_cdb99c05982d5191ac8465ac010"`);
-        await queryRunner.query(`ALTER TABLE "order_items" DROP CONSTRAINT "FK_f1d359a55923bb45b057fbdab0d"`);
-        await queryRunner.query(`ALTER TABLE "products" DROP CONSTRAINT "FK_ff56834e735fa78a15d0cf21926"`);
-        await queryRunner.query(`ALTER TABLE "products" DROP CONSTRAINT "FK_e8c788030f2c88cbccf6965328c"`);
-        await queryRunner.query(`ALTER TABLE "inventory_log" DROP CONSTRAINT "FK_dddbfd50ecb737f7f1b719baac8"`);
-        await queryRunner.query(`ALTER TABLE "inventory_log" DROP CONSTRAINT "FK_7878b93342d306307315e2acfdb"`);
-        await queryRunner.query(`ALTER TABLE "reviews" DROP CONSTRAINT "FK_53a68dc905777554b7f702791fa"`);
-        await queryRunner.query(`ALTER TABLE "reviews" DROP CONSTRAINT "FK_a6b3c434392f5d10ec171043666"`);
-        await queryRunner.query(`ALTER TABLE "reviews" DROP CONSTRAINT "FK_7ed5659e7139fc8bc039198cc1f"`);
-        await queryRunner.query(`ALTER TABLE "cart_items" DROP CONSTRAINT "FK_72679d98b31c737937b8932ebe6"`);
-        await queryRunner.query(`ALTER TABLE "cart_items" DROP CONSTRAINT "FK_edd714311619a5ad09525045838"`);
-        await queryRunner.query(`ALTER TABLE "carts" DROP CONSTRAINT "FK_69828a178f152f157dcf2f70a89"`);
-        await queryRunner.query(`ALTER TABLE "categories" DROP CONSTRAINT "FK_fcb2e05575ea73809a8ff82fa1d"`);
-        await queryRunner.query(`ALTER TABLE "product_images" DROP CONSTRAINT "FK_195c571baada405f19e8a18466f"`);
-        await queryRunner.query(`ALTER TABLE "product_images" DROP CONSTRAINT "FK_b367708bf720c8dd62fc6833161"`);
-        await queryRunner.query(`ALTER TABLE "user_preferences" DROP CONSTRAINT "FK_b6202d1cacc63a0b9c8dac2abd4"`);
-        await queryRunner.query(`DROP INDEX "public"."IDX_348b1d0f5ab891d71c445b888b"`);
-        await queryRunner.query(`DROP TABLE "wishlist"`);
-        await queryRunner.query(`DROP TABLE "users"`);
-        await queryRunner.query(`DROP TYPE "public"."users_status_enum"`);
-        await queryRunner.query(`DROP TYPE "public"."users_role_enum"`);
-        await queryRunner.query(`DROP INDEX "public"."IDX_c2ee054d3192a9fed2f685c120"`);
-        await queryRunner.query(`DROP TABLE "contact_us"`);
-        await queryRunner.query(`DROP TYPE "public"."contact_us_status_enum"`);
-        await queryRunner.query(`DROP INDEX "public"."IDX_3c5b542e4143cf5012eb649645"`);
-        await queryRunner.query(`DROP TABLE "notifications"`);
-        await queryRunner.query(`DROP TYPE "public"."notifications_type_enum"`);
-        await queryRunner.query(`DROP TABLE "addresses"`);
-        await queryRunner.query(`DROP TYPE "public"."addresses_label_enum"`);
-        await queryRunner.query(`DROP INDEX "public"."IDX_75eba1c6b1a66b09f2a97e6927"`);
-        await queryRunner.query(`DROP TABLE "orders"`);
-        await queryRunner.query(`DROP TYPE "public"."orders_paymentstatus_enum"`);
-        await queryRunner.query(`DROP TYPE "public"."orders_orderstatus_enum"`);
-        await queryRunner.query(`DROP TABLE "order_coupon"`);
-        await queryRunner.query(`DROP INDEX "public"."IDX_e025109230e82925843f2a14c4"`);
-        await queryRunner.query(`DROP TABLE "coupons"`);
-        await queryRunner.query(`DROP TYPE "public"."coupons_discount_type_enum"`);
-        await queryRunner.query(`DROP INDEX "public"."IDX_3c324ca49dabde7ffc0ef64675"`);
-        await queryRunner.query(`DROP TABLE "payments"`);
-        await queryRunner.query(`DROP TYPE "public"."payments_payment_status_enum"`);
-        await queryRunner.query(`DROP TYPE "public"."payments_payment_method_enum"`);
-        await queryRunner.query(`DROP TABLE "order_items"`);
-        await queryRunner.query(`DROP TABLE "products"`);
-        await queryRunner.query(`DROP TYPE "public"."products_status_enum"`);
-        await queryRunner.query(`DROP INDEX "public"."IDX_ff30e298489819beac7cb034fc"`);
-        await queryRunner.query(`DROP INDEX "public"."IDX_57c0d82cb1cd93f5932ebfe992"`);
-        await queryRunner.query(`DROP TABLE "inventory_log"`);
-        await queryRunner.query(`DROP TYPE "public"."inventory_log_change_type_enum"`);
-        await queryRunner.query(`DROP INDEX "public"."IDX_19bcf7bbb9c2beec008ecd811e"`);
-        await queryRunner.query(`DROP INDEX "public"."IDX_9007ffba411fd471dfe233dabf"`);
-        await queryRunner.query(`DROP TABLE "reviews"`);
-        await queryRunner.query(`DROP TYPE "public"."reviews_status_enum"`);
-        await queryRunner.query(`DROP TYPE "public"."reviews_skin_type_enum"`);
-        await queryRunner.query(`DROP TABLE "cart_items"`);
-        await queryRunner.query(`DROP TABLE "carts"`);
-        await queryRunner.query(`DROP TYPE "public"."carts_status_enum"`);
-        await queryRunner.query(`DROP TABLE "categories"`);
-        await queryRunner.query(`DROP TABLE "files"`);
-        await queryRunner.query(`DROP TYPE "public"."files_type_enum"`);
-        await queryRunner.query(`DROP TABLE "product_images"`);
-        await queryRunner.query(`DROP TABLE "user_preferences"`);
-        await queryRunner.query(`DROP TYPE "public"."user_preferences_skin_type_enum"`);
-    }
-
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(
+      `ALTER TABLE "wishlist" DROP CONSTRAINT "FK_17e00e49d77ccaf7ff0e14de37b"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "wishlist" DROP CONSTRAINT "FK_f6eeb74a295e2aad03b76b0ba87"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "users" DROP CONSTRAINT "FK_b1bda35cdb9a2c1b777f5541d87"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "contact_us" DROP CONSTRAINT "FK_af435964834e1879ccbe1a14b29"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "contact_us" DROP CONSTRAINT "FK_fdc3449ff4d12de09343c2a54fb"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "notifications" DROP CONSTRAINT "FK_692a909ee0fa9383e7859f9b406"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "addresses" DROP CONSTRAINT "FK_95c93a584de49f0b0e13f753630"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "orders" DROP CONSTRAINT "FK_820a4c09ddad44884a97378d336"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "orders" DROP CONSTRAINT "FK_cc4e4adab232e8c05026b2f345d"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "orders" DROP CONSTRAINT "FK_151b79a83ba240b0cb31b2302d1"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "order_coupon" DROP CONSTRAINT "FK_b677a3586d2ae8ac87e2a1f3ab6"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "order_coupon" DROP CONSTRAINT "FK_3dbe70de5d53c0491d3970d20c0"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "payments" DROP CONSTRAINT "FK_af929a5f2a400fdb6913b4967e1"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "order_items" DROP CONSTRAINT "FK_cdb99c05982d5191ac8465ac010"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "order_items" DROP CONSTRAINT "FK_f1d359a55923bb45b057fbdab0d"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "products" DROP CONSTRAINT "FK_ff56834e735fa78a15d0cf21926"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "products" DROP CONSTRAINT "FK_e8c788030f2c88cbccf6965328c"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "inventory_log" DROP CONSTRAINT "FK_dddbfd50ecb737f7f1b719baac8"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "inventory_log" DROP CONSTRAINT "FK_7878b93342d306307315e2acfdb"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "reviews" DROP CONSTRAINT "FK_53a68dc905777554b7f702791fa"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "reviews" DROP CONSTRAINT "FK_a6b3c434392f5d10ec171043666"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "reviews" DROP CONSTRAINT "FK_7ed5659e7139fc8bc039198cc1f"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "cart_items" DROP CONSTRAINT "FK_72679d98b31c737937b8932ebe6"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "cart_items" DROP CONSTRAINT "FK_edd714311619a5ad09525045838"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "carts" DROP CONSTRAINT "FK_69828a178f152f157dcf2f70a89"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "categories" DROP CONSTRAINT "FK_fcb2e05575ea73809a8ff82fa1d"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "product_images" DROP CONSTRAINT "FK_195c571baada405f19e8a18466f"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "product_images" DROP CONSTRAINT "FK_b367708bf720c8dd62fc6833161"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "user_preferences" DROP CONSTRAINT "FK_b6202d1cacc63a0b9c8dac2abd4"`,
+    );
+    await queryRunner.query(
+      `DROP INDEX "public"."IDX_348b1d0f5ab891d71c445b888b"`,
+    );
+    await queryRunner.query(`DROP TABLE "wishlist"`);
+    await queryRunner.query(`DROP TABLE "users"`);
+    await queryRunner.query(`DROP TYPE "public"."users_status_enum"`);
+    await queryRunner.query(`DROP TYPE "public"."users_role_enum"`);
+    await queryRunner.query(
+      `DROP INDEX "public"."IDX_c2ee054d3192a9fed2f685c120"`,
+    );
+    await queryRunner.query(`DROP TABLE "contact_us"`);
+    await queryRunner.query(`DROP TYPE "public"."contact_us_status_enum"`);
+    await queryRunner.query(
+      `DROP INDEX "public"."IDX_3c5b542e4143cf5012eb649645"`,
+    );
+    await queryRunner.query(`DROP TABLE "notifications"`);
+    await queryRunner.query(`DROP TYPE "public"."notifications_type_enum"`);
+    await queryRunner.query(`DROP TABLE "addresses"`);
+    await queryRunner.query(`DROP TYPE "public"."addresses_label_enum"`);
+    await queryRunner.query(
+      `DROP INDEX "public"."IDX_75eba1c6b1a66b09f2a97e6927"`,
+    );
+    await queryRunner.query(`DROP TABLE "orders"`);
+    await queryRunner.query(`DROP TYPE "public"."orders_paymentstatus_enum"`);
+    await queryRunner.query(`DROP TYPE "public"."orders_orderstatus_enum"`);
+    await queryRunner.query(`DROP TABLE "order_coupon"`);
+    await queryRunner.query(
+      `DROP INDEX "public"."IDX_e025109230e82925843f2a14c4"`,
+    );
+    await queryRunner.query(`DROP TABLE "coupons"`);
+    await queryRunner.query(`DROP TYPE "public"."coupons_discount_type_enum"`);
+    await queryRunner.query(
+      `DROP INDEX "public"."IDX_3c324ca49dabde7ffc0ef64675"`,
+    );
+    await queryRunner.query(`DROP TABLE "payments"`);
+    await queryRunner.query(
+      `DROP TYPE "public"."payments_payment_status_enum"`,
+    );
+    await queryRunner.query(
+      `DROP TYPE "public"."payments_payment_method_enum"`,
+    );
+    await queryRunner.query(`DROP TABLE "order_items"`);
+    await queryRunner.query(`DROP TABLE "products"`);
+    await queryRunner.query(`DROP TYPE "public"."products_status_enum"`);
+    await queryRunner.query(
+      `DROP INDEX "public"."IDX_ff30e298489819beac7cb034fc"`,
+    );
+    await queryRunner.query(
+      `DROP INDEX "public"."IDX_57c0d82cb1cd93f5932ebfe992"`,
+    );
+    await queryRunner.query(`DROP TABLE "inventory_log"`);
+    await queryRunner.query(
+      `DROP TYPE "public"."inventory_log_change_type_enum"`,
+    );
+    await queryRunner.query(
+      `DROP INDEX "public"."IDX_19bcf7bbb9c2beec008ecd811e"`,
+    );
+    await queryRunner.query(
+      `DROP INDEX "public"."IDX_9007ffba411fd471dfe233dabf"`,
+    );
+    await queryRunner.query(`DROP TABLE "reviews"`);
+    await queryRunner.query(`DROP TYPE "public"."reviews_status_enum"`);
+    await queryRunner.query(`DROP TYPE "public"."reviews_skin_type_enum"`);
+    await queryRunner.query(`DROP TABLE "cart_items"`);
+    await queryRunner.query(`DROP TABLE "carts"`);
+    await queryRunner.query(`DROP TYPE "public"."carts_status_enum"`);
+    await queryRunner.query(`DROP TABLE "categories"`);
+    await queryRunner.query(`DROP TABLE "files"`);
+    await queryRunner.query(`DROP TYPE "public"."files_type_enum"`);
+    await queryRunner.query(`DROP TABLE "product_images"`);
+    await queryRunner.query(`DROP TABLE "user_preferences"`);
+    await queryRunner.query(
+      `DROP TYPE "public"."user_preferences_skin_type_enum"`,
+    );
+  }
 }

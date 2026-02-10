@@ -9,27 +9,20 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ContactUsService } from './contact-us.service';
-import { CreateContactUsDto } from './dto/create-contact-us.dto';
-import { RespondContactUsDto } from './dto/create-contact-us.dto';
-import { User } from 'src/common/decorator/user.decorator';
+import { CreateContactUsDto } from './dto/create-publiccontact-us.dto';
+import { RespondContactUsDto } from './dto/create-publiccontact-us.dto';
 import { AuthGuard, RolesGuard } from 'src/common/guards';
-import { Roles } from 'src/common/decorator';
+import { CurrentUser, Roles } from 'src/common/decorator';
 import { UserRole } from 'src/common/enums/user.enum';
-import { Exclude } from 'class-transformer';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { CreateRegisteredContactUsDto } from './dto/create-registeredcontact-us.dto';
 
 @Controller('public-contact')
 export class ContactUsController {
   constructor(private readonly contactUsService: ContactUsService) {}
 
   @Post()
-  async submitMessage(@Body() dto: CreateContactUsDto) {
-    if (!dto.name || !dto.email || !dto.subject || !dto.message) {
-      throw new BadRequestException(
-        'name, email, subject, and message are required',
-      );
-    }
-
+  submitMessage(@Body() dto: CreateContactUsDto) {
     return this.contactUsService.createPublicContactMessage(dto);
   }
 
@@ -38,19 +31,10 @@ export class ContactUsController {
   @Roles(UserRole.CUSTOMER)
   @ApiBearerAuth()
   async submitRegisteredMessage(
-    @Body() dto: CreateContactUsDto,
-    @User('id') userId: string,
+    @CurrentUser() user,
+    @Body() dto: CreateRegisteredContactUsDto,
   ) {
-    if (!dto.name || !dto.email || !dto.subject || !dto.message) {
-      throw new BadRequestException(
-        'name, email, subject, and message are required',
-      );
-    }
-
-    return this.contactUsService.createPublicContactMessage({
-      ...dto,
-      userId,
-    });
+    return this.contactUsService.createRegisteredContactMessage(dto, user.sub);
   }
 
   @Get('public')
@@ -68,13 +52,15 @@ export class ContactUsController {
     return this.contactUsService.getPublicMessageById({ where: { id } });
   }
 
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
   @Patch(':id/respond')
-  respondToContact(@Param('id') id: string, @Body() dto: RespondContactUsDto) {
-    const adminUserId = 'adminid';
-    return this.contactUsService.respondToMessage(
-      id,
-      dto.response,
-      adminUserId,
-    );
+  respondToContact(
+    @CurrentUser() user,
+    @Param('id') id: string,
+    @Body() dto: RespondContactUsDto,
+  ) {
+    return this.contactUsService.respondToMessage(id, dto.response, user.sub);
   }
 }

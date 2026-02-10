@@ -27,9 +27,6 @@ export class CreateContactUsDto {
   @IsNotEmpty()
   message: string;
 
-  @IsOptional()
-  @IsString()
-  userId?: string;
 }
 
 export class RespondContactUsDto {

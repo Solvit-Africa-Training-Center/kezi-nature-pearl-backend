@@ -1,5 +1,5 @@
 import { PartialType } from '@nestjs/swagger';
-import { CreateContactUsDto } from './create-contact-us.dto';
+import { CreateContactUsDto } from './create-publiccontact-us.dto';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { ContactUsStatus } from '../../../common/enums/product.enum';
 
