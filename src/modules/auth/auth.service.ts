@@ -260,7 +260,7 @@ export class AuthService {
     //   );
 
     return {
-      accessToken: tokens['access_token'],
+      ...tokens,
     };
   }
 
