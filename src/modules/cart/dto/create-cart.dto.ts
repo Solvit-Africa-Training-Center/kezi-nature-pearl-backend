@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsNumber, IsUUID } from 'class-validator';
+import { IsInt, IsNumber, IsUUID, Min } from 'class-validator';
 
 export class CreateCartDto {
   @ApiProperty()
@@ -9,6 +9,7 @@ export class CreateCartDto {
 
   @ApiProperty()
   @Type(() => Number)
-  @IsNumber()
+  @IsInt()
+  @Min(1)
   quantity: number;
 }

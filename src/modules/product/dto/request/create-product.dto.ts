@@ -30,32 +30,14 @@ export class CreateProductDto extends CreateFilesDto {
   @IsNumber()
   price: number;
 
-  @ApiPropertyOptional()
-  @IsOptional()
+  @ApiProperty()
   @IsNotEmpty()
-  @IsString()
-  salePrice?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNotEmpty()
-  @IsString()
-  costPrice?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNotEmpty()
-  @IsString()
+  @Type(() => Number)
+  @IsNumber()
   stockQuantity: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNotEmpty()
-  @IsString()
-  weight?: number;
 
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  ingredients?: string;
+  ingredients: string;
 }

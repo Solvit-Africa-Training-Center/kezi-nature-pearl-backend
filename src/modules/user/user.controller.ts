@@ -35,8 +35,7 @@ export class UserController {
     @CurrentUser() user: Payload,
     @Body() dto: UpdateUserProfile,
   ) {
-    // await this.userService.update(user.sub, dto);
-    console.log(dto.currentPassword);
+    await this.userService.update(user.sub, dto);
     return await this.userService.getUserProfile({
       where: { id: user.sub },
     });

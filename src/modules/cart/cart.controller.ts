@@ -1,16 +1,6 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Delete, UseGuards } from '@nestjs/common';
 import { CartService } from './cart.service';
 import { CreateCartDto } from './dto/create-cart.dto';
-import { UpdateCartDto } from './dto/update-cart.dto';
 import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { AuthGuard, RolesGuard } from 'src/common/guards';
 import { Roles, User } from 'src/common/decorator';
@@ -29,13 +19,20 @@ export class CartController {
   @Roles(UserRole.CUSTOMER)
   @ApiOperation({ summary: 'Add product to cart' })
   async create(@User() user: Payload, @Body() dto: CreateCartDto) {
-    return await this.cartService.create(dto, user.sub);
+    return await this.cartService.addToCart(dto, user.sub);
+  }
+
+  @Post('check-out')
+  @Roles(UserRole.CUSTOMER)
+  @ApiOperation({ summary: 'Check out Cart' })
+  async checkout(@User() user: Payload) {
+    await this.cartService.checkout(user.sub);
   }
 
   @Get()
   @Roles(UserRole.CUSTOMER)
   @ApiOperation({ summary: 'User cart' })
-  findOne(@User() user) {
+  findOne(@User() user: Payload) {
     return this.cartService.findOne({
       where: { userId: user.sub, status: CartStatus.ACTIVE },
       relations: { items: true },
@@ -44,7 +41,7 @@ export class CartController {
 
   @Delete()
   @ApiOperation({ summary: 'Delete Item to cart' })
-  async removeItem(@User() user: Payload, @Body() dto: RemoveItemFromCartDto) {
+  async removeItems(@User() user: Payload, @Body() dto: RemoveItemFromCartDto) {
     return await this.cartService.removeItem(dto, user.sub);
   }
 }

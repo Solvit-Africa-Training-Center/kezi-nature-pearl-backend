@@ -48,7 +48,9 @@ export class UserService {
 
     Object.assign(user, dto);
 
-    return await this.userRepo.save(user);
+    console.log(user);
+
+    return await this.userRepo.update(id, user);
   }
 
   remove(id: number) {
