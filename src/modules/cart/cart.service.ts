@@ -1,7 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateCartDto } from './dto/create-cart.dto';
-import { UpdateCartDto } from './dto/update-cart.dto';
-import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
+import { FindOneOptions, Repository } from 'typeorm';
 import { Cart } from './entities/cart.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CartItemService } from '../cart-item/cart-item.service';
@@ -17,19 +20,24 @@ export class CartService {
     private readonly cartItemService: CartItemService,
     private readonly productService: ProductService,
   ) {}
-  async create(dto: CreateCartDto, userId: string) {
+  async addToCart(dto: CreateCartDto, userId: string) {
+    const product = await this.productService.findOne({
+      where: { id: dto.productId },
+    });
+
+    if (!product) throw new NotFoundException('Product not found');
+
+    if (dto.quantity > product.stockQuantity)
+      throw new BadRequestException(
+        'Requested quantity exceeds available stock',
+      );
+
     const userCartActive = await this.findOne({
       where: { userId, status: CartStatus.ACTIVE },
     });
 
     let cart = userCartActive;
     if (!cart) cart = await this.cartRepo.save({ userId });
-
-    const product = await this.productService.findOne({
-      where: { id: dto.productId },
-    });
-
-    if (!product) throw new NotFoundException('Product not found');
 
     const cartItem = await this.cartItemService.create({
       cartId: cart.id,
@@ -41,7 +49,16 @@ export class CartService {
     cart.items?.push(cartItem);
 
     await this.cartRepo.save(cart);
+
     return { message: 'Product added to cart' };
+  }
+
+  async checkout(userId: string) {
+    const cart = await this.findOne({
+      where: { userId, status: CartStatus.ACTIVE },
+    });
+
+    if (!cart) throw new NotFoundException('Cart not found');
   }
 
   async findOne(options: FindOneOptions<Cart>) {
@@ -50,7 +67,7 @@ export class CartService {
 
   async removeItem(dto: RemoveItemFromCartDto, userId: string) {
     const cart = await this.findOne({
-      where: { userId },
+      where: { userId, status: CartStatus.ACTIVE },
       relations: { items: true },
     });
 
@@ -60,6 +77,11 @@ export class CartService {
       throw new NotFoundException('Cart has no items');
 
     for (const item of dto.items) {
+      const cartItem = await this.cartItemService.findOne({
+        where: { id: item },
+      });
+      if (!cartItem) continue;
+
       await this.cartItemService.delete(item);
     }
 
