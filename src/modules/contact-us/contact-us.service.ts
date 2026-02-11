@@ -15,6 +15,7 @@ import { ContactUsStatus } from 'src/common/enums/product.enum';
 import { NotFoundException } from '@nestjs/common';
 import { CreateRegisteredContactUsDto } from './dto/create-registeredcontact-us.dto';
 import { UserService } from '../user/user.service';
+import { MailService } from 'src/util';
 
 @Injectable()
 export class ContactUsService {
@@ -22,6 +23,7 @@ export class ContactUsService {
     @InjectRepository(ContactUs)
     private readonly contactRepo: Repository<ContactUs>,
     private readonly userService: UserService,
+    private readonly mailService: MailService,
   ) {}
 
   async createPublicContactMessage(
@@ -96,7 +98,10 @@ export class ContactUsService {
     responseText: string,
     adminUserId: string,
   ): Promise<{ message: string }> {
-    const contact = await this.contactRepo.findOne({ where: { id } });
+    const contact = await this.contactRepo.findOne({
+      where: { id },
+      relations: ['user'],
+    });
 
     if (!contact) {
       throw new NotFoundException('Contact message not found');
@@ -110,6 +115,11 @@ export class ContactUsService {
     contact.respondedAt = new Date();
 
     await this.contactRepo.save(contact);
+
+    this.mailService.sendMail({
+      subject: `RE:[${contact.message}]`,
+      to: contact.email,
+    });
 
     return { message: 'Contact message resolved successfully' };
   }
