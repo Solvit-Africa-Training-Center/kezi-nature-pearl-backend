@@ -13,10 +13,4 @@ export class CreateCategoryDto extends PartialType(CreateFileDto) {
   @IsOptional()
   @IsString()
   description?: string;
-
-  @ApiPropertyOptional()
-  @IsNotEmpty()
-  @IsOptional()
-  @IsBoolean()
-  isActive?: boolean;
 }

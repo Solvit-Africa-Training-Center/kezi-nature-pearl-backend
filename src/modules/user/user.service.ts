@@ -46,11 +46,9 @@ export class UserService {
     }
     if (dto.password) dto.password = await hashContent(dto.password);
 
-    Object.assign(user, dto);
+    // Object.assign(user, dto);
 
-    console.log(user);
-
-    return await this.userRepo.update(id, user);
+    // return await this.userRepo.update(id, user);
   }
 
   remove(id: number) {
