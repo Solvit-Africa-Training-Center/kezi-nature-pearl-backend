@@ -1,32 +1,36 @@
-import { User } from '@/modules/user/user.entity';
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  OneToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Entity, Column, OneToMany } from 'typeorm';
+import { BaseEntity } from '../../../common/entities/base.entity';
+import { FileType } from '../../../common/enums/product.enum';
+import { User } from '../../../modules/user/entities/user.entity';
+import { Category } from '../../../modules/category/entities/category.entity';
+import { ProductImage } from '../../../modules/product-image/entities/product-image.entity';
 
 @Entity('files')
-export class File {
-  @PrimaryGeneratedColumn('uuid')
-  fileId: string;
-
+export class File extends BaseEntity {
   @Column()
   name: string;
 
-  @Column({ unique: true })
+  @Column()
   url: string;
 
-  @Column()
-  type: string;
+  @Column({ type: 'enum', enum: FileType })
+  type: FileType;
 
-  @Column()
-  resourceType: string;
+  @Column({ name: 'mime_type' })
+  mimeType: string;
 
-  @CreateDateColumn()
-  createdAt: Date;
+  @Column('int')
+  size: number;
 
-  @OneToOne(() => User, (user) => user.file)
-  user: User;
+  // Relations
+  @OneToMany(() => User, (user) => user.profile)
+  userProfiles?: User[];
+
+  @OneToMany(() => Category, (category) => category.image, {
+    onDelete: 'CASCADE',
+  })
+  categoryImages?: Category[];
+
+  @OneToMany(() => ProductImage, (productImage) => productImage.file)
+  productImageFiles?: ProductImage[];
 }

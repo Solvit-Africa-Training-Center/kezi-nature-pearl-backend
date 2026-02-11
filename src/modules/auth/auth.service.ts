@@ -1,277 +1,271 @@
 import {
-  BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
+  InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
-
-import { randomBytes } from 'crypto';
-import { ConfigService } from '@nestjs/config';
+import { LoginDto } from './dto/request/login.dto';
+import { RegisterDto } from './dto/request/register.dto';
 import { UserService } from '../user/user.service';
-import { EmailverificationTokenService } from '../emailVerificationToken/emailVerificationToken.service';
-import { PasswordResetTokenService } from '../passwordResetToken/passwordResetToken.service';
-import { MailService } from '@/util/mail.service';
-import { TokenService } from '@/util/token.service';
-import { LoginDTO, RegisterDTO, ResetPasswordDTO } from './auth.dto';
-import { comparehashContent, hashContent } from '@/util/lib';
-import {
-  UpdateEmailVerificationTokenDTO,
-  VerifyEmailDTO,
-} from '../emailVerificationToken/emailVerification.dto';
-import { EmailVerificationToken } from '../emailVerificationToken/emailVerification.entity';
-import { PasswordResetToken } from '../passwordResetToken/passwordResetToken.entity';
-import {
-  ResetPasswordTokenIdDTO,
-  UpdatePasswordResetTokenDTO,
-} from '../passwordResetToken/passwordresettoken.dto';
+import { UserStatus } from 'src/common/enums/user.enum';
+import { TokenService } from 'src/util/token.service';
+import { tokenTypeEnum } from 'src/common/enums/tokenType.enum';
+import { MailService } from 'src/util/mail.service';
+import { ConfigService } from '@nestjs/config';
+import { IsNull } from 'typeorm';
+import { RefreshTokenDto, ResetPassword } from './dto/request';
+import { comparehashContent } from 'src/util/lib';
+import { RedisService } from 'src/shared/redis/redis.service';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly configService: ConfigService,
     private readonly userService: UserService,
-    private readonly emailVerificationTokenService: EmailverificationTokenService,
-    private readonly passwordResetTokenService: PasswordResetTokenService,
-    private readonly mailService: MailService,
     private readonly tokenService: TokenService,
+    private readonly mailService: MailService,
+    private readonly configService: ConfigService,
+    // private readonly redisService: RedisService,
   ) {}
-  async register(user: RegisterDTO) {
-    const { password, ...query } = user;
-    const existEmail = await this.userService.findOne(
-      { email: user.email },
-      { withDeleted: true },
-    );
 
-    if (existEmail && existEmail.deletedAt != null) {
-      await this.userService.hardDelete({ userId: existEmail.userId });
-    }
-
-    const existPhoneNumber = await this.userService.findOne(
-      { phoneNumber: user.phoneNumber },
-      { withDeleted: true },
-    );
-
-    if (existPhoneNumber && existPhoneNumber.deletedAt != null) {
-      await this.userService.hardDelete({ userId: existPhoneNumber.userId });
-    }
-
-    const newuser = await this.userService.create({
-      ...user,
-      password: hashContent(user.password),
-    });
-    await this.sendVerification(newuser.email);
-    return { message: 'User Registered Successfully' };
-  }
-
-  async login(dto: LoginDTO) {
-    const { identifier, password } = dto;
-
-    const isEmail = identifier.includes('@');
-
-    const user = isEmail
-      ? await this.userService.findOne({ email: identifier })
-      : await this.userService.findOne({ phoneNumber: identifier });
-
-    if (!user || !comparehashContent(user.password, dto.password))
-      throw new UnauthorizedException('Invalid Credentials');
-
-    if (!user.emailVerifiedAt)
-      throw new ForbiddenException('Account not verified');
-
-    const token = (await this.tokenService.generateToken(user)).accessToken;
-
-    return { message: 'User Login Successfully', token };
-  }
-
-  async sendVerification(email: string) {
-    const user = await this.userService.findOne({ email });
-
-    if (!user) return { message: 'Account Verification Link Sent' };
-
-    const token = randomBytes(32).toString('hex');
-    const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
-
-    const existingToken = await this.emailVerificationTokenService.findOne({
-      userId: user.userId,
+  async register(dto: RegisterDto) {
+    const existingUserByEmail = await this.userService.findOne({
+      where: { email: dto.email.toLowerCase().trim() },
     });
 
-    let emailverificationToken: EmailVerificationToken;
+    if (existingUserByEmail) {
+      throw new ConflictException('Email already exists');
+    }
 
-    if (!existingToken) {
-      emailverificationToken = await this.emailVerificationTokenService.create({
-        userId: user.userId,
-        token: hashContent(token),
-        expiresAt,
-      });
-    } else {
-      const updateToken: UpdateEmailVerificationTokenDTO = {
-        token: hashContent(token),
-        expiresAt,
+    const existingUserByPhone = await this.userService.findOne({
+      where: { phoneNumber: dto.phoneNumber },
+    });
+
+    if (existingUserByPhone) {
+      throw new ConflictException('Phone number already exists');
+    }
+
+    try {
+      await this.userService.create(dto);
+
+      const { message } = await this.resendVerification(dto.email);
+
+      return {
+        message: `Registration successful. ${message}`,
       };
-      emailverificationToken = await this.emailVerificationTokenService.update(
-        existingToken.id,
-        updateToken,
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Registration failed. Please try again.',
       );
     }
-
-    const host = this.configService.get<string>('server.host');
-
-    const link = `${host}/${this.configService.get<number>('server.prefix')}/auth/verify-email/?id=${emailverificationToken.id}&token=${token}`;
-
-    await this.mailService.sendMail({
-      to: email,
-      subject: 'Welcome To Kezi Natural Pearl',
-      html: `
-        <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-          <p>Please verify your email by clicking the button below:</p>
-
-          <a
-            href="${link}"
-            style="
-              display: inline-block;
-              padding: 12px 24px;
-              background-color: #2563eb;
-              color: #ffffff;
-              text-decoration: none;
-              border-radius: 6px;
-              font-weight: bold;
-            "
-            target="_blank"
-          >
-            Verify Email
-          </a>
-        </div>
-      `,
-      text: `Hello ${user.fullName}`,
-    });
-    return { message: 'Account Verification Link Sent' };
   }
 
-  async verifyEmail(verifiyEmailDTO: VerifyEmailDTO) {
-    const emailVerificationToken =
-      await this.emailVerificationTokenService.findOne({
-        id: verifiyEmailDTO.id,
-      });
-
-    if (
-      !emailVerificationToken ||
-      emailVerificationToken.expiresAt < new Date() ||
-      !comparehashContent(emailVerificationToken.token, verifiyEmailDTO.token)
-    )
-      throw new BadRequestException('Invalid or expired Token');
-
+  async login(dto: LoginDto) {
     const user = await this.userService.findOne({
-      userId: emailVerificationToken.userId,
+      where: { email: dto.email },
+      select: [
+        'id',
+        'email',
+        'password',
+        'status',
+        'verifiedAt',
+        'role',
+        'fullName',
+      ],
     });
 
-    if (!user) throw new BadRequestException('Invalid or expired Token');
-
-    await this.emailVerificationTokenService.delete(emailVerificationToken.id);
-    user.emailVerifiedAt = new Date();
-
-    await this.userService.update(user);
-
-    const origin = this.configService.get<string>('server.origin');
-
-    const token = (await this.tokenService.generateToken(user)).accessToken;
-
-    return { message: 'User Login Successfully', token };
-  }
-
-  async forgotPassword(email: string) {
-    const user = await this.userService.findOne({ email });
-
-    if (!user) return { message: 'Password Reset Link sent' };
-
-    const token = randomBytes(32).toString('hex');
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
-
-    const existingToken = await this.passwordResetTokenService.findOne({
-      userId: user.userId,
-    });
-
-    let passwordResetToken: PasswordResetToken;
-
-    if (!existingToken) {
-      passwordResetToken = await this.passwordResetTokenService.create({
-        userId: user.userId,
-        token: hashContent(token),
-        expiresAt,
-      });
-    } else {
-      const updateToken: UpdatePasswordResetTokenDTO = {
-        token: hashContent(token),
-        expiresAt,
-      };
-      passwordResetToken = await this.passwordResetTokenService.update(
-        existingToken.id,
-        updateToken,
-      );
+    if (!user || !(await comparehashContent(dto.password, user.password))) {
+      throw new UnauthorizedException('Invalid credentials');
     }
 
-    const host = this.configService.get<string>('server.host');
+    if (!user.verifiedAt) {
+      throw new ForbiddenException('Email not verified');
+    }
 
-    const link = `${host}/${this.configService.get<number>('server.prefix')}/auth/verify-email/?id=${passwordResetToken.id}&token=${token}`;
+    if (user.status !== UserStatus.ACTIVE) {
+      switch (user.status) {
+        case UserStatus.SUSPENDED:
+          throw new ForbiddenException(
+            'Your account has been suspended. Please contact support.',
+          );
+        case UserStatus.INACTIVE:
+          throw new ForbiddenException(
+            'Your account is inactive. Please contact support to reactivate.',
+          );
+        default:
+          throw new ForbiddenException('Your account is not active.');
+      }
+    }
 
-    await this.mailService.sendMail({
-      to: email,
-      subject: 'Password Reset',
-      html: `
-        <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-          <p>Reset Passwordby clicking the button below:</p>
+    try {
+      const tokens = this.tokenService.generateToken(
+        { sub: user.id, email: user.email, role: user.role },
+        [tokenTypeEnum.ACCESS, tokenTypeEnum.REFRESH],
+      );
 
-          <a
-            href="${link}"
-            style="
-              display: inline-block;
-              padding: 12px 24px;
-              background-color: #2563eb;
-              color: #ffffff;
-              text-decoration: none;
-              border-radius: 6px;
-              font-weight: bold;
-            "
-            target="_blank"
-          >
-            Reset Password
-          </a>
+      await this.userService.update(user.id, {
+        lastLoginAt: new Date(),
+      });
 
-          <p>Or copy the url</p>
-          <p>${link}</p>
-        </div>
-      `,
-      text: `Hello ${user.fullName}`,
-    });
-    return { message: 'Password Reset Link sent' };
+      // if (tokens['refresh_token'])
+      //   await this.redisService.set(
+      //     `refresh_token:${user.id}`,
+      //     tokens['refresh_token'],
+      //     7 * 24 * 60 * 60,
+      //   );
+
+      return {
+        message: 'Logged in successful',
+        ...tokens,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException('Login failed. Please try again.');
+    }
   }
 
-  async resetPassword(
-    passwordTokenId: ResetPasswordTokenIdDTO,
-    passwordDTO: ResetPasswordDTO,
-  ) {
-    const passwordResetToken = await this.passwordResetTokenService.findOne({
-      id: passwordTokenId.id,
+  async resendVerification(email: string) {
+    const user = await this.userService.findOne({
+      where: { email, verifiedAt: IsNull() },
     });
 
-    if (
-      !passwordResetToken ||
-      passwordResetToken.expiresAt < new Date() ||
-      !comparehashContent(passwordResetToken.token, passwordTokenId.token)
-    )
-      throw new BadRequestException('Invalid or expired Tokens');
+    if (user) {
+      const token = this.tokenService.generateToken(
+        { sub: user.id, email: user.email, role: user.role },
+        [tokenTypeEnum.EMAIL_VERIFICATION],
+      );
+
+      const link = `${this.configService.get('server.host')}/${this.configService.get('server.prefix')}/auth/verify/${token['emailverification_token']}`;
+
+      this.mailService.sendMail({
+        to: email,
+        subject: 'Account Verification',
+        html: `<a href="${link}">Verify Account</a>`,
+      });
+    }
+
+    return {
+      message: 'Please check your email to verify your account',
+    };
+  }
+
+  async verifyAccount(token: string) {
+    const payload = this.tokenService.verifyToken(
+      token,
+      tokenTypeEnum.EMAIL_VERIFICATION,
+    );
 
     const user = await this.userService.findOne({
-      userId: passwordResetToken.userId,
+      where: { id: payload.userId, email: payload.email },
     });
 
-    if (!user) throw new BadRequestException('Invalid or expired Token');
+    if (!user || user.verifiedAt !== null)
+      throw new UnauthorizedException('Invalid or expired token');
 
-    user.password = hashContent(passwordDTO.password);
+    await this.userService.update(user.id, { verifiedAt: new Date() });
 
-    await this.passwordResetTokenService.delete(passwordResetToken.id);
-    user.emailVerifiedAt = new Date();
+    return {
+      messsage: 'Account Verified',
+    };
+  }
 
-    await this.userService.update(user);
-    return { message: 'Password Reset Successfully' };
+  async sendPassReset(email: string) {
+    const user = await this.userService.findOne({
+      where: { email },
+    });
+
+    if (user) {
+      const token = this.tokenService.generateToken(
+        { sub: user.id, email: user.email, role: user.role },
+        [tokenTypeEnum.PASSWORD_RESET],
+      );
+
+      const link = `${this.configService.get('server.host')}/${this.configService.get('server.prefix')}/verify/${token['passwordreset_token']}`;
+
+      this.mailService.sendMail({
+        to: email,
+        subject: 'Password Reset',
+        html: `<a href="${link}">Reset Password</a>`,
+      });
+    }
+
+    return {
+      message: 'Please check your email to reset password',
+    };
+  }
+
+  async resetPass(token: string, dto: ResetPassword) {
+    const payload = this.tokenService.verifyToken(
+      token,
+      tokenTypeEnum.PASSWORD_RESET,
+    );
+
+    const user = await this.userService.findOne({
+      where: { id: payload.userId, email: payload.email },
+    });
+
+    if (!user) throw new UnauthorizedException('Invalid or expired token');
+
+    await this.userService.update(user.id, dto);
+
+    return {
+      messsage: 'Password Updated',
+    };
+  }
+
+  async refreshToken(dto: RefreshTokenDto) {
+    const payload = this.tokenService.verifyToken(
+      dto.refreshToken,
+      tokenTypeEnum.REFRESH,
+    );
+
+    if (payload.type !== 'refresh_token') {
+      throw new UnauthorizedException('Invalid token type');
+    }
+
+    // const storedToken = await this.redisService.get(
+    //   `refresh_token:${payload.sub}`,
+    // );
+
+    // if (!storedToken || storedToken !== dto.refreshToken) {
+    //   throw new UnauthorizedException('Refresh token revoked');
+    // }
+
+    const user = await this.userService.findOne({ where: { id: payload.sub } });
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    if (user.status !== UserStatus.ACTIVE) {
+      throw new ForbiddenException('Account is not active');
+    }
+
+    if (!user.verifiedAt) {
+      throw new ForbiddenException('Email not verified');
+    }
+
+    const tokens = this.tokenService.generateToken(
+      {
+        sub: user.id,
+        email: user.email,
+        role: user.role,
+      },
+      [tokenTypeEnum.ACCESS, tokenTypeEnum.REFRESH],
+    );
+
+    // if (tokens['refresh_token'])
+    //   await this.redisService.set(
+    //     `refresh_token:${user.id}`,
+    //     tokens['refresh_token'],
+    //     7 * 24 * 60 * 60,
+    //   );
+
+    return {
+      accessToken: tokens['access_token'],
+    };
+  }
+
+  async logout(id: string) {
+    // const storedToken = await this.redisService.del([`refresh_token:${id}`]);
+    return { message: 'Logged out' };
   }
 }

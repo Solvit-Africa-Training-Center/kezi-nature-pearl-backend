@@ -1,13 +1,16 @@
-import { userRoleEnum } from '@/common/enums/userRole.enum';
-import { User } from '@/modules/user/user.entity';
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { tokenTypeEnum } from 'src/common/enums/tokenType.enum';
+import { UserRole } from 'src/common/enums/user.enum';
 
-export interface Payload {
+export class Payload {
   sub: string;
-  role: userRoleEnum;
+  email: string;
+  role: UserRole;
 }
+
+type GeneratedTokens = Partial<Record<tokenTypeEnum, string>>;
 
 @Injectable()
 export class TokenService {
@@ -16,35 +19,45 @@ export class TokenService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async generateToken(user: User) {
-    const payload: Payload = {
-      sub: user.userId,
-      role: user.role,
-    };
+  generateToken(load: Payload, types: tokenTypeEnum[]) {
+    const result: GeneratedTokens = {};
+    for (const type of types) {
+      const jwtAccess = this.determineJwt(type);
 
-    const accessSecret = this.configService.get<string>(
-      'server.jwt_access_secret',
-    );
-    const refreshSecret = this.configService.get<string>(
-      'server.jwt_refresh_secret',
-    );
-
-    return {
-      accessToken: await this.jwtService.signAsync(payload, {
-        secret: accessSecret,
-        expiresIn: '15M',
-      }),
-      refreshToken: await this.jwtService.signAsync(payload, {
-        secret: refreshSecret,
-        expiresIn: '7d',
-      }),
-    };
+      result[type] = this.encodeToken({ ...load, type }, jwtAccess);
+    }
+    return result;
   }
 
-  // validateToken(payload: { sub: string; role: string }) {
-  //   return {
-  //     userId: payload.sub,
-  //     role: payload.role,
-  //   };
-  // }
+  determineJwt(type: tokenTypeEnum) {
+    if (type === tokenTypeEnum.ACCESS) {
+      return this.configService.get('server.jwt_access');
+    } else if (type === tokenTypeEnum.EMAIL_VERIFICATION) {
+      return this.configService.get('server.jwt_email_verification');
+    } else if (type === tokenTypeEnum.PASSWORD_RESET) {
+      return this.configService.get('server.jwt_password_reset');
+    } else if (type === tokenTypeEnum.REFRESH) {
+      return this.configService.get('server.jwt_refresh');
+    }
+  }
+
+  encodeToken(load: object, jwtToken: any) {
+    const token = this.jwtService.sign(load, {
+      secret: `${jwtToken.secret}`,
+      expiresIn: `${jwtToken.expire}`,
+    });
+    return token;
+  }
+
+  verifyToken(token: string, type: tokenTypeEnum) {
+    const jwtEmailVrification = this.determineJwt(type);
+    try {
+      const payload = this.jwtService.verify(token, {
+        secret: `${jwtEmailVrification.secret}`,
+      });
+      return payload;
+    } catch (error) {
+      throw new UnauthorizedException('Invalid or expired token');
+    }
+  }
 }

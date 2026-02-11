@@ -1,15 +1,21 @@
-import { Injectable, NotImplementedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  NotImplementedException,
+} from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UploadApiResponse, v2 } from 'cloudinary';
 import { File } from './entities/file.entity';
+import { UploadApiResponse, v2 } from 'cloudinary';
 import fs from 'fs';
+import { FileType } from 'src/common/enums/product.enum';
+import { url } from 'inspector';
 
 @Injectable()
 export class FileService {
   constructor(
     @InjectRepository(File)
-    private readonly fileRepository: Repository<File>,
+    private readonly fileRepo: Repository<File>,
   ) {}
 
   async uploadFile(file: {
@@ -40,14 +46,15 @@ export class FileService {
     });
   }
 
-  async save(file: Express.Multer.File, fileType: string) {
+  async save(file: Express.Multer.File, fileType: FileType) {
     const res = await this.uploadFile(file);
 
-    const newFile = await this.fileRepository.save({
-      type: fileType,
+    const newFile = await this.fileRepo.save({
+      url: res.url,
       name: res.public_id,
-      url: res.secure_url,
-      resourceType: res.resource_type,
+      type: fileType,
+      mimeType: res.type,
+      size: res.bytes,
     });
 
     if (file.path) {
@@ -59,19 +66,41 @@ export class FileService {
     return newFile;
   }
 
+  deleteFile(url: string, resourceType: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      void v2.uploader.destroy(
+        url,
+        { resource_type: resourceType },
+        (error, result) => {
+          if (error) return reject(error);
+
+          if (result?.result !== 'ok') {
+            return reject(
+              new Error(`Cloudinary delete failed: ${result?.result}`),
+            );
+          }
+
+          resolve();
+        },
+      );
+    });
+  }
+
+  async findOne(id: string) {
+    return await this.fileRepo.findOne({ where: { id } });
+  }
+
+  async remove(id: string) {
+    const file = await this.findOne(id);
+    if (!file) throw new NotFoundException('File not found');
+
+    console.log('Delete file');
+
+    this.deleteFile(file.name, file.type);
+    this.fileRepo.delete(id);
+  }
+
   findAll() {
     return `This action returns all file`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} file`;
-  }
-
-  // update(id: number, updateFileDto: UpdateFileDto) {
-  //   return `This action updates a #${id} file`;
-  // }
-
-  remove(id: number) {
-    return `This action removes a #${id} file`;
   }
 }

@@ -1,52 +1,68 @@
 import {
-  Body,
   Controller,
-  Delete,
   Get,
-  Param,
-  Patch,
   Post,
-  Query,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  NotFoundException,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
-import { ApiOperation } from '@nestjs/swagger';
 import { CategoryService } from './category.service';
-import {
-  CategoryDTO,
-  CreateCategoryDTO,
-  IdCategoryDTO,
-  UpdateCategoryDTO,
-} from './category.dto';
+import { CreateCategoryDto, UpdateCategoryDto } from './dto/request';
+import { CategoryResponse } from './dto/response';
+import { ApiConsumes } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { FileUploadInterceptor } from 'src/common/interceptors/file-upload.interceptor';
 
 @Controller('category')
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
-  @ApiOperation({ summary: 'List Categories' })
-  @Get()
-  async listCategory(@Query() dto: CategoryDTO) {
-    return await this.categoryService.find(dto);
-  }
-
-  @ApiOperation({ summary: 'Add new Category' })
   @Post()
-  async addCategory(@Body() dto: CreateCategoryDTO) {
-    await this.categoryService.create(dto);
-    return 'Product category added';
-  }
-
-  @ApiOperation({ summary: 'Update new Category' })
-  @Patch(':categoryId')
-  async updateCategory(
-    @Param() id: IdCategoryDTO,
-    @Body() dto: UpdateCategoryDTO,
+  @UseInterceptors(new FileUploadInterceptor('picture', 1))
+  @ApiConsumes('multipart/form-data')
+  async create(
+    @Body() dto: CreateCategoryDto,
+    @UploadedFile() picture: Express.Multer.File,
   ) {
-    await this.categoryService.update(id, dto);
-    return 'Product Category Updated ';
+    return await this.categoryService.create(dto, picture);
   }
 
-  @ApiOperation({ summary: 'Delete Category' })
-  @Delete(':categoryId')
-  async deleteCategory(@Param() id: IdCategoryDTO) {
-    await this.categoryService.hardDelete(id.categoryId);
+  @Get()
+  async findAll() {
+    return (await this.categoryService.findAll({ relations: ['image'] })).map(
+      (category) => {
+        return new CategoryResponse(category);
+      },
+    );
+  }
+
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    const category = await this.categoryService.findOne({
+      where: { id },
+      relations: ['image'],
+    });
+    if (!category) throw new NotFoundException('Category not found');
+    return new CategoryResponse(category);
+  }
+
+  @Patch(':id')
+  @UseInterceptors(new FileUploadInterceptor('picture', 1))
+  @ApiConsumes('multipart/form-data')
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateCategoryDto,
+    @UploadedFile() picture: Express.Multer.File,
+  ) {
+    return await this.categoryService.update(id, dto, picture);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.categoryService.remove(id);
   }
 }

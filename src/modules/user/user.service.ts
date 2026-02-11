@@ -4,83 +4,60 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { FindOneOptions, Repository } from 'typeorm';
+import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from './user.entity';
-import { FileService } from '../file/file.service';
-import { CreateAdminDTO, UserIdDTO } from './dto/user-request.dto';
-import { comparehashContent, hashContent } from '@/util/lib';
+import { RegisterDto } from '../auth/dto/request';
+import { UpdateUserDto } from './dto/request';
+import { comparehashContent, hashContent } from 'src/util';
+import { UserProfile } from './dto/response';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
-    private readonly fileSerive: FileService,
   ) {}
 
-  async create(user: CreateAdminDTO) {
-    return await this.userRepo.save(user);
+  async create(dto: RegisterDto) {
+    if (dto.password) dto.password = await hashContent(dto.password);
+
+    return await this.userRepo.save(dto);
   }
 
-  async find(filter?: Partial<User>) {
-    return await this.userRepo.find({ where: filter });
+  findAll() {
+    return `This action returns all user`;
   }
 
-  async findOne(
-    filter: Partial<User>,
-    options?: Omit<FindOneOptions<User>, 'where'>,
-  ) {
-    const user = await this.userRepo.findOne({
-      where: filter,
-      ...options,
-    });
-
+  async findOne(options: FindOneOptions<User>) {
+    const user = await this.userRepo.findOne({ ...options });
     return user;
   }
 
-  async update(
-    user: Partial<User>,
-    options?: {
-      profilePicture?: Express.Multer.File;
-      fileType?: string;
-      currentPassword?: string;
-      newPassword?: string;
-    },
-  ) {
-    const exist = await this.findOne({ userId: user.userId });
-    if (!exist) throw new NotFoundException('User not found.');
+  async update(id: string, dto: UpdateUserDto) {
+    const user = await this.userRepo.findOneBy({ id });
 
-    exist.email = user.email ?? exist.email;
-    exist.fullName = user.fullName ?? exist.fullName;
-    exist.phoneNumber = user.phoneNumber ?? exist.phoneNumber;
-    exist.password = user.password ?? exist.password;
-    exist.role = user.role ?? exist.role;
-    exist.emailVerifiedAt = user.emailVerifiedAt ?? exist.emailVerifiedAt;
-
-    if (options) {
-      if (options.currentPassword && options.newPassword) {
-        if (!comparehashContent(exist.password, options.currentPassword))
-          throw new BadRequestException('Current password is incorrect.');
-
-        exist.password = hashContent(options.newPassword);
-      }
-
-      if (options.profilePicture && options.fileType) {
-        const newFile = await this.fileSerive.save(
-          options.profilePicture,
-          options.fileType,
-        );
-        exist.profile = newFile.fileId;
-      }
+    if (!user) {
+      throw new NotFoundException('User not found');
     }
 
-    return await this.userRepo.save(exist);
+    if (dto.currentPassword) {
+      if (!comparehashContent(dto.currentPassword, user.password))
+        throw new BadRequestException('Invalid current password');
+    }
+    if (dto.password) dto.password = await hashContent(dto.password);
+
+    Object.assign(user, dto);
+
+    return await this.userRepo.save(user);
   }
 
-  async softDelete(params: UserIdDTO) {
-    return await this.userRepo.softDelete(params.userId);
+  remove(id: number) {
+    return `This action removes a #${id} user`;
   }
-  async hardDelete(params: UserIdDTO) {
-    return await this.userRepo.delete(params.userId);
+
+  async getUserProfile(options: FindOneOptions<User>) {
+    const user = await this.findOne(options);
+    if (!user) throw new NotFoundException('User not found');
+    return new UserProfile(user);
   }
 }

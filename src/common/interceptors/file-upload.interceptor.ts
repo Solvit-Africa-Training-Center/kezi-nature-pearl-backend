@@ -15,7 +15,7 @@ import { randomUUID } from 'crypto';
 export class FileUploadInterceptor implements NestInterceptor {
   constructor(
     private readonly fieldName: string,
-    private readonly maxCount?: number,
+    private readonly maxCount: number,
   ) {}
 
   intercept(
@@ -44,9 +44,10 @@ export class FileUploadInterceptor implements NestInterceptor {
       cb(null, true);
     };
 
-    const upload = this.maxCount
-      ? multer({ storage, fileFilter }).array(this.fieldName, this.maxCount)
-      : multer({ storage, fileFilter }).single(this.fieldName);
+    const upload =
+      this.maxCount > 1
+        ? multer({ storage, fileFilter }).array(this.fieldName, this.maxCount)
+        : multer({ storage, fileFilter }).single(this.fieldName);
 
     return new Promise((resolve, reject) => {
       upload(req, res, (err: any) => {

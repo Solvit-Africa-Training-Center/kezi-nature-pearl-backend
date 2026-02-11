@@ -1,43 +1,41 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { CreateProductDto } from './dto/request/create-product.dto';
+import { UpdateProductDto } from './dto/request/update-product.dto';
+import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
+import { Product } from './entities/product.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Product } from './product.entity';
-import {
-  CreateProductDTO,
-  IdProductDTO,
-  UpdateProductDTO,
-} from './product.dto';
+import { ProductImageService } from '../product-image/product-image.service';
 
 @Injectable()
 export class ProductService {
   constructor(
     @InjectRepository(Product)
     private readonly productRepo: Repository<Product>,
+    private readonly productImageService: ProductImageService,
   ) {}
-
-  async find(filters?: Partial<Product>) {
-    return await this.productRepo.find({ where: filters });
+  async create(dto: CreateProductDto, pictures: Express.Multer.File[]) {
+    const product = await this.productRepo.save(dto);
+    this.productImageService.create({
+      files: pictures,
+      productId: product.id,
+    });
+    return { message: 'Product added' };
   }
 
-  async create(product: CreateProductDTO) {
-    return await this.productRepo.save(product);
+  async findAll(options?: FindManyOptions<Product>) {
+    return await this.productRepo.find(options);
   }
 
-  async update(idParm: IdProductDTO, product: UpdateProductDTO) {
-    const exists = await this.findOne({ productId: idParm.productId });
-    if (!exists) throw new NotFoundException();
-    exists.name = product.name ?? exists.name;
-    exists.description = product.description ?? exists.description;
-    exists.status = product.status ?? exists.status;
-
-    return await this.productRepo.save(exists);
+  async findOne(option: FindOneOptions<Product>) {
+    return await this.productRepo.findOne(option);
   }
 
-  async findOne(filter: Partial<Product>) {
-    return await this.productRepo.findOne({ where: filter });
+  update(id: string, updateProductDto: UpdateProductDto) {
+    return `This action updates a #${id} product`;
   }
 
-  async hardDelete(id: string) {
+  async remove(id: string) {
     await this.productRepo.delete(id);
+    return { message: 'Product delete' };
   }
 }
