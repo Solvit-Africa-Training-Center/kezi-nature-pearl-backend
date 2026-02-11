@@ -1,34 +1,36 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  UseGuards,
+} from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { WishlistService } from './wishlist.service';
 import { CreateWishlistDto } from './dto/create-wishlist.dto';
-import { UpdateWishlistDto } from './dto/update-wishlist.dto';
+import { CurrentUser } from 'src/common/decorator';
 
 @Controller('wishlist')
 export class WishlistController {
   constructor(private readonly wishlistService: WishlistService) {}
 
-  @Post()
-  create(@Body() createWishlistDto: CreateWishlistDto) {
-    return this.wishlistService.create(createWishlistDto);
-  }
-
+  @UseGuards(AuthGuard('jwt'))
   @Get()
-  findAll() {
-    return this.wishlistService.findAll();
+  getWishlist(@CurrentUser() user) {
+    return this.wishlistService.getUserWishlist(user.sub);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.wishlistService.findOne(+id);
+  @UseGuards(AuthGuard('jwt'))
+  @Post()
+  addWishlist(@CurrentUser() user, @Body() dto: CreateWishlistDto) {
+    return this.wishlistService.addToWishlist(user.sub, dto);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateWishlistDto: UpdateWishlistDto) {
-    return this.wishlistService.update(+id, updateWishlistDto);
-  }
-
+  @UseGuards(AuthGuard('jwt'))
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.wishlistService.remove(+id);
+  removeWishlist(@CurrentUser() user, @Param('id') id: string) {
+    return this.wishlistService.removeFromWishlist(user.sub, id);
   }
 }
