@@ -26,11 +26,14 @@ export class CreateContactUsDto {
   @IsString()
   @IsNotEmpty()
   message: string;
-
 }
 
 export class RespondContactUsDto {
+  @ApiProperty({
+    example: 'Thank you for reaching out. We have resolved your issue.',
+    description: 'Admin response to the contact message',
+  })
   @IsString()
+  @IsNotEmpty()
   response: string;
 }
-
