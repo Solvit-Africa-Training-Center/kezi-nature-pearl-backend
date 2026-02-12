@@ -52,11 +52,14 @@ import { RedisModule } from './shared/redis/redis.module';
     CategoryModule,
     ProductModule,
     ProductImageModule,
-    AddressModule,
-    UserPreferencesModule,
     CartModule,
     CartItemModule,
+
     OrderModule,
+
+    AddressModule,
+    UserPreferencesModule,
+
     OrderItemModule,
     PaymentModule,
     WishlistModule,

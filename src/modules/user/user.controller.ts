@@ -1,18 +1,21 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
-  NotFoundException,
   Patch,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { AuthGuard, RolesGuard } from 'src/common/guards';
 import { CurrentUser, Roles } from 'src/common/decorator';
 import { Payload } from 'src/util/token.service';
-import { ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiOperation } from '@nestjs/swagger';
 import { UserRole } from 'src/common/enums/user.enum';
-import { UpdateUserDto, UpdateUserProfile } from './dto/request';
+import { UpdateUserProfile, UpdateUserRolesDto } from './dto/request';
+import { FileUploadInterceptor } from 'src/common/interceptors/file-upload.interceptor';
 
 @Controller('user')
 @UseGuards(AuthGuard, RolesGuard)
@@ -20,45 +23,56 @@ import { UpdateUserDto, UpdateUserProfile } from './dto/request';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  // All
+
   @Get('profile')
+  @ApiOperation({ summary: 'Get user profile' })
   @Roles(UserRole.CUSTOMER, UserRole.ADMIN)
   async getUserProfile(@CurrentUser() user: Payload) {
     return await this.userService.getUserProfile({
       where: { id: user.sub },
+      relations: { profile: true },
     });
   }
 
   @Patch('update')
-  @Roles(UserRole.CUSTOMER, UserRole.ADMIN)
   @ApiConsumes('multipart/form-data')
+  @UseInterceptors(new FileUploadInterceptor('picture', 1))
+  @ApiOperation({ summary: 'Update user profile' })
+  @Roles(UserRole.CUSTOMER, UserRole.ADMIN)
   async updateUserProfile(
     @CurrentUser() user: Payload,
     @Body() dto: UpdateUserProfile,
+    @UploadedFile() picture: Express.Multer.File,
   ) {
-    // await this.userService.update(user.sub, dto);
-    console.log(dto.currentPassword);
+    console.log('Logging Update user :', dto);
+
+    await this.userService.update(user.sub, dto, picture);
     return await this.userService.getUserProfile({
       where: { id: user.sub },
     });
   }
 
-  // @Post()
-  // create(@Body() createUserDto: CreateUserDto) {
-  //   return this.userService.create(createUserDto);
-  // }
+  @Delete('delete')
+  @ApiOperation({ summary: 'User Delete Account' })
+  @Roles(UserRole.CUSTOMER)
+  remove(@CurrentUser() user: Payload) {
+    return this.userService.remove(user.sub);
+  }
 
-  // @Get()
-  // findAll() {
-  //   return this.userService.findAll();
-  // }
+  // Admin
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-  //   return this.userService.update(+id, updateUserDto);
-  // }
+  @Get('all')
+  @ApiOperation({ summary: 'Get List of Users' })
+  @Roles(UserRole.ADMIN)
+  getAllUsers() {
+    return this.userService.getAllUsers({ relations: { profile: true } });
+  }
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.userService.remove(+id);
-  // }
+  @Patch('update-role')
+  @ApiOperation({ summary: 'Update Users Role' })
+  @Roles(UserRole.ADMIN)
+  async updateUserRole(@Body() users: UpdateUserRolesDto) {
+    return await this.userService.updateUserRole(users);
+  }
 }

@@ -29,7 +29,7 @@ export class AuthController {
   }
 
   @Post('login')
-  @ApiOperation({ summary: 'User Registration' })
+  @ApiOperation({ summary: 'User Login' })
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
   }
@@ -71,6 +71,7 @@ export class AuthController {
   @Post('logout')
   @ApiOperation({ summary: 'Logout User' })
   @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   async logout(@CurrentUser() user: Payload) {
     return await this.authService.logout(user.sub);
   }

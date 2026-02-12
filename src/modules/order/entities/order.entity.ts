@@ -7,14 +7,6 @@ import {
   BeforeInsert,
   Index,
 } from 'typeorm';
-import {
-  IsEnum,
-  IsNumber,
-  IsOptional,
-  IsString,
-  Min,
-  IsDate,
-} from 'class-validator';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { OrderStatus, PaymentStatus } from '../../../common/enums/product.enum';
 import { User } from '../../../modules/user/entities/user.entity';
@@ -29,7 +21,6 @@ import { Review } from '../../../modules/review/entities/review.entity';
 @Index(['orderNumber'], { unique: true })
 export class Order extends BaseEntity {
   @Column({ name: 'order_number', unique: true })
-  @IsString()
   orderNumber: string;
 
   @Column()
@@ -46,19 +37,11 @@ export class Order extends BaseEntity {
   @JoinColumn({ name: 'shippingAddressId' })
   shippingAddress: Address;
 
-  @Column()
-  billingAddressId: string;
-
-  @ManyToOne(() => Address)
-  @JoinColumn({ name: 'billingAddressId' })
-  billingAddress: Address;
-
   @Column({
     type: 'enum',
     enum: OrderStatus,
     default: OrderStatus.PENDING,
   })
-  @IsEnum(OrderStatus)
   orderStatus: OrderStatus;
 
   @Column({
@@ -66,47 +49,30 @@ export class Order extends BaseEntity {
     enum: PaymentStatus,
     default: PaymentStatus.PENDING,
   })
-  @IsEnum(PaymentStatus)
   paymentStatus: PaymentStatus;
 
   @DecimalColumn({ name: 'total_amount' })
-  @IsNumber()
-  @Min(0)
   totalAmount: number;
 
   @DecimalColumn({ name: 'shipping_cost', default: 0 })
-  @IsNumber()
-  @Min(0)
   shippingCost: number;
 
   @DecimalColumn({ name: 'tax_amount', default: 0 })
-  @IsNumber()
-  @Min(0)
   taxAmount: number;
 
   @DecimalColumn({ name: 'discount_amount', default: 0 })
-  @IsNumber()
-  @Min(0)
   discountAmount: number;
 
   @DecimalColumn({ name: 'final_amount' })
-  @IsNumber()
-  @Min(0)
   finalAmount: number;
 
   @Column('text', { nullable: true })
-  @IsOptional()
-  @IsString()
   notes?: string;
 
   @Column({ name: 'tracking_number', nullable: true })
-  @IsOptional()
-  @IsString()
   trackingNumber?: string;
 
   @Column({ name: 'estimated_delivery', type: 'date', nullable: true })
-  @IsOptional()
-  @IsDate()
   estimatedDelivery?: Date;
 
   @Column({ name: 'delivered_at', type: 'timestamptz', nullable: true })

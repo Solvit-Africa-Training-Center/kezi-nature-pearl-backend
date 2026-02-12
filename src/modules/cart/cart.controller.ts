@@ -1,34 +1,50 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Delete, UseGuards } from '@nestjs/common';
 import { CartService } from './cart.service';
 import { CreateCartDto } from './dto/create-cart.dto';
-import { UpdateCartDto } from './dto/update-cart.dto';
+import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { AuthGuard, RolesGuard } from 'src/common/guards';
+import { CurrentUser, Roles } from 'src/common/decorator';
+import { UserRole } from 'src/common/enums/user.enum';
+import { Payload } from 'src/util';
+import { RemoveItemFromCartDto } from '../cart-item/dto/request/remove-item-from-cart.dto';
+import { CartStatus } from 'src/common/enums/product.enum';
 
 @Controller('cart')
+@UseGuards(AuthGuard, RolesGuard)
+@ApiBearerAuth()
 export class CartController {
   constructor(private readonly cartService: CartService) {}
 
-  @Post()
-  create(@Body() createCartDto: CreateCartDto) {
-    return this.cartService.create(createCartDto);
+  @Post('add-to-cart')
+  @Roles(UserRole.CUSTOMER)
+  @ApiOperation({ summary: 'Add product to cart' })
+  async create(@CurrentUser() user: Payload, @Body() dto: CreateCartDto) {
+    return await this.cartService.addToCart(dto, user.sub);
+  }
+
+  @Post('check-out')
+  @Roles(UserRole.CUSTOMER)
+  @ApiOperation({ summary: 'Check out Cart' })
+  async checkout(@CurrentUser() user: Payload) {
+    await this.cartService.checkout(user.sub);
   }
 
   @Get()
-  findAll() {
-    return this.cartService.findAll();
+  @Roles(UserRole.CUSTOMER)
+  @ApiOperation({ summary: 'User cart' })
+  findOne(@CurrentUser() user: Payload) {
+    return this.cartService.findOne({
+      where: { userId: user.sub, status: CartStatus.ACTIVE },
+      relations: { items: true },
+    });
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.cartService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCartDto: UpdateCartDto) {
-    return this.cartService.update(+id, updateCartDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.cartService.remove(+id);
+  @Delete()
+  @ApiOperation({ summary: 'Delete Item to cart' })
+  async removeItems(
+    @CurrentUser() user: Payload,
+    @Body() dto: RemoveItemFromCartDto,
+  ) {
+    return await this.cartService.removeItem(dto, user.sub);
   }
 }

@@ -14,11 +14,6 @@ export class Cart extends BaseEntity {
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @Column({ name: 'session_id', nullable: true })
-  @IsOptional()
-  @IsString()
-  sessionId?: string;
-
   @Column({
     type: 'enum',
     enum: CartStatus,
