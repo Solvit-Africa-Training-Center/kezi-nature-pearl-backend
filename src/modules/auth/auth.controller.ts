@@ -71,6 +71,7 @@ export class AuthController {
   @Post('logout')
   @ApiOperation({ summary: 'Logout User' })
   @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   async logout(@CurrentUser() user: Payload) {
     return await this.authService.logout(user.sub);
   }

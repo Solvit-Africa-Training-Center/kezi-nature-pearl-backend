@@ -1,27 +1,19 @@
-import { ApiPropertyOptional, PartialType } from '@nestjs/swagger';
-import { CreateProductDto } from './create-product.dto';
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
-import { Type } from 'class-transformer';
+import { PartialType, PickType } from '@nestjs/swagger';
+import { ProductRequestBaseDto } from './base-product.dto';
 
-export class UpdateProductDto extends PartialType(CreateProductDto) {
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNotEmpty()
-  @Type(() => Number)
-  @IsNumber()
-  salePrice?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNotEmpty()
-  @Type(() => Number)
-  @IsNumber()
-  costPrice?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNotEmpty()
-  @Type(() => Number)
-  @IsNumber()
-  weight?: number;
-}
+export class UpdateProductDto extends PartialType(
+  PickType(ProductRequestBaseDto, [
+    'pictures',
+    'name',
+    'description',
+    'categoryId',
+    'price',
+    'salePrice',
+    'costPrice',
+    'stockQuantity',
+    'lowStockThreshold',
+    'weight',
+    'ingredients',
+    'status',
+  ]),
+) {}

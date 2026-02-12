@@ -1,16 +1,8 @@
-import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
-import { IsString, IsOptional, IsBoolean, IsNotEmpty } from 'class-validator';
-import { CreateFileDto } from 'src/modules/file/dto/request';
+import { PickType } from '@nestjs/swagger';
+import { CategoryRequestBaseDto } from './base-category.dto';
 
-export class CreateCategoryDto extends PartialType(CreateFileDto) {
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
-  name: string;
-
-  @ApiPropertyOptional()
-  @IsNotEmpty()
-  @IsOptional()
-  @IsString()
-  description?: string;
-}
+export class CreateCategoryDto extends PickType(CategoryRequestBaseDto, [
+  'picture',
+  'name',
+  'description',
+]) {}
