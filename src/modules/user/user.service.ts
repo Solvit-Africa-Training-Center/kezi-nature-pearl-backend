@@ -3,19 +3,27 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { FindOneOptions, Repository } from 'typeorm';
+import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RegisterDto } from '../auth/dto/request';
-import { UpdateUserDto } from './dto/request';
+import {
+  UpdateUserDto,
+  UpdateUserProfile,
+  UpdateUserRolesDto,
+} from './dto/request';
 import { comparehashContent, hashContent } from 'src/util';
-import { UserProfile } from './dto/response';
+import { UserProfile, UserProfiles } from './dto/response';
+import { FileService } from '../file/file.service';
+import { FileType } from 'src/common/enums/product.enum';
+import { UserRequestBaseDto } from './dto/request/user-base.dto';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
+    private readonly fileService: FileService,
   ) {}
 
   async create(dto: RegisterDto) {
@@ -24,8 +32,8 @@ export class UserService {
     return await this.userRepo.save(dto);
   }
 
-  findAll() {
-    return `This action returns all user`;
+  async findAll(options?: FindManyOptions<User>) {
+    return await this.userRepo.find(options);
   }
 
   async findOne(options: FindOneOptions<User>) {
@@ -33,11 +41,16 @@ export class UserService {
     return user;
   }
 
-  async update(id: string, dto: UpdateUserDto) {
+  // All
+
+  async update(id: string, dto: UpdateUserDto, picture?: Express.Multer.File) {
     const user = await this.userRepo.findOneBy({ id });
 
     if (!user) {
       throw new NotFoundException('User not found');
+    }
+    if (picture) {
+      user.profile = await this.fileService.save(picture, FileType.IMAGE);
     }
 
     if (dto.currentPassword) {
@@ -48,16 +61,32 @@ export class UserService {
 
     Object.assign(user, dto);
 
-    return await this.userRepo.save(user);
+    return await this.userRepo.update(id, user);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: string) {
+    await this.userRepo.delete(id);
+    return { message: 'Current User Deleted' };
   }
 
   async getUserProfile(options: FindOneOptions<User>) {
     const user = await this.findOne(options);
     if (!user) throw new NotFoundException('User not found');
     return new UserProfile(user);
+  }
+
+  // Admin
+
+  async getAllUsers(options?: FindManyOptions<User>) {
+    const users = await this.userRepo.find(options);
+
+    return users.map((user) => new UserProfiles(user));
+  }
+
+  async updateUserRole(dto: UpdateUserRolesDto) {
+    dto.users.map(async (user) => {
+      await this.update(user.id, { role: dto.role });
+    });
+    return { message: 'Users Updated' };
   }
 }

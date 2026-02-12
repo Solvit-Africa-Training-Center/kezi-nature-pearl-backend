@@ -55,7 +55,4 @@ export class Address extends BaseEntity {
   // Relations
   @OneToMany(() => Order, (order) => order.shippingAddress)
   shippingOrders?: Order[];
-
-  @OneToMany(() => Order, (order) => order.billingAddress)
-  billingOrders?: Order[];
 }

@@ -25,7 +25,7 @@ export class AuthService {
     private readonly tokenService: TokenService,
     private readonly mailService: MailService,
     private readonly configService: ConfigService,
-    // private readonly redisService: RedisService,
+    private readonly redisService: RedisService,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -107,12 +107,12 @@ export class AuthService {
         lastLoginAt: new Date(),
       });
 
-      // if (tokens['refresh_token'])
-      //   await this.redisService.set(
-      //     `refresh_token:${user.id}`,
-      //     tokens['refresh_token'],
-      //     7 * 24 * 60 * 60,
-      //   );
+      if (tokens['refresh_token'])
+        await this.redisService.set(
+          `refresh_token:${user.id}`,
+          tokens['refresh_token'],
+          7 * 24 * 60 * 60,
+        );
 
       return {
         message: 'Logged in successful',
@@ -222,13 +222,13 @@ export class AuthService {
       throw new UnauthorizedException('Invalid token type');
     }
 
-    // const storedToken = await this.redisService.get(
-    //   `refresh_token:${payload.sub}`,
-    // );
+    const storedToken = await this.redisService.get(
+      `refresh_token:${payload.sub}`,
+    );
 
-    // if (!storedToken || storedToken !== dto.refreshToken) {
-    //   throw new UnauthorizedException('Refresh token revoked');
-    // }
+    if (!storedToken || storedToken !== dto.refreshToken) {
+      throw new UnauthorizedException('Refresh token revoked');
+    }
 
     const user = await this.userService.findOne({ where: { id: payload.sub } });
     if (!user) {
@@ -252,20 +252,22 @@ export class AuthService {
       [tokenTypeEnum.ACCESS, tokenTypeEnum.REFRESH],
     );
 
-    // if (tokens['refresh_token'])
-    //   await this.redisService.set(
-    //     `refresh_token:${user.id}`,
-    //     tokens['refresh_token'],
-    //     7 * 24 * 60 * 60,
-    //   );
+    if (tokens['refresh_token']) {
+      this.redisService.del([`refresh_token:${payload.sub}`]);
+      this.redisService.set(
+        `refresh_token:${user.id}`,
+        tokens['refresh_token'],
+        7 * 24 * 60 * 60,
+      );
+    }
 
     return {
-      accessToken: tokens['access_token'],
+      ...tokens,
     };
   }
 
   async logout(id: string) {
-    // const storedToken = await this.redisService.del([`refresh_token:${id}`]);
+    await this.redisService.del([`refresh_token:${id}`]);
     return { message: 'Logged out' };
   }
 }

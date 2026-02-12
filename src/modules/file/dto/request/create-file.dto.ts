@@ -1,12 +1,11 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateFileDto {
   @ApiProperty({
     type: 'file',
     format: 'binary',
   })
-  picture: Express.Multer.File;
+  picture?: Express.Multer.File;
 }
 
 export class CreateFilesDto {
@@ -17,5 +16,6 @@ export class CreateFilesDto {
       format: 'binary',
     },
   })
+  // @IsNotEmpty()
   pictures: Express.Multer.File[];
 }

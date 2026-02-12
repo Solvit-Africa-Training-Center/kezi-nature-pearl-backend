@@ -25,11 +25,6 @@ export class OrderItem extends BaseEntity {
   @IsString()
   productName: string;
 
-  @Column({ name: 'variant_name', nullable: true })
-  @IsOptional()
-  @IsString()
-  variantName?: string;
-
   @Column('int')
   @IsInt()
   @Min(1)
