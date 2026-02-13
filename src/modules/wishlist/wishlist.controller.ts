@@ -7,28 +7,29 @@ import {
   Delete,
   UseGuards,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { WishlistService } from './wishlist.service';
 import { CreateWishlistDto } from './dto/create-wishlist.dto';
-import { CurrentUser } from 'src/common/decorator';
+import { CurrentUser, Roles } from 'src/common/decorator';
+import { AuthGuard, RolesGuard } from 'src/common/guards';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { UserRole } from 'src/common/enums/user.enum';
 
 @Controller('wishlist')
+@UseGuards(AuthGuard, RolesGuard)
+@Roles(UserRole.CUSTOMER)
+@ApiBearerAuth()
 export class WishlistController {
   constructor(private readonly wishlistService: WishlistService) {}
 
-  @UseGuards(AuthGuard('jwt'))
   @Get()
   getWishlist(@CurrentUser() user) {
     return this.wishlistService.getUserWishlist(user.sub);
   }
-
-  @UseGuards(AuthGuard('jwt'))
-  @Post()
+ @Post()
   addWishlist(@CurrentUser() user, @Body() dto: CreateWishlistDto) {
     return this.wishlistService.addToWishlist(user.sub, dto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
   @Delete(':id')
   removeWishlist(@CurrentUser() user, @Param('id') id: string) {
     return this.wishlistService.removeFromWishlist(user.sub, id);
