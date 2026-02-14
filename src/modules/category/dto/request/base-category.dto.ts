@@ -9,9 +9,9 @@ export class CategoryRequestBaseDto extends CreateFileDto {
   name: string;
 
   @ApiPropertyOptional({ example: 'Soap Products' })
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  description?: string;
+  description: string;
 
   @ApiProperty()
   @IsBoolean()

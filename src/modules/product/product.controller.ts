@@ -10,6 +10,7 @@ import {
   UploadedFiles,
   NotFoundException,
   UseGuards,
+  UseFilters,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/request/create-product.dto';
@@ -21,6 +22,7 @@ import { AuthGuard, RolesGuard } from 'src/common/guards';
 import { Roles } from 'src/common/decorator';
 import { UserRole } from 'src/common/enums/user.enum';
 import { Public } from 'src/common/decorator/public.decorator';
+import { AllExceptionsFilter } from 'src/common/filters/AllExceptionFilter';
 
 @Controller('product')
 @UseGuards(AuthGuard, RolesGuard)
@@ -46,7 +48,7 @@ export class ProductController {
   async findAll() {
     return (
       await this.productService.findAll({
-        relations: { images: { file: true } },
+        relations: { images: { file: true }, category: true },
       })
     ).map((product) => {
       return new ProductResponseDto(product);
@@ -59,24 +61,30 @@ export class ProductController {
   async findOne(@Param('id') id: string) {
     const product = await this.productService.findOne({
       where: { id },
-      relations: { images: { file: true } },
+      relations: { images: { file: true }, category: true },
     });
     if (!product) throw new NotFoundException('Product not found');
 
     return new ProductResponseDto(product);
   }
 
-  @Patch(':id')
-  @ApiOperation({ summary: 'Add Product' })
-  @UseInterceptors(new FileUploadInterceptor('pictures', 5))
-  @ApiConsumes('multipart/form-data')
-  update(@Param('id') id: string, @Body() dto: UpdateProductDto) {
-    return this.productService.update(id, dto);
-  }
+  // @Patch(':id')
+  // @Roles(UserRole.ADMIN)
+  // @ApiOperation({ summary: 'Add Product' })
+  // @UseInterceptors(new FileUploadInterceptor('pictures', 5))
+  // @ApiConsumes('multipart/form-data')
+  // async update(
+  //   @Param('id') id: string,
+  //   @Body() dto: UpdateProductDto,
+  //   @UploadedFiles() pictures: Express.Multer.File[],
+  // ) {
+  //   return await this.productService.update(id, dto, pictures);
+  // }
 
   @Delete(':id')
   @Roles(UserRole.ADMIN)
-  remove(@Param('id') id: string) {
-    return this.productService.remove(id);
+  @ApiOperation({ summary: 'Delete Product' })
+  async remove(@Param('id') id: string) {
+    return await this.productService.remove(id);
   }
 }

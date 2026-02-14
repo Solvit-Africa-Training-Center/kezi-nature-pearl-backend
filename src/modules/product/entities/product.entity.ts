@@ -19,7 +19,7 @@ import { InventoryLog } from '../../../modules/inventory-log/entities/inventory-
 
 @Entity('products')
 export class Product extends BaseEntity {
-  @Column()
+  @Column({ unique: true })
   name: string;
 
   @Column('text', { nullable: true })

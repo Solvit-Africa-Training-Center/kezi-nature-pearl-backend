@@ -19,13 +19,11 @@ export class ProductRequestBaseDto extends CreateFilesDto {
 
   @ApiPropertyOptional()
   @IsOptional()
-  @IsNotEmpty()
   @IsString()
   description: string;
 
   @ApiPropertyOptional()
   @IsOptional()
-  @IsNotEmpty()
   @IsString()
   @IsUUID()
   categoryId: string;
@@ -37,33 +35,28 @@ export class ProductRequestBaseDto extends CreateFilesDto {
   price: number;
 
   @ApiProperty()
-  @IsNotEmpty()
   @Type(() => Number)
   @IsNumber()
   salePrice: number;
 
   @ApiProperty()
-  @IsNotEmpty()
   @Type(() => Number)
   @IsNumber()
   costPrice: number;
 
   @ApiPropertyOptional()
   @IsOptional()
-  @IsNotEmpty()
   @Type(() => Number)
   @IsNumber()
   stockQuantity: number;
 
   @ApiProperty()
-  @IsNotEmpty()
   @Type(() => Number)
   @IsNumber()
   lowStockThreshold: number;
 
   @ApiPropertyOptional()
   @IsOptional()
-  @IsNotEmpty()
   @Type(() => Number)
   @IsNumber()
   weight: number;

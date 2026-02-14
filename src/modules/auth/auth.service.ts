@@ -17,6 +17,7 @@ import { IsNull } from 'typeorm';
 import { RefreshTokenDto, ResetPassword } from './dto/request';
 import { comparehashContent } from 'src/util/lib';
 import { RedisService } from 'src/shared/redis/redis.service';
+import { LoggerService } from 'src/common/logger/logger.service';
 
 @Injectable()
 export class AuthService {
@@ -26,7 +27,10 @@ export class AuthService {
     private readonly mailService: MailService,
     private readonly configService: ConfigService,
     private readonly redisService: RedisService,
-  ) {}
+    private logger: LoggerService,
+  ) {
+    this.logger.setContext(AuthService.name);
+  }
 
   async register(dto: RegisterDto) {
     const existingUserByEmail = await this.userService.findOne({
@@ -63,15 +67,6 @@ export class AuthService {
   async login(dto: LoginDto) {
     const user = await this.userService.findOne({
       where: { email: dto.email },
-      select: [
-        'id',
-        'email',
-        'password',
-        'status',
-        'verifiedAt',
-        'role',
-        'fullName',
-      ],
     });
 
     if (!user || !(await comparehashContent(dto.password, user.password))) {
@@ -115,7 +110,7 @@ export class AuthService {
         );
 
       return {
-        message: 'Logged in successful',
+        message: 'Loggin successful',
         ...tokens,
       };
     } catch (error) {

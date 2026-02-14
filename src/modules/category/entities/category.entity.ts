@@ -8,7 +8,7 @@ export class Category extends BaseEntity {
   @Column({ type: 'uuid', nullable: true })
   imageId?: string | null;
 
-  @ManyToOne(() => File, { nullable: true, onDelete: 'CASCADE' })
+  @ManyToOne(() => File, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'imageId' })
   image?: File;
 

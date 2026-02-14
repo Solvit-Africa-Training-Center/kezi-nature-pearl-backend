@@ -17,7 +17,7 @@ export class ProductImageService {
   async create(dto: CreateProductImageDto) {
     for (const file of dto.files) {
       const image = await this.fileService.save(file, FileType.IMAGE);
-      return await this.productImageRepo.save({
+      await this.productImageRepo.save({
         productId: dto.productId,
         fileId: image.id,
       });
@@ -32,11 +32,15 @@ export class ProductImageService {
     return await this.productImageRepo.findOne(option);
   }
 
-  update(id: string, updateProductImageDto: UpdateProductImageDto) {
-    return `This action updates a #${id} productImage`;
-  }
-
   async remove(id: string) {
-    return await this.productImageRepo.delete(id);
+    const productImage = await this.findOne({
+      where: { id },
+      relations: { file: true },
+    });
+
+    if (!productImage) return;
+
+    await this.fileService.remove(productImage.file.id);
+    await this.productImageRepo.delete(id);
   }
 }

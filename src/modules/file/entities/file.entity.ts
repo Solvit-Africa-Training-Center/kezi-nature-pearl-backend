@@ -26,9 +26,7 @@ export class File extends BaseEntity {
   @OneToMany(() => User, (user) => user.profile)
   userProfiles?: User[];
 
-  @OneToMany(() => Category, (category) => category.image, {
-    onDelete: 'CASCADE',
-  })
+  @OneToMany(() => Category, (category) => category.image)
   categoryImages?: Category[];
 
   @OneToMany(() => ProductImage, (productImage) => productImage.file)

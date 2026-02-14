@@ -5,6 +5,7 @@ import {
   Get,
   Patch,
   UploadedFile,
+  UseFilters,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -16,6 +17,7 @@ import { ApiBearerAuth, ApiConsumes, ApiOperation } from '@nestjs/swagger';
 import { UserRole } from 'src/common/enums/user.enum';
 import { UpdateUserProfile, UpdateUserRolesDto } from './dto/request';
 import { FileUploadInterceptor } from 'src/common/interceptors/file-upload.interceptor';
+import { AllExceptionsFilter } from 'src/common/filters/AllExceptionFilter';
 
 @Controller('user')
 @UseGuards(AuthGuard, RolesGuard)
@@ -45,11 +47,10 @@ export class UserController {
     @Body() dto: UpdateUserProfile,
     @UploadedFile() picture: Express.Multer.File,
   ) {
-    console.log('Logging Update user :', dto);
-
     await this.userService.update(user.sub, dto, picture);
     return await this.userService.getUserProfile({
       where: { id: user.sub },
+      relations: { profile: true },
     });
   }
 
