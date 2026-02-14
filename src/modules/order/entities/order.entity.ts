@@ -5,20 +5,16 @@ import {
   OneToMany,
   JoinColumn,
   BeforeInsert,
-  Index,
 } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { OrderStatus, PaymentStatus } from '../../../common/enums/product.enum';
 import { User } from '../../../modules/user/entities/user.entity';
-import { Address } from '../../../modules/address/entities/address.entity';
 import { DecimalColumn } from '../../../common/decorator/decimal-column.decorator';
 import { OrderItem } from '../../../modules/order-item/entities/order-item.entity';
 import { Payment } from '../../../modules/payment/entities/payment.entity';
 import { OrderCoupon } from '../../../modules/order-coupon/entities/order-coupon.entity';
-import { Review } from '../../../modules/review/entities/review.entity';
 
 @Entity('orders')
-@Index(['orderNumber'], { unique: true })
 export class Order extends BaseEntity {
   @Column({ name: 'order_number', unique: true })
   orderNumber: string;
@@ -30,12 +26,29 @@ export class Order extends BaseEntity {
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @Column()
-  shippingAddressId: string;
+  @Column({ name: 'shipping_address', type: 'jsonb' })
+  shippingAddressSnapshot: {
+    fullName: string;
+    phoneNumber: string;
+    addressLine1: string;
+    addressLine2?: string;
+    city: string;
+    state: string;
+    postalCode?: string;
+    country: string;
+  };
 
-  @ManyToOne(() => Address)
-  @JoinColumn({ name: 'shippingAddressId' })
-  shippingAddress: Address;
+  @Column({ name: 'billing_address', type: 'jsonb', nullable: true })
+  billingAddressSnapshot?: {
+    fullName: string;
+    phoneNumber: string;
+    addressLine1: string;
+    addressLine2?: string;
+    city: string;
+    state: string;
+    postalCode?: string;
+    country: string;
+  };
 
   @Column({
     type: 'enum',
@@ -91,9 +104,6 @@ export class Order extends BaseEntity {
     cascade: true,
   })
   coupons?: OrderCoupon[];
-
-  @OneToMany(() => Review, (review) => review.order)
-  reviews?: Review[];
 
   @BeforeInsert()
   generateOrderNumber() {

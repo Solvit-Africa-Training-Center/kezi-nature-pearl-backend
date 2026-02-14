@@ -17,8 +17,8 @@ export enum SkinType {
   NORMAL = 'normal',
 }
 
-export enum AddressLabel {
-  HOME = 'home',
-  WORK = 'work',
-  OTHER = 'other',
+export enum AddressType {
+  SHIPPING = 'shipping',
+  BILLING = 'billing',
+  BOTH = 'both',
 }

@@ -57,9 +57,9 @@ import { LoggerModule } from './common/logger/logger.module';
     CartModule,
     CartItemModule,
 
+    AddressModule,
     OrderModule,
 
-    AddressModule,
     UserPreferencesModule,
 
     OrderItemModule,
