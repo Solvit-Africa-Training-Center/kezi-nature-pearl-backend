@@ -52,12 +52,12 @@ import { LoggerModule } from './common/logger/logger.module';
     UserModule,
     FileModule,
     CategoryModule,
+    AddressModule,
     ProductModule,
     ProductImageModule,
     CartModule,
     CartItemModule,
 
-    AddressModule,
     OrderModule,
 
     UserPreferencesModule,

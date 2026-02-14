@@ -43,7 +43,7 @@ export class CartController {
   async findOne(@CurrentUser() user: Payload) {
     const cart = await this.cartService.findOne({
       where: { userId: user.sub, status: CartStatus.ACTIVE },
-      relations: { items: { product: true } },
+      relations: { items: { product: { images: { file: true } } } },
     });
 
     if (!cart) return { message: 'No cart' };
@@ -52,7 +52,7 @@ export class CartController {
   }
 
   @Delete()
-  @ApiOperation({ summary: 'Delete Item to cart' })
+  @ApiOperation({ summary: 'Delete Item from cart' })
   async removeItems(
     @CurrentUser() user: Payload,
     @Body() dto: RemoveItemFromCartDto,

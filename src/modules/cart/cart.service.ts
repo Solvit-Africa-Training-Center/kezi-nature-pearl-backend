@@ -56,9 +56,28 @@ export class CartService {
   async checkout(userId: string) {
     const cart = await this.findOne({
       where: { userId, status: CartStatus.ACTIVE },
+      relations: { items: true },
     });
 
     if (!cart) throw new NotFoundException('Cart not found');
+
+    if (cart.items) {
+      for (const cartItem of cart.items) {
+        const item = await this.cartItemService.findOne({
+          where: { id: cartItem.id },
+          relations: { product: true },
+        });
+
+        if (!item) throw new NotFoundException(`Cart Item not found`);
+
+        const product = await this.productService.findOne({
+          where: { id: item.productId },
+        });
+
+        if (product?.stockQuantity) {
+        }
+      }
+    }
   }
 
   async findOne(options: FindOneOptions<Cart>) {
