@@ -4,21 +4,26 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreateCartDto } from './dto/request/create-cart.dto';
-import { FindOneOptions, Repository } from 'typeorm';
+import { DataSource, FindOneOptions, Repository } from 'typeorm';
 import { Cart } from './entities/cart.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CartItemService } from '../cart-item/cart-item.service';
 import { ProductService } from '../product/product.service';
 import { CartStatus } from 'src/common/enums/product.enum';
 import { RemoveItemFromCartDto } from '../cart-item/dto/request/remove-item-from-cart.dto';
+import { OrderService } from '../order/order.service';
+import { OrderItemService } from '../order-item/order-item.service';
 
 @Injectable()
 export class CartService {
   constructor(
     @InjectRepository(Cart)
     private readonly cartRepo: Repository<Cart>,
+    private readonly dataSource: DataSource,
     private readonly cartItemService: CartItemService,
     private readonly productService: ProductService,
+    private readonly orderService: OrderService,
+    private readonly cart,
   ) {}
   async addToCart(dto: CreateCartDto, userId: string) {
     const product = await this.productService.findOne({
@@ -54,30 +59,38 @@ export class CartService {
   }
 
   async checkout(userId: string) {
-    const cart = await this.findOne({
-      where: { userId, status: CartStatus.ACTIVE },
-      relations: { items: true },
-    });
+    await this.dataSource.transaction(async (manager) => {
+      const cart =
+        (await this.findOne({
+          where: { userId, status: CartStatus.ACTIVE },
+          relations: { items: true },
+        })) ?? (await manager.save(Cart, { userId }));
 
-    if (!cart) throw new NotFoundException('Cart not found');
+      if (!cart || !cart.items) throw new NotFoundException('Cart not found');
 
-    if (cart.items) {
       for (const cartItem of cart.items) {
-        const item = await this.cartItemService.findOne({
-          where: { id: cartItem.id },
-          relations: { product: true },
-        });
-
-        if (!item) throw new NotFoundException(`Cart Item not found`);
-
         const product = await this.productService.findOne({
-          where: { id: item.productId },
+          where: { id: cartItem.productId },
         });
 
-        if (product?.stockQuantity) {
-        }
+        if (!product) throw new NotFoundException(`Item not found`);
+        if (product.stockQuantity < cartItem.quantity)
+          throw new BadRequestException(`Product ${product.name} out of stock`);
+
+        await this.productService.update(product.id, product);
+
+        // going to make orderItem
+
+        await this.orderService.create({ userId });
       }
-    }
+
+      this.cartRepo.update(
+        { id: cart.id },
+        { ...cart, status: CartStatus.CONVERTED },
+      );
+
+      return { message: 'Checkout succesful' };
+    });
   }
 
   async findOne(options: FindOneOptions<Cart>) {
@@ -105,9 +118,5 @@ export class CartService {
     }
 
     return { message: 'Item  Removed' };
-  }
-
-  async remove(id: string) {
-    return await this.cartRepo.delete(id);
   }
 }

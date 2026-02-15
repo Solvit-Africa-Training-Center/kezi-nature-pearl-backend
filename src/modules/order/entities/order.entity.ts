@@ -70,9 +70,6 @@ export class Order extends BaseEntity {
   @DecimalColumn({ name: 'shipping_cost', default: 0 })
   shippingCost: number;
 
-  @DecimalColumn({ name: 'tax_amount', default: 0 })
-  taxAmount: number;
-
   @DecimalColumn({ name: 'discount_amount', default: 0 })
   discountAmount: number;
 

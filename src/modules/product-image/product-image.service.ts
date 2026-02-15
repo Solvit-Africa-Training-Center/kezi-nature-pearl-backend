@@ -3,7 +3,12 @@ import { CreateProductImageDto } from './dto/create-product-image.dto';
 import { UpdateProductImageDto } from './dto/update-product-image.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProductImage } from './entities/product-image.entity';
-import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
+import {
+  EntityManager,
+  FindManyOptions,
+  FindOneOptions,
+  Repository,
+} from 'typeorm';
 import { FileService } from '../file/file.service';
 import { FileType } from 'src/common/enums/product.enum';
 
@@ -32,7 +37,7 @@ export class ProductImageService {
     return await this.productImageRepo.findOne(option);
   }
 
-  async remove(id: string) {
+  async remove(id: string, manager?: EntityManager) {
     const productImage = await this.findOne({
       where: { id },
       relations: { file: true },

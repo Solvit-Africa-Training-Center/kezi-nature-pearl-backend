@@ -5,7 +5,7 @@ export class ProductResponseDto {
   images: string[];
   name: string;
   description: string | null;
-  category: string;
+  category: { name: string; image: string } | undefined;
   price: number;
   stockQuantity: number;
   ingredients: string;
@@ -18,7 +18,10 @@ export class ProductResponseDto {
       }) ?? [];
     this.name = product.name;
     this.description = product.description ?? null;
-    this.category = product.category?.name ?? undefined;
+    this.category =
+      product.category && product.category.image
+        ? { name: product.category.name, image: product.category.image.url }
+        : undefined;
     this.price = product.price;
     this.stockQuantity = product.stockQuantity;
     this.ingredients = product.ingredients;

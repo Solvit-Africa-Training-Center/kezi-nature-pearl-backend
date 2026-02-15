@@ -3,7 +3,7 @@ import {
   NotFoundException,
   NotImplementedException,
 } from '@nestjs/common';
-import { FindOneOptions, Repository } from 'typeorm';
+import { EntityManager, FindOneOptions, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { File } from './entities/file.entity';
 import { UploadApiResponse, v2 } from 'cloudinary';

@@ -16,15 +16,16 @@ export class FileUploadInterceptor implements NestInterceptor {
   constructor(
     private readonly fieldName: string,
     private readonly maxCount: number,
+    private readonly required: boolean = true, // Add required parameter
   ) {}
 
-  intercept(
+  async intercept(
     context: ExecutionContext,
     next: CallHandler<any>,
-  ): Observable<any> | Promise<Observable<any>> {
+  ): Promise<Observable<any>> {
     const ctx = context.switchToHttp();
-    const req = ctx.getRequest<Request>();
-    const res = ctx.getResponse<Response>();
+    const req = ctx.getRequest();
+    const res = ctx.getResponse();
 
     const storage = diskStorage({
       destination: './uploads',
@@ -44,20 +45,63 @@ export class FileUploadInterceptor implements NestInterceptor {
       cb(null, true);
     };
 
-    const upload =
-      this.maxCount > 1
-        ? multer({ storage, fileFilter }).array(this.fieldName, this.maxCount)
-        : multer({ storage, fileFilter }).single(this.fieldName);
+    const upload = multer({ storage, fileFilter })[
+      this.maxCount > 1 ? 'array' : 'single'
+    ](this.fieldName, this.maxCount);
 
     return new Promise((resolve, reject) => {
-      upload(req, res, (err: any) => {
+      upload(req, res, async (err: any) => {
         if (err) {
           return reject(
-            new BadRequestException(`File Upload failed: ${err.message}`),
+            new BadRequestException(`File upload failed: ${err.message}`),
           );
         }
+
+        // ✅ CRITICAL: Check if files were actually uploaded
+        const uploadedFiles = this.maxCount > 1 ? req.files : req.file;
+
+        if (
+          this.required &&
+          (!uploadedFiles ||
+            (Array.isArray(uploadedFiles) && uploadedFiles.length === 0))
+        ) {
+          // Clean up any partially uploaded files
+          await this.cleanupTempFiles(uploadedFiles);
+
+          return reject(
+            new BadRequestException(
+              `At least one file is required for field: ${this.fieldName}`,
+            ),
+          );
+        }
+
+        // Attach files to request for later use
+        if (this.maxCount > 1) {
+          req.uploadedFiles = req.files;
+        } else {
+          req.uploadedFile = req.file;
+        }
+
         resolve(next.handle());
       });
-    }) as unknown as Observable<any>;
+    });
+  }
+
+  private async cleanupTempFiles(files: any): Promise<void> {
+    const fs = require('fs').promises;
+
+    if (!files) return;
+
+    const fileArray = Array.isArray(files) ? files : [files];
+
+    for (const file of fileArray) {
+      if (file?.path) {
+        try {
+          await fs.unlink(file.path);
+        } catch (error) {
+          // Ignore cleanup errors
+        }
+      }
+    }
   }
 }

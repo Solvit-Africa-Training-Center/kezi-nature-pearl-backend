@@ -5,14 +5,6 @@ export enum FileType {
   AUTO = 'auto',
 }
 
-export enum ProductStatus {
-  DRAFT = 'draft',
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-  DISCONTINUED = 'discontinued',
-  OUT_OF_STOCK = 'out_of_stock',
-}
-
 export enum CartStatus {
   ACTIVE = 'active',
   ABANDONED = 'abandoned',
@@ -26,7 +18,6 @@ export enum OrderStatus {
   SHIPPED = 'shipped',
   DELIVERED = 'delivered',
   CANCELLED = 'cancelled',
-  REFUNDED = 'refunded',
 }
 
 export enum PaymentStatus {

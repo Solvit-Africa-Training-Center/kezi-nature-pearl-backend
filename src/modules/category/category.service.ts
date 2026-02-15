@@ -49,17 +49,19 @@ export class CategoryService {
     return { message: 'Category Updated' };
   }
 
-  async remove(id: string) {
-    const category = await this.findOne({
-      where: { id },
-      relations: { image: true },
-    });
+  async remove(categoryIds: string[]) {
+    for (const id of categoryIds) {
+      const category = await this.findOne({
+        where: { id },
+        relations: { image: true },
+      });
 
-    if (!category) throw new NotFoundException('Category not found');
+      if (!category) throw new NotFoundException('Category not found');
 
-    if (category.image) this.fileService.remove(category.image.id);
+      if (category.image) this.fileService.remove(category.image.id);
 
-    this.categoryRepo.delete(id);
+      this.categoryRepo.delete(id);
+    }
 
     return { message: 'Category Deleted' };
   }

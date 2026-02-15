@@ -4,6 +4,7 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from './entities/order.entity';
+import { OrderStatus, PaymentStatus } from 'src/common/enums/product.enum';
 
 @Injectable()
 export class OrderService {
@@ -12,7 +13,11 @@ export class OrderService {
     private readonly orderRepo: Repository<Order>,
   ) {}
   async create(dto: CreateOrderDto) {
-    return await this.orderRepo.save(dto);
+    return await this.orderRepo.save({
+      ...dto,
+      orderStatus: OrderStatus.PENDING,
+      paymentStatus: PaymentStatus.PENDING,
+    });
   }
 
   async findAll(options?: FindManyOptions<Order>) {

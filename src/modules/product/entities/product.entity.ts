@@ -7,7 +7,6 @@ import {
   BeforeUpdate,
 } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
-import { ProductStatus } from '../../../common/enums/product.enum';
 import { Category } from '../../../modules/category/entities/category.entity';
 import { DecimalColumn } from '../../../common/decorator/decimal-column.decorator';
 import { ProductImage } from '../../../modules/product-image/entities/product-image.entity';
@@ -37,11 +36,8 @@ export class Product extends BaseEntity {
   @DecimalColumn()
   price: number;
 
-  @DecimalColumn({ name: 'sale_price', nullable: true })
-  salePrice?: number;
-
-  @DecimalColumn({ name: 'cost_price', nullable: true })
-  costPrice?: number;
+  @DecimalColumn({ name: 'old_price', nullable: true })
+  oldPrice?: number;
 
   @Column({ name: 'stock_quantity', default: 0 })
   stockQuantity: number;
@@ -57,13 +53,6 @@ export class Product extends BaseEntity {
 
   @Column('text', { nullable: true })
   ingredients: string;
-
-  @Column({
-    type: 'enum',
-    enum: ProductStatus,
-    default: ProductStatus.DRAFT,
-  })
-  status: ProductStatus;
 
   // Relations
 
@@ -85,15 +74,10 @@ export class Product extends BaseEntity {
   @OneToMany(() => InventoryLog, (log) => log.product)
   inventoryLogs?: InventoryLog[];
 
-  @BeforeUpdate()
-  updateStatusBasedOnStock() {
-    if (
-      this.stockQuantity === 0 &&
-      this.status !== ProductStatus.DISCONTINUED
-    ) {
-      this.status = ProductStatus.OUT_OF_STOCK;
-    }
-  }
+  // @BeforeUpdate()
+  // updateStatusBasedOnStock() {
+  //   this.oldPrice = this.price;
+  // }
 
   // Helper methods
   get isLowStock(): boolean {
@@ -102,9 +86,5 @@ export class Product extends BaseEntity {
 
   get isOutOfStock(): boolean {
     return this.stockQuantity === 0;
-  }
-
-  get currentPrice(): number {
-    return this.salePrice || this.price;
   }
 }
