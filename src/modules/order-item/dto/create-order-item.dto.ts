@@ -1,24 +1,15 @@
 import { IsInt, IsNumber, Min } from 'class-validator';
+import { Order } from 'src/modules/order/entities/order.entity';
 import { Product } from 'src/modules/product/entities/product.entity';
 
 export class CreateOrderItemDto {
-  orderId: string;
-
-  //   order: Order;
+  order: Order;
 
   product: Product;
 
   productName: string;
 
-  @IsInt()
-  @Min(1)
   quantity: number;
 
-  @IsNumber()
-  @Min(0)
   unitPrice: number;
-
-  @IsNumber()
-  @Min(0)
-  totalPrice: number;
 }

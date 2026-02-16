@@ -129,7 +129,7 @@ export class AuthService {
         [tokenTypeEnum.EMAIL_VERIFICATION],
       );
 
-      const link = `${this.configService.get('server.host')}/${this.configService.get('server.prefix')}/auth/verify/${token['emailverification_token']}`;
+      const link = `${this.configService.get('server.origin')}//verification-successful/${token['emailverification_token']}`;
 
       this.mailService.sendMail({
         to: email,

@@ -7,12 +7,10 @@ import databaseConfig from './config/database.config';
 import mailConfig from './config/mail.config';
 import cloudinaryConfig from './config/cloudinary.config';
 import swaggerConfig from './config/swagger.config';
-import redisConfig from './config/redis.config';
 
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { AllExceptionsFilter } from './common/filters/AllExceptionFilter';
 
-import { LoggerService } from './common/logger/logger.service';
 import { RequestLoggerMiddleware } from './common/middleware/request-logger.middleware';
 import { FileModule } from './modules/file/file.module';
 import { AddressModule } from './modules/address/address.module';
@@ -45,8 +43,8 @@ import { LoggerModule } from './common/logger/logger.module';
     }),
     TypeOrmModule.forRootAsync(databaseConfig.asProvider()),
 
-    LoggerModule,
     RedisModule,
+    LoggerModule,
 
     AuthModule,
     UserModule,
@@ -59,10 +57,10 @@ import { LoggerModule } from './common/logger/logger.module';
     CartItemModule,
 
     OrderModule,
+    OrderItemModule,
 
     UserPreferencesModule,
 
-    OrderItemModule,
     PaymentModule,
     WishlistModule,
     ReviewModule,
@@ -71,7 +69,6 @@ import { LoggerModule } from './common/logger/logger.module';
     InventoryLogModule,
     NotificationModule,
     ContactUsModule,
-    LoggerModule,
   ],
   providers: [
     {

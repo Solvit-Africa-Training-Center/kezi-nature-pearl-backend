@@ -12,7 +12,10 @@ export class OrderItemService {
     private readonly orderItemRepo: Repository<OrderItem>,
   ) {}
   async create(dto: CreateOrderItemDto) {
-    return await this.orderItemRepo.save(dto);
+    return await this.orderItemRepo.save({
+      ...dto,
+      totalPrice: dto.unitPrice * dto.quantity,
+    });
   }
 
   async findAll(options?: FindManyOptions<OrderItem>) {

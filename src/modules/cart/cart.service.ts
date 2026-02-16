@@ -12,7 +12,6 @@ import { ProductService } from '../product/product.service';
 import { CartStatus } from 'src/common/enums/product.enum';
 import { RemoveItemFromCartDto } from '../cart-item/dto/request/remove-item-from-cart.dto';
 import { OrderService } from '../order/order.service';
-import { OrderItemService } from '../order-item/order-item.service';
 
 @Injectable()
 export class CartService {
@@ -23,7 +22,6 @@ export class CartService {
     private readonly cartItemService: CartItemService,
     private readonly productService: ProductService,
     private readonly orderService: OrderService,
-    private readonly cart,
   ) {}
   async addToCart(dto: CreateCartDto, userId: string) {
     const product = await this.productService.findOne({
@@ -59,38 +57,37 @@ export class CartService {
   }
 
   async checkout(userId: string) {
-    await this.dataSource.transaction(async (manager) => {
-      const cart =
-        (await this.findOne({
-          where: { userId, status: CartStatus.ACTIVE },
-          relations: { items: true },
-        })) ?? (await manager.save(Cart, { userId }));
+    try {
+      await this.dataSource.transaction(async (manager) => {
+        const cart =
+          (await this.findOne({
+            where: { userId, status: CartStatus.ACTIVE },
+            relations: { items: true },
+          })) ?? (await manager.save(Cart, { userId }));
 
-      if (!cart || !cart.items) throw new NotFoundException('Cart not found');
+        if (!cart || !cart.items) throw new NotFoundException('Cart not found');
 
-      for (const cartItem of cart.items) {
-        const product = await this.productService.findOne({
-          where: { id: cartItem.productId },
-        });
+        for (const cartItem of cart.items) {
+          const product = await this.productService.findOne({
+            where: { id: cartItem.productId },
+          });
 
-        if (!product) throw new NotFoundException(`Item not found`);
-        if (product.stockQuantity < cartItem.quantity)
-          throw new BadRequestException(`Product ${product.name} out of stock`);
+          if (!product) throw new NotFoundException(`Item not found`);
+          if (product.stockQuantity < cartItem.quantity)
+            throw new BadRequestException(
+              `Product ${product.name} out of stock`,
+            );
 
-        await this.productService.update(product.id, product);
+          await this.productService.update(product.id, product);
+        }
+        await this.orderService.create({ userId, items: cart.items });
+        // this.cartRepo.update({ id: cart.id }, { status: CartStatus.CONVERTED });
 
-        // going to make orderItem
-
-        await this.orderService.create({ userId });
-      }
-
-      this.cartRepo.update(
-        { id: cart.id },
-        { ...cart, status: CartStatus.CONVERTED },
-      );
-
-      return { message: 'Checkout succesful' };
-    });
+        return { message: 'Checkout succesful' };
+      });
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   async findOne(options: FindOneOptions<Cart>) {

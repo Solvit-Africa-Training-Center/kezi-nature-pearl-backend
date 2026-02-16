@@ -16,7 +16,7 @@ import { OrderCoupon } from '../../../modules/order-coupon/entities/order-coupon
 
 @Entity('orders')
 export class Order extends BaseEntity {
-  @Column({ name: 'order_number', unique: true })
+  @Column({ name: 'order_number', unique: true, nullable: true })
   orderNumber: string;
 
   @Column()
@@ -26,8 +26,8 @@ export class Order extends BaseEntity {
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @Column({ name: 'shipping_address', type: 'jsonb' })
-  shippingAddressSnapshot: {
+  @Column({ name: 'shipping_address', type: 'jsonb', nullable: true })
+  shippingAddressSnapshot?: {
     fullName: string;
     phoneNumber: string;
     addressLine1: string;
