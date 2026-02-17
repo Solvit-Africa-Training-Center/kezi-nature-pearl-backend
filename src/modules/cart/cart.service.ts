@@ -88,13 +88,13 @@ export class CartService {
     return { message: 'Product added to cart' };
   }
 
-  async checkout(userId: string) {
+  async checkout(userId: string, guestId: string) {
     await this.dataSource.transaction(async (manager) => {
       const cart =
         (await this.findOne({
-          where: { userId, status: CartStatus.ACTIVE },
+          where: { userId, guestId, status: CartStatus.ACTIVE },
           relations: { items: true },
-        })) ?? (await manager.save(Cart, { userId }));
+        })) ?? (await manager.save(Cart, { userId, guestId }));
 
       if (!cart || !cart.items) throw new NotFoundException('Cart not found');
 
@@ -109,8 +109,11 @@ export class CartService {
 
         await this.productService.update(product.id, product);
       }
-      await this.orderService.create({ userId, items: cart.items });
-      // this.cartRepo.update({ id: cart.id }, { status: CartStatus.CONVERTED });
+      await this.orderService.create({ userId, guestId, items: cart.items });
+      await this.cartRepo.update(
+        { id: cart.id },
+        { status: CartStatus.CONVERTED },
+      );
 
       return { message: 'Checkout succesful' };
     });

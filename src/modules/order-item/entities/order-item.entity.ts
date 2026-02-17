@@ -20,9 +20,6 @@ export class OrderItem extends BaseEntity {
   @JoinColumn({ name: 'productId' })
   product: Product;
 
-  @Column({ name: 'product_name', nullable: true })
-  productName: string;
-
   @Column('int')
   quantity: number;
 

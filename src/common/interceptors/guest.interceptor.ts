@@ -23,8 +23,8 @@ export class GuestInterceptor implements NestInterceptor {
         response.cookie('guestId', guestId, {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+          sameSite: 'None',
+          maxAge: 7 * 24 * 60 * 60 * 1000, // 30 days
         });
       }
 

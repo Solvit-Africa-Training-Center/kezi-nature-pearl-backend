@@ -19,12 +19,15 @@ export class Order extends BaseEntity {
   @Column({ name: 'order_number', unique: true, nullable: true })
   orderNumber: string;
 
-  @Column()
-  userId: string;
+  @Column({ type: 'uuid', nullable: true })
+  userId: string | null = null;
 
-  @ManyToOne(() => User, (user) => user.orders)
+  @ManyToOne(() => User, (user) => user.orders, { nullable: true })
   @JoinColumn({ name: 'userId' })
-  user: User;
+  user: User | null = null;
+
+  @Column({ type: 'uuid', nullable: true })
+  guestId: string | null = null;
 
   @Column({ name: 'shipping_address', type: 'jsonb', nullable: true })
   shippingAddressSnapshot?: {

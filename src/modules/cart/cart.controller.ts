@@ -39,7 +39,7 @@ export class CartController {
   async checkout(@Req() req: Request) {
     const userId = req['user']?.sub ?? null;
     const guestId = req['guestId'] ?? null;
-    await this.cartService.checkout(userId);
+    await this.cartService.checkout(userId, guestId);
   }
 
   @Get()

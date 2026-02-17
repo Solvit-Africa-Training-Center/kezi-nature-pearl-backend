@@ -32,6 +32,8 @@ export class OrderService {
       totalAmount,
     });
 
+    this.logger.log(`Number of items: ${dto.items.length}`);
+
     for (const item of dto.items) {
       const product = await this.productService.findOne({
         where: { id: item.productId },
@@ -43,7 +45,6 @@ export class OrderService {
       await this.orderItemService.create({
         order,
         product,
-        productName: product.name ?? 'default',
         quantity: item.quantity,
         unitPrice: item.unitPrice,
       });
