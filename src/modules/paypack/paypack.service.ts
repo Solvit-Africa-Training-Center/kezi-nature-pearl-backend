@@ -3,6 +3,11 @@ import { CreatePaypackDto } from './dto/create-paypack.dto';
 import { UpdatePaypackDto } from './dto/update-paypack.dto';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Payment } from '../payment/entities/payment.entity';
+import { Repository } from 'typeorm';
+import { Order } from '../order/entities/order.entity';
+import { OrderStatus, PaymentStatus } from 'src/common/enums/product.enum';
 
 @Injectable()
 export class PaypackService {
@@ -13,7 +18,14 @@ export class PaypackService {
     currency: string;
   };
 
-  constructor(private readonly config: ConfigService) {
+  constructor(
+    private readonly config: ConfigService,
+    @InjectRepository(Payment)
+    private readonly paymentRepo: Repository<Payment>,
+
+    @InjectRepository(Order)
+    private readonly orderRepo: Repository<Order>,
+  ) {
     const cfg = config.get('paypack') as {
       key: string;
       secret: string;
@@ -71,24 +83,62 @@ export class PaypackService {
     }
   }
 
+  async handlePaypackWebhook(payload: any) {
+    const { reference, status, paidAt } = payload;
+
+    const payment = await this.paymentRepo.findOne({
+      where: { transactionId: reference },
+      relations: ['order'],
+    });
+
+    if (!payment) return;
+
+    if (status === 'SUCCESS') {
+      payment.paymentStatus = PaymentStatus.PAID;
+      payment.paidAt = paidAt ? new Date(paidAt) : new Date();
+      payment.gatewayResponse = payload;
+
+      if (payment.order) {
+        payment.order.paymentStatus = PaymentStatus.PAID;
+
+        payment.order.orderStatus = OrderStatus.CONFIRMED;
+      }
+    }
+
+    if (status === 'FAILED') {
+      payment.paymentStatus = PaymentStatus.FAILED;
+      payment.gatewayResponse = payload;
+
+      if (payment.order) {
+        payment.order.paymentStatus = PaymentStatus.FAILED;
+      }
+    }
+
+    await this.paymentRepo.save(payment);
+
+    if (payment.order) {
+      await this.orderRepo.save(payment.order);
+    }
+  }
+
   async create(dto: CreatePaypackDto) {
     await this.requestPayment(dto.amount, dto.phone);
     return { message: 'Request sent' };
   }
 
-  findAll() {
-    return `This action returns all paypack`;
-  }
+  // findAll() {
+  //   return `This action returns all paypack`;
+  // }
 
-  findOne(id: number) {
-    return `This action returns a #${id} paypack`;
-  }
+  // findOne(id: number) {
+  //   return `This action returns a #${id} paypack`;
+  // }
 
-  update(id: number, updatePaypackDto: UpdatePaypackDto) {
-    return `This action updates a #${id} paypack`;
-  }
+  // update(id: number, updatePaypackDto: UpdatePaypackDto) {
+  //   return `This action updates a #${id} paypack`;
+  // }
 
-  remove(id: number) {
-    return `This action removes a #${id} paypack`;
-  }
+  // remove(id: number) {
+  //   return `This action removes a #${id} paypack`;
+  // }
 }
