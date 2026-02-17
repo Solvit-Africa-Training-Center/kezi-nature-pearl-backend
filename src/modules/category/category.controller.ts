@@ -71,9 +71,9 @@ export class CategoryController {
     return await this.categoryService.update(id, dto, picture);
   }
 
-  @Delete(':id')
+  @Delete()
   @Roles(UserRole.ADMIN)
-  remove(@Param('id') id: string) {
-    return this.categoryService.remove(id);
+  remove(@Body() categoryIds: string[]) {
+    return this.categoryService.remove(categoryIds);
   }
 }

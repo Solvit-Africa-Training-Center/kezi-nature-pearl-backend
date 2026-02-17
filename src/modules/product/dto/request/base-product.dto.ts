@@ -8,17 +8,15 @@ import {
   IsString,
   IsUUID,
 } from 'class-validator';
-import { ProductStatus } from 'src/common/enums/product.enum';
 import { CreateFilesDto } from 'src/modules/file/dto/request';
 
 export class ProductRequestBaseDto extends CreateFilesDto {
-  @ApiProperty()
+  @ApiProperty({ example: 'Soap' })
   @IsNotEmpty()
   @IsString()
   name: string;
 
-  @ApiPropertyOptional()
-  @IsOptional()
+  @ApiProperty({ example: 'Soap product' })
   @IsNotEmpty()
   @IsString()
   description: string;
@@ -30,51 +28,32 @@ export class ProductRequestBaseDto extends CreateFilesDto {
   @IsUUID()
   categoryId: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: '1000' })
   @IsNotEmpty()
   @Type(() => Number)
   @IsNumber()
   price: number;
 
-  @ApiProperty()
-  @IsNotEmpty()
-  @Type(() => Number)
-  @IsNumber()
-  salePrice: number;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  @Type(() => Number)
-  @IsNumber()
-  costPrice: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
+  @ApiProperty({ example: '100' })
   @IsNotEmpty()
   @Type(() => Number)
   @IsNumber()
   stockQuantity: number;
 
-  @ApiProperty()
+  @ApiProperty({ example: '10' })
   @IsNotEmpty()
   @Type(() => Number)
   @IsNumber()
   lowStockThreshold: number;
 
-  @ApiPropertyOptional()
-  @IsOptional()
+  @ApiProperty({ example: '50kg' })
   @IsNotEmpty()
   @Type(() => Number)
   @IsNumber()
   weight: number;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'Salt' })
   @IsNotEmpty()
   @IsString()
   ingredients: string;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsEnum(ProductStatus)
-  status: ProductStatus;
 }

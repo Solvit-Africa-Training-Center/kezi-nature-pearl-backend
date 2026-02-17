@@ -6,7 +6,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UpdateCategoryDto } from './dto/request';
 import { FileService } from '../file/file.service';
 import { FileType } from 'src/common/enums/product.enum';
-import { File } from '../file/entities/file.entity';
 
 @Injectable()
 export class CategoryService {
@@ -15,13 +14,10 @@ export class CategoryService {
     private readonly categoryRepo: Repository<Category>,
     private readonly fileService: FileService,
   ) {}
-  async create(dto: CreateCategoryDto, picture?: Express.Multer.File) {
-    let imageId: string | null = null;
-    if (picture) {
-      const image = await this.fileService.save(picture, FileType.IMAGE);
-      imageId = image.id;
-    }
-    await this.categoryRepo.save({ ...dto, ...{ imageId } });
+  async create(dto: CreateCategoryDto, picture: Express.Multer.File) {
+    const category = this.categoryRepo.create(dto);
+    category.image = await this.fileService.save(picture, FileType.IMAGE);
+    await this.categoryRepo.save(category);
     return { message: 'Category Created' };
   }
 
@@ -36,32 +32,35 @@ export class CategoryService {
   async update(
     id: string,
     dto: UpdateCategoryDto,
-    picture?: Express.Multer.File,
+    picture: Express.Multer.File,
   ) {
-    const category = await this.findOne({ where: { id } });
-    if (!category) throw new NotFoundException('Category not found');
-
-    let imageId: string | null = null;
-
-    if (picture) {
-      const image = await this.fileService.save(picture, FileType.IMAGE);
-      imageId = image.id;
-    }
-
-    await this.categoryRepo.update(id, { ...dto, imageId });
-    return { message: 'Category Updated' };
-  }
-
-  async remove(id: string) {
     const category = await this.findOne({
       where: { id },
-      relations: ['image'],
+      relations: { image: true },
     });
     if (!category) throw new NotFoundException('Category not found');
 
-    await this.categoryRepo.delete(id);
-    if (category.image) {
-      this.fileService.remove(category.image.id);
+    if (category.image) this.fileService.remove(category.image.id);
+
+    category.image = await this.fileService.save(picture, FileType.IMAGE);
+    Object.assign(category, dto);
+
+    await this.categoryRepo.update(id, category);
+    return { message: 'Category Updated' };
+  }
+
+  async remove(categoryIds: string[]) {
+    for (const id of categoryIds) {
+      const category = await this.findOne({
+        where: { id },
+        relations: { image: true },
+      });
+
+      if (!category) throw new NotFoundException('Category not found');
+
+      if (category.image) this.fileService.remove(category.image.id);
+
+      this.categoryRepo.delete(id);
     }
 
     return { message: 'Category Deleted' };

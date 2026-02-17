@@ -16,7 +16,6 @@ import { comparehashContent, hashContent } from 'src/util';
 import { UserProfile, UserProfiles } from './dto/response';
 import { FileService } from '../file/file.service';
 import { FileType } from 'src/common/enums/product.enum';
-import { UserRequestBaseDto } from './dto/request/user-base.dto';
 
 @Injectable()
 export class UserService {
@@ -85,7 +84,9 @@ export class UserService {
 
   async updateUserRole(dto: UpdateUserRolesDto) {
     dto.users.map(async (user) => {
-      await this.update(user.id, { role: dto.role });
+      if (!(await this.findOne({ where: { id: user.id } }))) return;
+
+      await this.update(user.id, { role: user.role });
     });
     return { message: 'Users Updated' };
   }

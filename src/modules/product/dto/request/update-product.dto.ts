@@ -8,12 +8,9 @@ export class UpdateProductDto extends PartialType(
     'description',
     'categoryId',
     'price',
-    'salePrice',
-    'costPrice',
     'stockQuantity',
     'lowStockThreshold',
     'weight',
     'ingredients',
-    'status',
   ]),
 ) {}

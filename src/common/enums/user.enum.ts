@@ -16,9 +16,3 @@ export enum SkinType {
   SENSITIVE = 'sensitive',
   NORMAL = 'normal',
 }
-
-export enum AddressLabel {
-  HOME = 'home',
-  WORK = 'work',
-  OTHER = 'other',
-}

@@ -45,11 +45,10 @@ export class UserController {
     @Body() dto: UpdateUserProfile,
     @UploadedFile() picture: Express.Multer.File,
   ) {
-    console.log('Logging Update user :', dto);
-
     await this.userService.update(user.sub, dto, picture);
     return await this.userService.getUserProfile({
       where: { id: user.sub },
+      relations: { profile: true },
     });
   }
 

@@ -3,13 +3,12 @@ import {
   NotFoundException,
   NotImplementedException,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { EntityManager, FindOneOptions, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { File } from './entities/file.entity';
 import { UploadApiResponse, v2 } from 'cloudinary';
 import fs from 'fs';
 import { FileType } from 'src/common/enums/product.enum';
-import { url } from 'inspector';
 
 @Injectable()
 export class FileService {
@@ -86,18 +85,16 @@ export class FileService {
     });
   }
 
-  async findOne(id: string) {
-    return await this.fileRepo.findOne({ where: { id } });
+  async findOne(options: FindOneOptions<File>) {
+    return await this.fileRepo.findOne(options);
   }
 
   async remove(id: string) {
-    const file = await this.findOne(id);
+    const file = await this.findOne({ where: { id } });
     if (!file) throw new NotFoundException('File not found');
 
-    console.log('Delete file');
-
-    this.deleteFile(file.name, file.type);
-    this.fileRepo.delete(id);
+    await this.deleteFile(file.name, file.type);
+    await this.fileRepo.delete(id);
   }
 
   findAll() {

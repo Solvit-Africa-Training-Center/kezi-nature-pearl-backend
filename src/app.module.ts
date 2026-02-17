@@ -7,12 +7,10 @@ import databaseConfig from './config/database.config';
 import mailConfig from './config/mail.config';
 import cloudinaryConfig from './config/cloudinary.config';
 import swaggerConfig from './config/swagger.config';
-import redisConfig from './config/redis.config';
 
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { AllExceptionsFilter } from './common/filters/AllExceptionFilter';
 
-import { LoggerService } from './common/logger/logger.service';
 import { RequestLoggerMiddleware } from './common/middleware/request-logger.middleware';
 import { FileModule } from './modules/file/file.module';
 import { AddressModule } from './modules/address/address.module';
@@ -35,9 +33,9 @@ import { ContactUsModule } from './modules/contact-us/contact-us.module';
 import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { RedisModule } from './shared/redis/redis.module';
+import { LoggerModule } from './common/logger/logger.module';
 import { TransactionModule } from './modules/transaction/transaction.module';
 import { PaypackModule } from './modules/paypack/paypack.module';
-
 
 @Module({
   imports: [
@@ -47,23 +45,24 @@ import { PaypackModule } from './modules/paypack/paypack.module';
     }),
     TypeOrmModule.forRootAsync(databaseConfig.asProvider()),
 
-    // RedisModule,
+    RedisModule,
+    LoggerModule,
 
     AuthModule,
     UserModule,
     FileModule,
     CategoryModule,
+    AddressModule,
     ProductModule,
     ProductImageModule,
     CartModule,
     CartItemModule,
 
     OrderModule,
+    OrderItemModule,
 
-    AddressModule,
     UserPreferencesModule,
 
-    OrderItemModule,
     PaymentModule,
     WishlistModule,
     ReviewModule,
@@ -77,13 +76,11 @@ import { PaypackModule } from './modules/paypack/paypack.module';
     PaymentModule,
   ],
   providers: [
-    // LoggerService,
-    // {
-    //   provide: APP_FILTER,
-    //   useClass: AllExceptionsFilter,
-    // },
+    {
+      provide: APP_FILTER,
+      useClass: AllExceptionsFilter,
+    },
   ],
-  controllers: [],
 })
 export class AppModule {
   // configure(consumer: MiddlewareConsumer) {

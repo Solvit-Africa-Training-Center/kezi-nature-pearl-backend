@@ -5,37 +5,53 @@ import {
   OneToMany,
   JoinColumn,
   BeforeInsert,
-  Index,
 } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { OrderStatus, PaymentStatus } from '../../../common/enums/product.enum';
 import { User } from '../../../modules/user/entities/user.entity';
-import { Address } from '../../../modules/address/entities/address.entity';
 import { DecimalColumn } from '../../../common/decorator/decimal-column.decorator';
 import { OrderItem } from '../../../modules/order-item/entities/order-item.entity';
 import { Payment } from '../../../modules/payment/entities/payment.entity';
 import { OrderCoupon } from '../../../modules/order-coupon/entities/order-coupon.entity';
-import { Review } from '../../../modules/review/entities/review.entity';
 
 @Entity('orders')
-@Index(['orderNumber'], { unique: true })
 export class Order extends BaseEntity {
-  @Column({ name: 'order_number', unique: true })
+  @Column({ name: 'order_number', unique: true, nullable: true })
   orderNumber: string;
 
-  @Column()
-  userId: string;
+  @Column({ type: 'uuid', nullable: true })
+  userId: string | null = null;
 
-  @ManyToOne(() => User, (user) => user.orders)
+  @ManyToOne(() => User, (user) => user.orders, { nullable: true })
   @JoinColumn({ name: 'userId' })
-  user: User;
+  user: User | null = null;
 
-  @Column()
-  shippingAddressId: string;
+  @Column({ type: 'uuid', nullable: true })
+  guestId: string | null = null;
 
-  @ManyToOne(() => Address)
-  @JoinColumn({ name: 'shippingAddressId' })
-  shippingAddress: Address;
+  @Column({ name: 'shipping_address', type: 'jsonb', nullable: true })
+  shippingAddressSnapshot?: {
+    fullName: string;
+    phoneNumber: string;
+    addressLine1: string;
+    addressLine2?: string;
+    city: string;
+    state: string;
+    postalCode?: string;
+    country: string;
+  };
+
+  @Column({ name: 'billing_address', type: 'jsonb', nullable: true })
+  billingAddressSnapshot?: {
+    fullName: string;
+    phoneNumber: string;
+    addressLine1: string;
+    addressLine2?: string;
+    city: string;
+    state: string;
+    postalCode?: string;
+    country: string;
+  };
 
   @Column({
     type: 'enum',
@@ -56,9 +72,6 @@ export class Order extends BaseEntity {
 
   @DecimalColumn({ name: 'shipping_cost', default: 0 })
   shippingCost: number;
-
-  @DecimalColumn({ name: 'tax_amount', default: 0 })
-  taxAmount: number;
 
   @DecimalColumn({ name: 'discount_amount', default: 0 })
   discountAmount: number;
@@ -91,9 +104,6 @@ export class Order extends BaseEntity {
     cascade: true,
   })
   coupons?: OrderCoupon[];
-
-  // @OneToMany(() => Review, (review) => review.order)
-  // reviews?: Review[];
 
   @BeforeInsert()
   generateOrderNumber() {

@@ -1,6 +1,7 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
+import { LoggerService } from 'src/common/logger/logger.service';
 
 @Injectable()
 export class RedisService implements OnModuleInit, OnModuleDestroy {
@@ -8,7 +9,12 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   private isConnected = false;
   private subscriber: Redis; // Separate client for pub/sub
 
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    private logger: LoggerService,
+    private readonly configService: ConfigService,
+  ) {
+    this.logger.setContext(RedisService.name);
+  }
   async onModuleInit() {
     await this.connect();
   }
@@ -38,33 +44,34 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       const port = redisUrl.port;
 
       this.client.on('connect', () => {
-        console.log(`Redis connected on ${host}:${port}`);
+        this.logger.log(`Redis connected on ${host}:${port}`);
         this.isConnected = true;
       });
 
       this.client.on('ready', () => {
-        console.log('Redis ready');
+        this.logger.log('Redis ready');
       });
 
       this.client.on('error', (error) => {
-        console.error('Redis error:', error);
+        this.logger.error(`Redis error: ${error}`);
         this.isConnected = false;
       });
 
       this.client.on('close', () => {
-        console.warn('Redis connection closed');
+        this.logger.warn('Redis connection closed');
         this.isConnected = false;
       });
 
       this.client.on('reconnecting', (delay) => {
-        console.log(`Redis reconnecting in ${delay}ms`);
+        this.logger.log(`Redis reconnecting in ${delay}ms`);
       });
 
       // Connect both clients
       await Promise.all([this.client.connect(), this.subscriber.connect()]);
     } catch (error) {
-      console.error('Failed to connect to Redis:', error);
-      throw error;
+      this.logger.error(`Failed to connect to Redis: ${error}`);
+      this.disconnect();
+      // throw error;
     }
   }
 
@@ -72,15 +79,15 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     try {
       if (this.client) {
         await this.client.quit();
-        console.log('Redis client disconnected');
+        this.logger.log('Redis client disconnected');
       }
 
       if (this.subscriber) {
         await this.subscriber.quit();
-        console.log('Redis subscriber disconnected');
+        this.logger.log('Redis subscriber disconnected');
       }
     } catch (error) {
-      console.error('Error disconnecting from Redis:', error);
+      this.logger.error('Error disconnecting from Redis:', error);
     } finally {
       this.isConnected = false;
     }
@@ -100,18 +107,34 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 
   // ============ BASIC OPERATIONS ============
   async get(key: string): Promise<string | null> {
-    return this.client.get(key);
+    try {
+      return this.client.get(key);
+    } catch (error) {
+      this.logger.error('Redis GET failed : ', error);
+      return null;
+    }
   }
 
   async set(
     key: string,
     value: string | number | Buffer,
     ttlSeconds?: number,
-  ): Promise<'OK'> {
-    if (ttlSeconds) {
-      return this.client.setex(key, ttlSeconds, value);
+  ): Promise<Boolean> {
+    try {
+      if (!this.isConnected) {
+        return false;
+      }
+
+      if (ttlSeconds) {
+        await this.client.setex(key, ttlSeconds, value);
+      } else {
+        await this.client.set(key, value);
+      }
+      return true;
+    } catch (error) {
+      this.logger.error('Redis SET failed : ', error);
+      return false;
     }
-    return this.client.set(key, value);
   }
 
   async del(key: string[]): Promise<number> {

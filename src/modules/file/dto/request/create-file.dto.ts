@@ -2,10 +2,10 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateFileDto {
   @ApiProperty({
-    type: 'file',
+    type: 'string',
     format: 'binary',
   })
-  picture?: Express.Multer.File;
+  picture: any;
 }
 
 export class CreateFilesDto {
@@ -16,6 +16,5 @@ export class CreateFilesDto {
       format: 'binary',
     },
   })
-  // @IsNotEmpty()
-  pictures: Express.Multer.File[];
+  pictures: any[];
 }

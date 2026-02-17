@@ -1,4 +1,12 @@
-import { Controller, Post, Body, Param, Get, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Param,
+  Get,
+  UseGuards,
+  UseFilters,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
   ApiBearerAuth,
@@ -16,6 +24,7 @@ import {
 import { Payload } from 'src/util';
 import { CurrentUser } from 'src/common/decorator';
 import { AuthGuard } from 'src/common/guards';
+import { AllExceptionsFilter } from 'src/common/filters/AllExceptionFilter';
 
 @ApiTags('Authentication')
 @Controller('auth')

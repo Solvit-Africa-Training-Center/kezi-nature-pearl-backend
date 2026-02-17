@@ -46,7 +46,7 @@ export class ProductController {
   async findAll() {
     return (
       await this.productService.findAll({
-        relations: { images: { file: true } },
+        relations: { images: { file: true }, category: { image: true } },
       })
     ).map((product) => {
       return new ProductResponseDto(product);
@@ -59,7 +59,7 @@ export class ProductController {
   async findOne(@Param('id') id: string) {
     const product = await this.productService.findOne({
       where: { id },
-      relations: { images: { file: true } },
+      relations: { images: { file: true }, category: { image: true } },
     });
     if (!product) throw new NotFoundException('Product not found');
 
@@ -67,16 +67,22 @@ export class ProductController {
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Add Product' })
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Update Product' })
   @UseInterceptors(new FileUploadInterceptor('pictures', 5))
   @ApiConsumes('multipart/form-data')
-  update(@Param('id') id: string, @Body() dto: UpdateProductDto) {
-    return this.productService.update(id, dto);
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateProductDto,
+    @UploadedFiles() pictures: Express.Multer.File[],
+  ) {
+    return await this.productService.update(id, dto, pictures);
   }
 
-  @Delete(':id')
+  @Delete()
   @Roles(UserRole.ADMIN)
-  remove(@Param('id') id: string) {
-    return this.productService.remove(id);
+  @ApiOperation({ summary: 'Delete Product' })
+  async remove(@Body() productIds: string[]) {
+    return this.productService.remove(productIds);
   }
 }
