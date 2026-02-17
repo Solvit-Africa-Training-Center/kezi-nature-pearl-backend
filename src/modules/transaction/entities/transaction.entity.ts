@@ -20,13 +20,12 @@ export class Transaction {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  
   @ManyToOne(() => Order, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'orderId' })
   order: Order;
 
   @Column('decimal', { precision: 10, scale: 2 })
-  amount: string;
+  amount: number;
 
   @Column({
     type: 'enum',
@@ -35,7 +34,6 @@ export class Transaction {
   })
   status: TransactionStatus;
 
-  
   @Column({ unique: true, nullable: true })
   reference?: string;
 

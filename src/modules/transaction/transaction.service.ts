@@ -5,7 +5,7 @@ import { Transaction, TransactionStatus } from './entities/transaction.entity';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { Order } from '../order/entities/order.entity';
 import { PaymentStatus } from 'src/common/enums/product.enum';
-
+import { PaypackService } from '../paypack/paypack.service';
 
 @Injectable()
 export class TransactionsService {
@@ -15,6 +15,8 @@ export class TransactionsService {
 
     @InjectRepository(Order)
     private readonly orderRepo: Repository<Order>,
+
+    private readonly paypackService: PaypackService,
   ) {}
 
   async createTransaction(dto: CreateTransactionDto): Promise<Transaction> {
@@ -28,9 +30,11 @@ export class TransactionsService {
 
     const transaction = this.transactionRepo.create({
       order,
-      amount: dto.amount,
+      amount: order.finalAmount,
       status: TransactionStatus.PENDING,
     });
+
+    this.paypackService.requestPayment(order.finalAmount, dto.phoneNumber);
 
     return this.transactionRepo.save(transaction);
   }
@@ -63,10 +67,10 @@ export class TransactionsService {
 
     transaction.status = status;
 
-   if (status === TransactionStatus.SUCCESS) {
-     transaction.order.paymentStatus = PaymentStatus.PAID;
-     await this.orderRepo.save(transaction.order);
-   }
+    if (status === TransactionStatus.SUCCESS) {
+      transaction.order.paymentStatus = PaymentStatus.PAID;
+      await this.orderRepo.save(transaction.order);
+    }
     await this.transactionRepo.save(transaction);
   }
 
