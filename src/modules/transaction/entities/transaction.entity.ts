@@ -7,7 +7,7 @@ import {
   UpdateDateColumn,
   JoinColumn,
 } from 'typeorm';
-import { Order } from 'src/modules/order/entities/order.entity';
+import { Order } from '../../../modules/order/entities/order.entity';
 
 export enum TransactionStatus {
   PENDING = 'pending',
