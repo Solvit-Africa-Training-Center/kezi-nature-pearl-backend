@@ -5,7 +5,6 @@ import {
   Get,
   Patch,
   UploadedFile,
-  UseFilters,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -17,7 +16,6 @@ import { ApiBearerAuth, ApiConsumes, ApiOperation } from '@nestjs/swagger';
 import { UserRole } from 'src/common/enums/user.enum';
 import { UpdateUserProfile, UpdateUserRolesDto } from './dto/request';
 import { FileUploadInterceptor } from 'src/common/interceptors/file-upload.interceptor';
-import { AllExceptionsFilter } from 'src/common/filters/AllExceptionFilter';
 
 @Controller('user')
 @UseGuards(AuthGuard, RolesGuard)

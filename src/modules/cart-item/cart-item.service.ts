@@ -23,8 +23,8 @@ export class CartItemService {
     return this.cartItemRepo.findOne(options);
   }
 
-  update(id: number, updateCartItemDto: UpdateCartItemDto) {
-    return `This action updates a #${id} cartItem`;
+  update(id: string, dto: UpdateCartItemDto) {
+    return this.cartItemRepo.update(id, dto);
   }
 
   delete(id: string) {

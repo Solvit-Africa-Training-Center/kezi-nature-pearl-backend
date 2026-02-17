@@ -21,7 +21,6 @@ export class OrderService {
   ) {}
 
   async create(dto: CreateOrderDto) {
-    console.log('Product naming 2 ', dto);
     const totalAmount = dto.items.reduce((sum, item) => {
       return sum + item.totalPrice;
     }, 0);
@@ -32,8 +31,6 @@ export class OrderService {
       finalAmount: totalAmount,
       totalAmount,
     });
-
-    // order = await this.orderRepo.save(order);
 
     for (const item of dto.items) {
       const product = await this.productService.findOne({
