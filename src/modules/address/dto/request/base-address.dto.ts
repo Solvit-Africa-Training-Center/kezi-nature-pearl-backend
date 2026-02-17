@@ -1,6 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
-import { AddressType } from 'src/common/enums/user.enum';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
 
 export class AddressBaseRequestDto {
   @ApiProperty({ example: 'John Doe' })
@@ -11,37 +10,45 @@ export class AddressBaseRequestDto {
   @IsString()
   phoneNumber: string;
 
-  @ApiProperty({ example: 'No. 12, Jalan Bukit Bintang' })
+  @ApiProperty({ example: 'country' })
   @IsString()
-  addressLine1: string;
+  country: string;
 
-  @ApiProperty({ example: 'Unit 15-03', required: false })
-  @IsOptional()
-  @IsString()
-  addressLine2?: string;
-
-  @ApiProperty({ example: 'Kuala Lumpur' })
-  @IsString()
-  city: string;
-
-  @ApiProperty({ example: 'WP Kuala Lumpur' })
+  @ApiProperty({ example: 'state' })
   @IsString()
   state: string;
 
-  @ApiProperty({ example: '55100', required: false })
+  @ApiPropertyOptional({ example: 'city' })
+  @IsOptional()
+  @IsString()
+  city: string;
+
+  @ApiPropertyOptional({ example: 'province' })
+  @IsOptional()
+  @IsString()
+  province: string;
+
+  @ApiPropertyOptional({ example: 'district' })
+  @IsOptional()
+  @IsString()
+  district: string;
+
+  @ApiPropertyOptional({ example: 'sector' })
+  @IsOptional()
+  @IsString()
+  sector: string;
+
+  @ApiPropertyOptional({ example: 'No. 12, Jalan Bukit Bintang' })
+  @IsOptional()
+  @IsString()
+  addressLine1: string;
+
+  @ApiPropertyOptional({ example: '55100', required: false })
   @IsOptional()
   @IsString()
   postalCode?: string;
 
-  @ApiProperty({ example: 'MY' })
-  @IsString()
-  country: string;
-
-  @ApiProperty({ enum: ['shipping', 'billing', 'both'], default: 'shipping' })
-  @IsEnum(AddressType)
-  type: AddressType;
-
-  @ApiProperty({ example: false, required: false })
+  @ApiPropertyOptional({ example: false, required: false })
   @IsOptional()
   @IsBoolean()
   isDefault?: boolean;

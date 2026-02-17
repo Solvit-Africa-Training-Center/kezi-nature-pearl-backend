@@ -34,6 +34,8 @@ import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { RedisModule } from './shared/redis/redis.module';
 import { LoggerModule } from './common/logger/logger.module';
+import { TransactionModule } from './modules/transaction/transaction.module';
+import { PaypackModule } from './modules/paypack/paypack.module';
 
 @Module({
   imports: [
@@ -69,6 +71,9 @@ import { LoggerModule } from './common/logger/logger.module';
     InventoryLogModule,
     NotificationModule,
     ContactUsModule,
+    TransactionModule,
+    PaypackModule,
+    PaymentModule,
   ],
   providers: [
     {

@@ -1,26 +1,61 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { CreateWishlistDto } from './dto/create-wishlist.dto';
 import { UpdateWishlistDto } from './dto/update-wishlist.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Wishlist } from './entities/wishlist.entity';
+import { Repository } from 'typeorm';
+import { Product } from '../product/entities/product.entity';
+import { NotFoundException } from '@nestjs/common';
 
 @Injectable()
 export class WishlistService {
-  create(createWishlistDto: CreateWishlistDto) {
-    return 'This action adds a new wishlist';
+  constructor(
+    @InjectRepository(Wishlist)
+    private readonly wishlistRepo: Repository<Wishlist>,
+    @InjectRepository(Product)
+    private readonly productRepo: Repository<Product>,
+  ) {}
+
+  async getUserWishlist(userId: string): Promise<Wishlist[]> {
+    return this.wishlistRepo.find({
+      where: { user: { id: userId } },
+      order: { createdAt: 'ASC' },
+    });
   }
 
-  findAll() {
-    return `This action returns all wishlist`;
+  async addToWishlist(
+    userId: string,
+    dto: CreateWishlistDto,
+  ): Promise<Wishlist> {
+    const product = await this.productRepo.findOne({
+      where: { id: dto.productId },
+    });
+    if (!product) throw new NotFoundException('Product not found');
+
+    const existing = await this.wishlistRepo.findOne({
+      where: { user: { id: userId }, product: { id: dto.productId } },
+    });
+
+    if (existing) throw new BadRequestException('Product already in wishlist');
+
+    const wishlistItem = this.wishlistRepo.create({
+      user: { id: userId },
+      product,
+    });
+
+    return this.wishlistRepo.save(wishlistItem);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} wishlist`;
-  }
+  async removeFromWishlist(
+    userId: string,
+    wishlistId: string,
+  ): Promise<{ message: string }> {
+    const item = await this.wishlistRepo.findOne({
+      where: { id: wishlistId, user: { id: userId } },
+    });
+    if (!item) throw new NotFoundException('Wishlist item not found');
 
-  update(id: number, updateWishlistDto: UpdateWishlistDto) {
-    return `This action updates a #${id} wishlist`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} wishlist`;
+    await this.wishlistRepo.remove(item);
+    return { message: 'Item removed from wishlist' };
   }
 }

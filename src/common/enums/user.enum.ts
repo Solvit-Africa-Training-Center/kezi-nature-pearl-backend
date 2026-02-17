@@ -16,9 +16,3 @@ export enum SkinType {
   SENSITIVE = 'sensitive',
   NORMAL = 'normal',
 }
-
-export enum AddressType {
-  SHIPPING = 'shipping',
-  BILLING = 'billing',
-  BOTH = 'both',
-}
