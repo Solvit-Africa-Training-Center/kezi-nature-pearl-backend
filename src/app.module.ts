@@ -36,14 +36,30 @@ import { RedisModule } from './shared/redis/redis.module';
 import { LoggerModule } from './common/logger/logger.module';
 import { TransactionModule } from './modules/transaction/transaction.module';
 import { PaypackModule } from './modules/paypack/paypack.module';
+import paypackConfig from './config/paypack.config';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [serverConfig, mailConfig, cloudinaryConfig, swaggerConfig],
+      load: [
+        serverConfig,
+        mailConfig,
+        cloudinaryConfig,
+        swaggerConfig,
+        paypackConfig,
+      ],
     }),
     TypeOrmModule.forRootAsync(databaseConfig.asProvider()),
+
+    HttpModule.registerAsync({
+      useFactory: () => ({
+        timeout: 5000,
+        maxRedirects: 5,
+      }),
+      global: true,
+    }),
 
     RedisModule,
     LoggerModule,

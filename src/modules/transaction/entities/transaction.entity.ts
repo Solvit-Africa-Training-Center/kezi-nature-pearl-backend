@@ -25,7 +25,7 @@ export class Transaction {
   order: Order;
 
   @Column('decimal', { precision: 10, scale: 2 })
-  amount: string;
+  amount: number;
 
   @Column({
     type: 'enum',

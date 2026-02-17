@@ -1,10 +1,9 @@
-import { IsUUID, IsNotEmpty, IsNumberString } from 'class-validator';
+import { IsUUID, IsNotEmpty, IsNumberString, IsNumber } from 'class-validator';
 
 export class CreateTransactionDto {
   @IsUUID()
   orderId: string;
 
-  
-  @IsNumberString()
-  amount: string;
+  @IsNumber()
+  phoneNumber: string;
 }
