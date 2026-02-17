@@ -25,6 +25,8 @@ import { GuestInterceptor } from 'src/common/interceptors/guest.interceptor';
 export class CartController {
   constructor(private readonly cartService: CartService) {}
 
+  // User
+
   @Post('add')
   @ApiOperation({ summary: 'Add product to cart' })
   async create(@Req() req: Request, @Body() dto: CreateCartDto) {
@@ -41,7 +43,6 @@ export class CartController {
     const guestId = req['guestId'] ?? null;
     await this.cartService.checkout(userId, guestId);
   }
-
   @Get()
   @ApiOperation({ summary: 'Get User cart' })
   async findOne(@Req() req: Request) {
