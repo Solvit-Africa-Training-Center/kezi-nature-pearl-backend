@@ -5,8 +5,9 @@ import {
   ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
+  JoinColumn,
 } from 'typeorm';
-import { User } from 'src/modules/user/entities/user.entity';
+import { Order } from 'src/modules/order/entities/order.entity';
 
 export enum TransactionStatus {
   PENDING = 'pending',
@@ -19,11 +20,13 @@ export class Transaction {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
-  user: User;
+  
+  @ManyToOne(() => Order, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'orderId' })
+  order: Order;
 
-  @Column('decimal')
-  amount: number;
+  @Column('decimal', { precision: 10, scale: 2 })
+  amount: string;
 
   @Column({
     type: 'enum',
@@ -32,11 +35,9 @@ export class Transaction {
   })
   status: TransactionStatus;
 
-  @Column({ nullable: true })
+  
+  @Column({ unique: true, nullable: true })
   reference?: string;
-
-  @Column({ nullable: true })
-  orderId?: string;
 
   @CreateDateColumn()
   createdAt: Date;
