@@ -92,8 +92,8 @@ export class Order extends BaseEntity {
   })
   coupons?: OrderCoupon[];
 
-  @OneToMany(() => Review, (review) => review.order)
-  reviews?: Review[];
+  // @OneToMany(() => Review, (review) => review.order)
+  // reviews?: Review[];
 
   @BeforeInsert()
   generateOrderNumber() {

@@ -13,7 +13,7 @@ import { ReviewStatus } from '../../../common/enums/product.enum';
 import { SkinType } from '../../../common/enums/user.enum';
 import { User } from '../../../modules/user/entities/user.entity';
 import { Product } from '../../../modules/product/entities/product.entity';
-import { Order } from '../../../modules/order/entities/order.entity';
+// import { Order } from '../../../modules/order/entities/order.entity';
 
 @Entity('reviews')
 @Index(['productId', 'status'])
@@ -35,13 +35,13 @@ export class Review extends BaseEntity {
   @JoinColumn({ name: 'productId' })
   product: Product;
 
-  @Column({ type: 'uuid', nullable: true })
-  @IsOptional()
-  orderId?: string;
+  // @Column({ type: 'uuid', nullable: true })
+  // @IsOptional()
+  // orderId?: string;
 
-  @ManyToOne(() => Order, { nullable: true })
-  @JoinColumn({ name: 'orderId' })
-  order?: Order;
+  // @ManyToOne(() => Order, { nullable: true })
+  // @JoinColumn({ name: 'orderId' })
+  // order?: Order;
 
   @Column('int')
   @IsInt()
