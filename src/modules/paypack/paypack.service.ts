@@ -8,6 +8,7 @@ import { Payment } from '../payment/entities/payment.entity';
 import { Repository } from 'typeorm';
 import { Order } from '../order/entities/order.entity';
 import { OrderStatus, PaymentStatus } from 'src/common/enums/product.enum';
+import { PaymentMethod } from 'src/common/enums/product.enum';
 
 @Injectable()
 export class PaypackService {
@@ -58,7 +59,12 @@ export class PaypackService {
     return token;
   }
 
-  async requestPayment(amount: number, number: string) {
+  async requestPayment(dto: CreatePaypackDto, idempotencyKey: string) {
+    const existing = await this.paymentRepo.findOne({
+      where: { idempotencyKey },
+    });
+    if (existing) return existing;
+
     try {
       const token = await this.login();
 
@@ -67,19 +73,30 @@ export class PaypackService {
       const response = await axios.post(
         endpoint,
         {
-          amount,
-          number,
+          amount: dto.amount,
+          number: dto.phoneNumber,
         },
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         },
       );
 
-      return response.data;
+      const payment = this.paymentRepo.create({
+        amount: dto.amount,
+        paymentMethod: PaymentMethod.MOMO,
+        paymentGateway: 'Paypack',
+        transactionId: response.data?.ref,
+        idempotencyKey,
+        gatewayResponse: response.data,
+        paymentStatus: PaymentStatus.PENDING,
+      });
+
+      await this.paymentRepo.save(payment);
+
+      return payment;
     } catch (error) {
-      throw new InternalServerErrorException('problem in axios');
+      console.error(error);
+      throw new InternalServerErrorException('Problem calling Paypack API');
     }
   }
 
@@ -120,10 +137,10 @@ export class PaypackService {
       await this.orderRepo.save(payment.order);
     }
   }
-
   async create(dto: CreatePaypackDto) {
-    await this.requestPayment(dto.amount, dto.phone);
-    return { message: 'Request sent' };
+    const idempotencyKey = `paypack-${Date.now()}-${Math.random()}`;
+    const payment = await this.requestPayment(dto, idempotencyKey);
+    return { message: 'Request sent', payment };
   }
 
   // findAll() {
