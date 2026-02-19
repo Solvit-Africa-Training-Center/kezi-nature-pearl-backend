@@ -59,9 +59,9 @@ export class PaypackService {
     return token;
   }
 
-  async requestPayment(dto: CreatePaypackDto, idempotencyKey: string) {
+  async requestPayment(dto: CreatePaypackDto) {
     const existing = await this.paymentRepo.findOne({
-      where: { idempotencyKey },
+      where: { idempotencyKey: dto.idempotency },
     });
     if (existing) return existing;
 
@@ -86,9 +86,10 @@ export class PaypackService {
         paymentMethod: PaymentMethod.MOMO,
         paymentGateway: 'Paypack',
         transactionId: response.data?.ref,
-        idempotencyKey,
+        idempotencyKey: dto.idempotency,
         gatewayResponse: response.data,
         paymentStatus: PaymentStatus.PENDING,
+        orderId: dto.orderId,
       });
 
       await this.paymentRepo.save(payment);
@@ -97,6 +98,46 @@ export class PaypackService {
     } catch (error) {
       console.error(error);
       throw new InternalServerErrorException('Problem calling Paypack API');
+    }
+  }
+
+  async requestCashout(dto: CreatePaypackDto) {
+    const existing = await this.paymentRepo.findOne({
+      where: { idempotencyKey: dto.idempotency },
+    });
+    if (existing) return existing;
+
+    try {
+      const token = await this.login();
+      const endpoint = `${this.paypackConfig.url}/transactions/cashout`;
+
+      const response = await axios.post(
+        endpoint,
+        {
+          amount: dto.amount,
+          number: dto.phoneNumber,
+        },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+
+      const payment = this.paymentRepo.create({
+        amount: dto.amount,
+        paymentMethod: PaymentMethod.MOMO,
+        paymentGateway: 'Paypack',
+        transactionId: response.data?.ref,
+        idempotencyKey: dto.idempotency,
+        gatewayResponse: response.data,
+        paymentStatus: PaymentStatus.PENDING,
+       
+      });
+
+      await this.paymentRepo.save(payment);
+      return payment;
+    } catch (error) {
+      console.error(error);
+      throw new InternalServerErrorException(
+        'Problem calling Paypack Cashout API',
+      );
     }
   }
 
@@ -139,7 +180,7 @@ export class PaypackService {
   }
   async create(dto: CreatePaypackDto) {
     const idempotencyKey = `paypack-${Date.now()}-${Math.random()}`;
-    const payment = await this.requestPayment(dto, idempotencyKey);
+    const payment = await this.requestPayment(dto);
     return { message: 'Request sent', payment };
   }
 

@@ -6,6 +6,7 @@ import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { Order } from '../order/entities/order.entity';
 import { PaymentStatus } from 'src/common/enums/product.enum';
 import { PaypackService } from '../paypack/paypack.service';
+import { CreatePaypackDto } from '../paypack/dto/create-paypack.dto';
 
 @Injectable()
 export class TransactionsService {
@@ -34,7 +35,14 @@ export class TransactionsService {
       status: TransactionStatus.PENDING,
     });
 
-    this.paypackService.requestPayment(order.finalAmount, dto.phoneNumber);
+    const paypackDto: CreatePaypackDto = {
+      amount: order.finalAmount,
+      phoneNumber: dto.phoneNumber,
+      orderId: dto.orderId,
+      idempotency: `paypack-${Date.now()}-${Math.random()}`,
+    };
+
+    await this.paypackService.requestPayment(paypackDto);
 
     return this.transactionRepo.save(transaction);
   }
