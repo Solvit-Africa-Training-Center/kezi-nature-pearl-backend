@@ -17,8 +17,6 @@ export class GuestInterceptor implements NestInterceptor {
     if (!request.user) {
       let guestId = request.cookies?.guestId;
 
-      console.log('Guest Id', guestId);
-
       if (!guestId) {
         guestId = randomUUID();
 

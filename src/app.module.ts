@@ -65,31 +65,35 @@ import { PaymentModule } from './modules/payment/payment.module';
     RedisModule,
     LoggerModule,
 
-    AuthModule,
-    UserModule,
     FileModule,
-    CategoryModule,
-    AddressModule,
-    ProductModule,
-    ProductImageModule,
+    PaypackModule,
+
+    // Endpoints
+
+    AuthModule, // ( Done )
+    UserModule, // ( Done )
+    CategoryModule, // ( Done )
+    AddressModule, // ( Done )
+    ProductModule, // ( Done )
+    ProductImageModule, // ( Done )
+
+    CartItemModule, // ( Done )
+    CartModule, // ( Done )
+
+    OrderModule, // ( Done )
+    OrderItemModule, // ( Done )
+
+    PaymentModule,
+    // UserPreferencesModule,
+
     ReviewModule,
     WishlistModule,
     ContactUsModule,
-    CartItemModule,
-    CartModule,
-
-    OrderModule,
-    OrderItemModule,
-
-    // UserPreferencesModule,
-
-    CouponModule,
-    OrderCouponModule,
-    InventoryLogModule,
-    NotificationModule,
+    // CouponModule,
+    // OrderCouponModule,
+    // InventoryLogModule,
+    // NotificationModule,
     TransactionModule,
-    PaypackModule,
-    PaymentModule,
   ],
   providers: [
     {

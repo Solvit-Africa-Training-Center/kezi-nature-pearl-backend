@@ -1,10 +1,25 @@
-import { Controller, Post, Body, Param, Patch, Get } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Param,
+  Patch,
+  Get,
+  UseGuards,
+} from '@nestjs/common';
 import { TransactionService } from './transaction.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionStatusDto } from './dto/update-transaction.dto';
 import { UpdateTransactionReferenceDto } from './dto/update-transaction.dto';
+import { AuthGuard, RolesGuard } from 'src/common/guards';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { Roles } from 'src/common/decorator';
+import { UserRole } from 'src/common/enums/user.enum';
 
 @Controller('transactions')
+@UseGuards(AuthGuard, RolesGuard)
+@Roles(UserRole.ADMIN)
+@ApiBearerAuth()
 export class TransactionController {
   constructor(private readonly transactionService: TransactionService) {}
 

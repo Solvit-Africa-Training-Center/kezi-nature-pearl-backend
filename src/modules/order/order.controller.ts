@@ -28,17 +28,26 @@ export class OrderController {
   // user
   @Get()
   @Roles(UserRole.CUSTOMER)
+  @ApiOperation({ summary: 'Get user orders *' })
   findAll(@CurrentUser() user: Payload) {
     return this.orderService.findAll({ where: { userId: user.sub } });
   }
 
   @Get('id')
   @Roles(UserRole.CUSTOMER)
+  @ApiOperation({ summary: 'Get user order by Id *' })
   findOne(@CurrentUser() user: Payload, @Param('id') id: string) {
     return this.orderService.findOne({ where: { id, userId: user.sub } });
   }
 
-  @Patch(':id')
+  @Patch(':id/cancel')
+  @Roles(UserRole.CUSTOMER)
+  @ApiOperation({ summary: 'Cancel user order by Id' })
+  cancelOrder(@Param('id') id: string) {
+    return this.orderService.cancelOrder(id);
+  }
+
+  @Patch(':id/cancel')
   update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
     return this.orderService.update(+id, updateOrderDto);
   }

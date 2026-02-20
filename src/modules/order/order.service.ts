@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
@@ -37,6 +41,23 @@ export class OrderService {
 
   async findOne(options: FindOneOptions<Order>) {
     return await this.orderRepo.findOne(options);
+  }
+
+  async cancelOrder(id: string) {
+    const order = await this.findOne({ where: { id } });
+
+    if (!order) throw new NotFoundException('Order not found');
+
+    if (
+      order.orderStatus === OrderStatus.DELIVERED ||
+      order.orderStatus === OrderStatus.CANCELLED
+    )
+      throw new BadRequestException(
+        'Order cannot be cancelled because it is already delivered or cancelled.',
+      );
+    order.orderStatus = OrderStatus.CANCELLED;
+    await this.orderRepo.save(order);
+    return { message: 'Order cancelled' };
   }
 
   update(id: number, updateOrderDto: UpdateOrderDto) {
