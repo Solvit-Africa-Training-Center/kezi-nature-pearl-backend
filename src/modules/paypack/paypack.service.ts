@@ -1,6 +1,5 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreatePaypackDto } from './dto/create-paypack.dto';
-import { UpdatePaypackDto } from './dto/update-paypack.dto';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -26,7 +25,7 @@ export class PaypackService {
     @InjectRepository(Order)
     private readonly orderRepo: Repository<Order>,
   ) {
-    const cfg = config.get('paypack') as {
+    const cfg = this.config.get('paypack') as {
       key: string;
       secret: string;
       url: string;
@@ -59,32 +58,30 @@ export class PaypackService {
   }
 
   async requestPayment(amount: number, number: string) {
-    try {
-      const token = await this.login();
+    const token = await this.login();
 
-      const endpoint = `${this.paypackConfig.url}/transactions/cashin`;
+    const endpoint = `${this.paypackConfig.url}/transactions/cashin`;
 
-      const response = await axios.post(
-        endpoint,
-        {
-          amount,
-          number,
+    const response = await axios.post(
+      endpoint,
+      {
+        amount,
+        number,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
+      },
+    );
 
-      return response.data;
-    } catch (error) {
-      throw new InternalServerErrorException('problem in axios');
-    }
+    return response.data;
   }
 
   async handlePaypackWebhook(payload: any) {
     const { reference, status, paidAt } = payload;
+
+    console.log(payload);
 
     const payment = await this.paymentRepo.findOne({
       where: { transactionId: reference },
@@ -121,10 +118,10 @@ export class PaypackService {
     }
   }
 
-  async create(dto: CreatePaypackDto) {
-    await this.requestPayment(dto.amount, dto.phone);
-    return { message: 'Request sent' };
-  }
+  // async create(dto: CreatePaypackDto) {
+  //   await this.requestPayment(dto.amount, dto.phone);
+  //   return { message: 'Request sent' };
+  // }
 
   // findAll() {
   //   return `This action returns all paypack`;

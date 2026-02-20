@@ -20,11 +20,13 @@ export class GuestInterceptor implements NestInterceptor {
       if (!guestId) {
         guestId = randomUUID();
 
+        const isProd = process.env.NODE_ENV === 'production';
+
         response.cookie('guestId', guestId, {
           httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'None',
-          maxAge: 7 * 24 * 60 * 60 * 1000, // 30 days
+          secure: isProd,
+          sameSite: isProd ? 'None' : 'Lax',
+          maxAge: 7 * 24 * 60 * 60 * 1000,
         });
       }
 

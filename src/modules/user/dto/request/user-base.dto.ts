@@ -53,7 +53,7 @@ export class UserRequestBaseDto {
   })
   password: string;
 
-  @ApiProperty()
+  @ApiProperty({ enum: UserRole })
   @IsNotEmpty()
   @IsEnum(UserRole)
   role: UserRole;

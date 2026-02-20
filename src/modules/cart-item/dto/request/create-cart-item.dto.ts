@@ -1,18 +1,15 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsInt, IsUUID } from 'class-validator';
+import { IsInt, IsUUID, Min } from 'class-validator';
 
-export class CreateCartItemDto {
-  @IsUUID()
-  cartId: string;
-
+export class AddItemTocartDto {
+  @ApiProperty()
   @IsUUID()
   productId: string;
 
+  @ApiProperty()
   @Type(() => Number)
   @IsInt()
+  @Min(1)
   quantity: number;
-
-  @Type(() => Number)
-  @IsInt()
-  unitPrice: number;
 }

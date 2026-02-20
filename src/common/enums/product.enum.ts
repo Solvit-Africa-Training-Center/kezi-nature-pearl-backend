@@ -29,7 +29,7 @@ export enum PaymentStatus {
 
 export enum PaymentMethod {
   CARD = 'card',
-  MOMO = 'mom',
+  MOMO = 'momo',
   // UPI = 'upi',
   // COD = 'cod',
   // BANK_TRANSFER = 'bank_transfer',

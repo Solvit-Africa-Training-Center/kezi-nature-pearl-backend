@@ -1,16 +1,10 @@
-import { IsEnum, IsNumber, IsString, Min } from 'class-validator';
-import {
-  PaymentMethod,
-  PaymentStatus,
-} from '../../../common/enums/product.enum';
+import { IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CreatePaymentDto {
-  @ApiProperty({ example: '' })
+export class MomoPaymentDto {
   @IsString()
   orderId: string;
 
-  @ApiProperty({ example: '' })
   @IsString()
   phoneNumber: string;
 }
