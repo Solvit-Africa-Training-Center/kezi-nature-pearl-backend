@@ -101,7 +101,7 @@ export class CartItemService {
       throw new BadRequestException('Insufficient Product stock');
 
     item.quantity = quantity;
-    return await this.cartItemRepo.save(item);
+    return await this.cartItemRepo.update(id, item);
   }
 
   async deleteItem(
