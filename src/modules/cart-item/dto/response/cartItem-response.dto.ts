@@ -12,6 +12,7 @@ export class CartItemResponseDto {
       id: cartItem.product.id,
       image: cartItem.product.images ? cartItem.product.images[0].file.url : '',
       name: cartItem.product.name,
+      stockquantity: cartItem.product.stockQuantity,
     };
     this.quantity = cartItem.quantity;
     this.unitPrice = cartItem.unitPrice;
