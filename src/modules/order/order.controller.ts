@@ -62,7 +62,7 @@ export class OrderController {
 
   @Get('admin')
   @Roles(UserRole.ADMIN)
-  @ApiOperation({ summary: 'Filter Orders *' })
+  @ApiOperation({ summary: 'Get Orders *' })
   findAllForAdmin(@Query() query: AdminOrderFilterDto) {
     return this.orderService.findAllForAdmin(query);
   }

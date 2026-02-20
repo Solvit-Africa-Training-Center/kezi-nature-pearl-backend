@@ -71,43 +71,45 @@ export class OrderService {
   // Admin
 
   async findAllForAdmin(filter: AdminOrderFilterDto) {
-    const page = filter.page ?? 1;
-    const limit = filter.limit ?? 20;
+    // const page = filter.page ?? 1;
+    // const limit = filter.limit ?? 20;
 
-    const qb = this.orderRepo.createQueryBuilder('order');
+    // const qb = this.orderRepo.createQueryBuilder('order');
 
-    if (filter.orderStatus) {
-      qb.andWhere('order.orderStatus  = :status', {
-        status: filter.orderStatus,
-      });
-    }
-
-    // if (filter.userId) {
-    //   qb.andWhere('order.userId = :userId', { userId: filter.userId });
+    // if (filter.orderStatus) {
+    //   qb.andWhere('order.orderStatus  = :status', {
+    //     status: filter.orderStatus,
+    //   });
     // }
 
-    if (filter.customerType === CustomerType.REGISTERED) {
-      qb.andWhere('order.userId IS NOT NULL');
-    }
+    // // if (filter.userId) {
+    // //   qb.andWhere('order.userId = :userId', { userId: filter.userId });
+    // // }
 
-    if (filter.customerType === CustomerType.GUEST) {
-      qb.andWhere('order.guestId IS NOT NULL');
-    }
+    // if (filter.customerType === CustomerType.REGISTERED) {
+    //   qb.andWhere('order.userId IS NOT NULL');
+    // }
 
-    if (filter.fromDate) {
-      qb.andWhere('order.createdAt >= :fromDate', {
-        fromDate: filter.fromDate,
-      });
-    }
+    // if (filter.customerType === CustomerType.GUEST) {
+    //   qb.andWhere('order.guestId IS NOT NULL');
+    // }
 
-    if (filter.toDate) {
-      qb.andWhere('order.createdAt <= :toDate', { toDate: filter.toDate });
-    }
+    // if (filter.fromDate) {
+    //   qb.andWhere('order.createdAt >= :fromDate', {
+    //     fromDate: filter.fromDate,
+    //   });
+    // }
 
-    qb.skip((page - 1) * limit)
-      .take(filter.limit)
-      .orderBy('order.createdAt', 'DESC');
+    // if (filter.toDate) {
+    //   qb.andWhere('order.createdAt <= :toDate', { toDate: filter.toDate });
+    // }
 
-    return qb.getManyAndCount();
+    // qb.skip((page - 1) * limit)
+    //   .take(filter.limit)
+    //   .orderBy('order.createdAt', 'DESC');
+
+    // return qb.getManyAndCount();
+
+    return await this.orderRepo.find({ where: { ...filter } });
   }
 }
