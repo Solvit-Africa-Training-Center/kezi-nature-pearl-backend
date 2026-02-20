@@ -13,6 +13,7 @@ import { OrderService } from '../order/order.service';
 import { CartCheckoutDto } from './dto/request';
 import { PaymentService } from '../payment/payment.service';
 import { AddressService } from '../address/address.service';
+import { OrderInvoiceDto } from '../order/dto/response/order-invoice.dto';
 
 @Injectable()
 export class CartService {
@@ -94,7 +95,19 @@ export class CartService {
         { status: CartStatus.CONVERTED },
       );
 
-      return { message: 'Checkout succesful' };
+      const invoice = await this.orderService.findOne({
+        where: { id: order.id },
+        relations: { items: { product: { images: { file: true } } } },
+      });
+
+      return invoice
+        ? {
+            message: 'Checkout succesful',
+            data: new OrderInvoiceDto(invoice),
+          }
+        : {
+            message: 'Checkout succesful. No invoice',
+          };
     });
   }
 

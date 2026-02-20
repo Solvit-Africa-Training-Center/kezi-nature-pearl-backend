@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { CreatePaypackDto } from './dto/create-paypack.dto';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
@@ -7,6 +11,7 @@ import { Payment } from '../payment/entities/payment.entity';
 import { Repository } from 'typeorm';
 import { Order } from '../order/entities/order.entity';
 import { OrderStatus, PaymentStatus } from 'src/common/enums/product.enum';
+import { LoggerService } from 'src/common/logger/logger.service';
 
 @Injectable()
 export class PaypackService {
@@ -24,6 +29,8 @@ export class PaypackService {
 
     @InjectRepository(Order)
     private readonly orderRepo: Repository<Order>,
+
+    private readonly logger: LoggerService,
   ) {
     const cfg = this.config.get('paypack') as {
       key: string;
