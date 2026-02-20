@@ -30,27 +30,17 @@ export class Order extends BaseEntity {
   guestId: string | null = null;
 
   @Column({ name: 'shipping_address', type: 'jsonb', nullable: true })
-  shippingAddressSnapshot?: {
+  shippingAddressSnapshot: {
     fullName: string;
     phoneNumber: string;
-    addressLine1: string;
-    addressLine2?: string;
-    city: string;
-    state: string;
-    postalCode?: string;
     country: string;
-  };
-
-  @Column({ name: 'billing_address', type: 'jsonb', nullable: true })
-  billingAddressSnapshot?: {
-    fullName: string;
-    phoneNumber: string;
-    addressLine1: string;
-    addressLine2?: string;
-    city: string;
-    state: string;
+    state?: string;
+    city?: string;
+    province?: string;
+    district?: string;
+    sector?: string;
+    addressLine1?: string;
     postalCode?: string;
-    country: string;
   };
 
   @Column({
@@ -71,10 +61,10 @@ export class Order extends BaseEntity {
   totalAmount: number;
 
   @DecimalColumn({ name: 'shipping_cost', default: 0 })
-  shippingCost: number;
+  shippingCost: number = 0;
 
   @DecimalColumn({ name: 'discount_amount', default: 0 })
-  discountAmount: number;
+  discountAmount: number = 0;
 
   @DecimalColumn({ name: 'final_amount' })
   finalAmount: number;
@@ -107,13 +97,14 @@ export class Order extends BaseEntity {
 
   @BeforeInsert()
   generateOrderNumber() {
-    if (!this.orderNumber) {
-      const timestamp = Date.now();
-      const random = Math.floor(Math.random() * 10000)
-        .toString()
-        .padStart(4, '0');
-      this.orderNumber = `ORD${timestamp}${random}`;
-    }
+    const timestamp = Date.now();
+    const random = Math.floor(Math.random() * 10000)
+      .toString()
+      .padStart(4, '0');
+    this.orderNumber = `ORD${timestamp}${random}`;
+
+    this.finalAmount =
+      this.totalAmount + this.shippingCost - this.discountAmount;
   }
 
   // Helper methods

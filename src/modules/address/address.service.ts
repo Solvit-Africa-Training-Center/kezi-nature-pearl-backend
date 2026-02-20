@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { CreateAddressDto } from './dto/create-address.dto';
-import { UpdateAddressDto } from './dto/update-address.dto';
+import { UpdateAddressDto } from './dto/request/update-address.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Address } from './entities/address.entity';
 import {
@@ -9,6 +8,7 @@ import {
   FindOptionsWhere,
   Repository,
 } from 'typeorm';
+import { CreateAddressDto } from './dto/request';
 
 @Injectable()
 export class AddressService {

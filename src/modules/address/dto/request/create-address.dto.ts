@@ -1,5 +1,5 @@
 import { PickType } from '@nestjs/swagger';
-import { AddressBaseRequestDto } from './request/base-address.dto';
+import { AddressBaseRequestDto } from './base-address.dto';
 
 export class CreateAddressDto extends PickType(AddressBaseRequestDto, [
   'fullName',
@@ -12,5 +12,4 @@ export class CreateAddressDto extends PickType(AddressBaseRequestDto, [
   'sector',
   'addressLine1',
   'postalCode',
-  'isDefault',
 ]) {}

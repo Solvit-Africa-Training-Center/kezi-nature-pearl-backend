@@ -8,7 +8,7 @@ import { PaymentStatus } from 'src/common/enums/product.enum';
 import { PaypackService } from '../paypack/paypack.service';
 
 @Injectable()
-export class TransactionsService {
+export class TransactionService {
   constructor(
     @InjectRepository(Transaction)
     private readonly transactionRepo: Repository<Transaction>,
@@ -19,7 +19,7 @@ export class TransactionsService {
     private readonly paypackService: PaypackService,
   ) {}
 
-  async createTransaction(dto: CreateTransactionDto): Promise<Transaction> {
+  async createTransaction(dto: CreateTransactionDto) {
     const order = await this.orderRepo.findOne({
       where: { id: dto.orderId },
     });
@@ -34,9 +34,16 @@ export class TransactionsService {
       status: TransactionStatus.PENDING,
     });
 
-    this.paypackService.requestPayment(order.finalAmount, dto.phoneNumber);
+    const gatewayResponse = await this.paypackService.requestPayment(
+      order.finalAmount,
+      dto.phoneNumber,
+    );
 
-    return this.transactionRepo.save(transaction);
+    transaction.reference = gatewayResponse.ref;
+
+    await this.transactionRepo.save(transaction);
+
+    return { transaction, gatewayResponse };
   }
 
   async getTransactionByReference(reference: string): Promise<Transaction> {

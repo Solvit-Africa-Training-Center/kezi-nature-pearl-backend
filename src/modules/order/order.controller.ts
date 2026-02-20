@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -15,20 +16,23 @@ import { AuthGuard, RolesGuard } from 'src/common/guards';
 import { CurrentUser, Roles } from 'src/common/decorator';
 import { UserRole } from 'src/common/enums/user.enum';
 import { Payload } from 'src/util';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { AdminOrderFilterDto } from './dto/request';
 
 @Controller('order')
 @UseGuards(AuthGuard, RolesGuard)
 @ApiBearerAuth()
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
+
+  // user
   @Get()
   @Roles(UserRole.CUSTOMER)
   findAll(@CurrentUser() user: Payload) {
     return this.orderService.findAll({ where: { userId: user.sub } });
   }
 
-  @Get(':id')
+  @Get('id')
   @Roles(UserRole.CUSTOMER)
   findOne(@CurrentUser() user: Payload, @Param('id') id: string) {
     return this.orderService.findOne({ where: { id, userId: user.sub } });
@@ -43,5 +47,14 @@ export class OrderController {
   @Roles(UserRole.CUSTOMER)
   remove(@Param('id') id: string) {
     return this.orderService.remove(id);
+  }
+
+  // Admin
+
+  @Get('admin')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Filter Orders *' })
+  findAllForAdmin(@Query() query: AdminOrderFilterDto) {
+    return this.orderService.findAllForAdmin(query);
   }
 }

@@ -7,16 +7,16 @@ import {
   UseGuards,
   UseInterceptors,
   Req,
+  Param,
 } from '@nestjs/common';
 import { CartService } from './cart.service';
-import { CreateCartDto } from './dto/request/create-cart.dto';
 import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { OptionalAuthGuard } from 'src/common/guards';
 import { UserRole } from 'src/common/enums/user.enum';
-import { RemoveItemFromCartDto } from '../cart-item/dto/request/remove-item-from-cart.dto';
 import { CartStatus } from 'src/common/enums/product.enum';
 import { CartResponseDto } from './dto/response/cart-response.dto';
 import { GuestInterceptor } from 'src/common/interceptors/guest.interceptor';
+import { CartCheckoutDto } from './dto/request';
 
 @Controller('cart')
 @UseGuards(OptionalAuthGuard)
@@ -27,24 +27,16 @@ export class CartController {
 
   // User
 
-  @Post('add')
-  @ApiOperation({ summary: 'Add product to cart' })
-  async create(@Req() req: Request, @Body() dto: CreateCartDto) {
-    const userId = req['user']?.sub ?? null;
-    const guestId = req['guestId'] ?? null;
-
-    return await this.cartService.addToCart(dto, { userId, guestId });
-  }
-
   @Post('check-out')
-  @ApiOperation({ summary: 'Check out Cart' })
-  async checkout(@Req() req: Request) {
+  @ApiOperation({ summary: 'Check out Cart *' })
+  async checkout(@Req() req: Request, @Body() dto: CartCheckoutDto) {
     const userId = req['user']?.sub ?? null;
     const guestId = req['guestId'] ?? null;
-    await this.cartService.checkout(userId, guestId);
+    return await this.cartService.checkout(userId, guestId, dto);
   }
+
   @Get()
-  @ApiOperation({ summary: 'Get User cart' })
+  @ApiOperation({ summary: 'Get User cart *' })
   async findOne(@Req() req: Request) {
     const userId = req['user']?.sub ?? null;
     const guestId = req['guestId'] ?? null;
@@ -60,11 +52,11 @@ export class CartController {
   }
 
   @Delete()
-  @ApiOperation({ summary: 'Delete Item from cart' })
-  async removeItems(@Req() req: Request, @Body() dto: RemoveItemFromCartDto) {
+  @ApiOperation({ summary: 'Clear cart *' })
+  async clearCart(@Req() req: Request) {
     const userId = req['user']?.sub ?? null;
     const guestId = req['guestId'] ?? null;
 
-    return await this.cartService.removeItem(dto, userId, guestId);
+    return await this.cartService.clearCart({ userId, guestId });
   }
 }

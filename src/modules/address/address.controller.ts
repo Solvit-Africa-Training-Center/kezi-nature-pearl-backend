@@ -9,14 +9,14 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AddressService } from './address.service';
-import { CreateAddressDto } from './dto/create-address.dto';
-import { UpdateAddressDto } from './dto/update-address.dto';
+import { UpdateAddressDto } from './dto/request/update-address.dto';
 import { CurrentUser, Roles } from 'src/common/decorator';
 import { Payload } from 'src/util';
 import { AuthGuard, RolesGuard } from 'src/common/guards';
 import { UserRole } from 'src/common/enums/user.enum';
 import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { userInfo } from 'os';
+import { CreateAddressDto } from './dto/request';
 
 @Controller('address')
 @UseGuards(AuthGuard, RolesGuard)
