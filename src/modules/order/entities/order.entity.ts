@@ -5,6 +5,7 @@ import {
   OneToMany,
   JoinColumn,
   BeforeInsert,
+  DeleteDateColumn,
 } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { OrderStatus, PaymentStatus } from '../../../common/enums/product.enum';
@@ -80,6 +81,9 @@ export class Order extends BaseEntity {
 
   @Column({ name: 'delivered_at', type: 'timestamptz', nullable: true })
   deliveredAt?: Date;
+
+  @DeleteDateColumn()
+  deletedAt: Date;
 
   // Relations
   @OneToMany(() => OrderItem, (orderItem) => orderItem.order, {

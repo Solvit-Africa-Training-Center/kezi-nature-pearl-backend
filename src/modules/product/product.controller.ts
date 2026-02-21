@@ -69,7 +69,7 @@ export class ProductController {
   @Patch(':id')
   @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Update Product' })
-  @UseInterceptors(new FileUploadInterceptor('pictures', 5))
+  @UseInterceptors(new FileUploadInterceptor('pictures', 5, false))
   @ApiConsumes('multipart/form-data')
   async update(
     @Param('id') id: string,

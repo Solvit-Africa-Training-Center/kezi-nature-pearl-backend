@@ -18,12 +18,15 @@ import { Product } from '../../../modules/product/entities/product.entity';
 @Index(['productId', 'status'])
 @Index(['userId', 'productId'], { unique: true })
 export class Review extends BaseEntity {
-  @Column()
-  userId: string;
+  @Column({ nullable: true })
+  userId: string | null = null;
 
-  @ManyToOne(() => User, (user) => user.reviews)
+  @ManyToOne(() => User, (user) => user.reviews, { nullable: true })
   @JoinColumn({ name: 'userId' })
-  user: User;
+  user: User | null = null;
+
+  @Column({ type: 'uuid', nullable: true })
+  guestId: string | null = null;
 
   @Column()
   productId: string;

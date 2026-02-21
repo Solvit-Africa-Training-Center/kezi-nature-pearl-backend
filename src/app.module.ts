@@ -86,9 +86,9 @@ import { PaymentModule } from './modules/payment/payment.module';
     PaymentModule,
     // UserPreferencesModule,
 
-    ReviewModule,
-    WishlistModule,
     ContactUsModule,
+    WishlistModule,
+    ReviewModule,
     // CouponModule,
     // OrderCouponModule,
     // InventoryLogModule,

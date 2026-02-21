@@ -37,7 +37,7 @@ export class UserController {
 
   @Patch('update')
   @ApiConsumes('multipart/form-data')
-  @UseInterceptors(new FileUploadInterceptor('picture', 1))
+  @UseInterceptors(new FileUploadInterceptor('picture', 1, false))
   @ApiOperation({ summary: 'Update user profile' })
   @Roles(UserRole.CUSTOMER, UserRole.ADMIN)
   async updateUserProfile(

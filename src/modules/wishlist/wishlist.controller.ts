@@ -13,6 +13,7 @@ import { CurrentUser, Roles } from 'src/common/decorator';
 import { AuthGuard, RolesGuard } from 'src/common/guards';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { UserRole } from 'src/common/enums/user.enum';
+import { WishlistResponseDto } from './dto/response/wishlist-response.dto';
 
 @Controller('wishlist')
 @UseGuards(AuthGuard, RolesGuard)
@@ -22,12 +23,16 @@ export class WishlistController {
   constructor(private readonly wishlistService: WishlistService) {}
 
   @Get()
-  getWishlist(@CurrentUser() user) {
-    return this.wishlistService.getUserWishlist(user.sub);
+  async getWishlist(@CurrentUser() user) {
+    return (await this.wishlistService.getUserWishlist(user.sub)).map(
+      (wishlist) => {
+        return new WishlistResponseDto(wishlist);
+      },
+    );
   }
- @Post()
-  addWishlist(@CurrentUser() user, @Body() dto: CreateWishlistDto) {
-    return this.wishlistService.addToWishlist(user.sub, dto);
+  @Post('productId')
+  addWishlist(@CurrentUser() user, @Param('productId') productId: string) {
+    return this.wishlistService.addToWishlist(user.sub, productId);
   }
 
   @Delete(':id')

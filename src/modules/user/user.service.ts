@@ -49,6 +49,7 @@ export class UserService {
       throw new NotFoundException('User not found');
     }
     if (picture) {
+      if (user.profile) this.fileService.remove(user.profile.id);
       user.profile = await this.fileService.save(picture, FileType.IMAGE);
     }
 

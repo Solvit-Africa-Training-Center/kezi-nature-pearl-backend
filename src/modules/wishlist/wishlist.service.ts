@@ -20,20 +20,20 @@ export class WishlistService {
     return this.wishlistRepo.find({
       where: { user: { id: userId } },
       order: { createdAt: 'ASC' },
+      relations: {
+        product: { images: { file: true }, category: { image: true } },
+      },
     });
   }
 
-  async addToWishlist(
-    userId: string,
-    dto: CreateWishlistDto,
-  ): Promise<Wishlist> {
+  async addToWishlist(userId: string, productId: string) {
     const product = await this.productRepo.findOne({
-      where: { id: dto.productId },
+      where: { id: productId },
     });
     if (!product) throw new NotFoundException('Product not found');
 
     const existing = await this.wishlistRepo.findOne({
-      where: { user: { id: userId }, product: { id: dto.productId } },
+      where: { user: { id: userId }, product: { id: productId } },
     });
 
     if (existing) throw new BadRequestException('Product already in wishlist');
@@ -43,7 +43,8 @@ export class WishlistService {
       product,
     });
 
-    return this.wishlistRepo.save(wishlistItem);
+    this.wishlistRepo.save(wishlistItem);
+    return { message: 'Product added to Wishlist' };
   }
 
   async removeFromWishlist(

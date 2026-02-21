@@ -61,7 +61,7 @@ export class CategoryController {
 
   @Patch(':id')
   @Roles(UserRole.ADMIN)
-  @UseInterceptors(new FileUploadInterceptor('picture', 1))
+  @UseInterceptors(new FileUploadInterceptor('picture', 1, false))
   @ApiConsumes('multipart/form-data')
   async update(
     @Param('id') id: string,

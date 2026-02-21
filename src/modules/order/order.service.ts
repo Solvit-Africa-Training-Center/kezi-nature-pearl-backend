@@ -10,7 +10,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from './entities/order.entity';
 import { OrderStatus, PaymentStatus } from 'src/common/enums/product.enum';
 import { AdminOrderFilterDto } from './dto/request';
-import { CustomerType } from 'src/common/enums/user.enum';
 
 @Injectable()
 export class OrderService {
@@ -65,7 +64,11 @@ export class OrderService {
   }
 
   async remove(id: string) {
-    return await this.orderRepo.delete(id);
+    const order = await this.findOne({ where: { id } });
+    if (!order) throw new NotFoundException('Order not found');
+
+    await this.orderRepo.softDelete(id);
+    return { message: 'order deleted' };
   }
 
   // Admin

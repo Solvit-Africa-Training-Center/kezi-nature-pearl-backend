@@ -40,9 +40,12 @@ export class CategoryService {
     });
     if (!category) throw new NotFoundException('Category not found');
 
-    if (category.image) this.fileService.remove(category.image.id);
+    if (picture) {
+      if (category.image) this.fileService.remove(category.image.id);
 
-    category.image = await this.fileService.save(picture, FileType.IMAGE);
+      category.image = await this.fileService.save(picture, FileType.IMAGE);
+    }
+
     Object.assign(category, dto);
 
     await this.categoryRepo.update(id, category);
