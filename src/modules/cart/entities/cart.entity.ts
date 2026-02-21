@@ -9,7 +9,7 @@ import {
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { User } from '../../../modules/user/entities/user.entity';
 import { CartStatus } from '../../../common/enums/product.enum';
-import { CartItem } from '../../../modules/cart-item/entities/cart-item.entity';
+import { Item } from '../../item/entities/item.entity';
 
 @Entity('carts')
 // @Index(['userId', 'status']) // Index for finding active carts
@@ -32,8 +32,8 @@ export class Cart extends BaseEntity {
   })
   status: CartStatus;
 
-  @OneToMany(() => CartItem, (cartItem) => cartItem.cart)
-  items: CartItem[];
+  @OneToMany(() => Item, (item) => item.cart)
+  items: Item[];
 
   // // Helper methods
   // get totalItems(): number {

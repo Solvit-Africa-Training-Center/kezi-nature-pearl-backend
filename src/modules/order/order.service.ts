@@ -10,39 +10,31 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from './entities/order.entity';
 import { OrderStatus, PaymentStatus } from 'src/common/enums/product.enum';
 import { AdminOrderFilterDto } from './dto/request';
-import { OrderItemService } from '../order-item/order-item.service';
+import { ItemService } from '../item/item.service';
 
 @Injectable()
 export class OrderService {
   constructor(
     @InjectRepository(Order)
     private readonly orderRepo: Repository<Order>,
-    private readonly orderItemService: OrderItemService,
+    private readonly itemService: ItemService,
   ) {}
 
   async create(dto: CreateOrderDto) {
-    const totalAmount = dto.items.reduce((sum, item) => {
+    const { items, ...rest } = dto;
+
+    const totalAmount = items.reduce((sum, item) => {
       return sum + item.totalPrice;
     }, 0);
 
     let order = this.orderRepo.create({
-      userId: dto.userId,
-      guestId: dto.guestId,
+      ...rest,
       orderStatus: OrderStatus.PENDING,
       paymentStatus: PaymentStatus.PENDING,
       totalAmount,
     });
 
     order = await this.orderRepo.save(order);
-
-    console.log('cart ', order);
-
-    for (const item of dto.items) {
-      await this.orderItemService.create({
-        ...item,
-        orderId: order.id,
-      });
-    }
 
     return order;
   }
@@ -67,8 +59,11 @@ export class OrderService {
       throw new BadRequestException(
         'Order cannot be cancelled because it is already delivered or cancelled.',
       );
-    order.orderStatus = OrderStatus.CANCELLED;
-    await this.orderRepo.save(order);
+
+    await this.orderRepo.update(order.id, {
+      orderStatus: OrderStatus.CANCELLED,
+    });
+
     return { message: 'Order cancelled' };
   }
 
@@ -86,7 +81,7 @@ export class OrderService {
 
   // Admin
 
-  async findAllForAdmin(filter: AdminOrderFilterDto) {
+  async findAllForAdmin(filter: FindManyOptions<Order>) {
     // const page = filter.page ?? 1;
     // const limit = filter.limit ?? 20;
 
@@ -126,6 +121,9 @@ export class OrderService {
 
     // return qb.getManyAndCount();
 
-    return await this.orderRepo.find({ where: { ...filter } });
+    return await this.orderRepo.find({
+      ...filter,
+      withDeleted: true,
+    });
   }
 }

@@ -11,9 +11,9 @@ import { BaseEntity } from '../../../common/entities/base.entity';
 import { OrderStatus, PaymentStatus } from '../../../common/enums/product.enum';
 import { User } from '../../../modules/user/entities/user.entity';
 import { DecimalColumn } from '../../../common/decorator/decimal-column.decorator';
-import { OrderItem } from '../../../modules/order-item/entities/order-item.entity';
 import { Payment } from '../../../modules/payment/entities/payment.entity';
 import { OrderCoupon } from '../../../modules/order-coupon/entities/order-coupon.entity';
+import { Item } from '../../../modules/item/entities/item.entity';
 
 @Entity('orders')
 export class Order extends BaseEntity {
@@ -30,7 +30,7 @@ export class Order extends BaseEntity {
   @Column({ type: 'uuid', nullable: true })
   guestId: string | null = null;
 
-  @Column({ name: 'shipping_address', type: 'jsonb', nullable: true })
+  @Column({ name: 'shipping_address', type: 'jsonb' })
   shippingAddressSnapshot: {
     fullName: string;
     phoneNumber: string;
@@ -87,10 +87,8 @@ export class Order extends BaseEntity {
   deletedAt: Date;
 
   // Relations
-  @OneToMany(() => OrderItem, (orderItem) => orderItem.order, {
-    cascade: true,
-  })
-  items?: OrderItem[];
+  @OneToMany(() => Item, (orderItem) => orderItem.order)
+  items?: Item[];
 
   @OneToMany(() => Payment, (payment) => payment.order, { cascade: true })
   payments?: Payment[];

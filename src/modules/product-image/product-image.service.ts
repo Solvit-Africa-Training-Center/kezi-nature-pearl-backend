@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { CreateProductImageDto } from './dto/create-product-image.dto';
-import { UpdateProductImageDto } from './dto/update-product-image.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProductImage } from './entities/product-image.entity';
 import {

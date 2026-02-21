@@ -1,4 +1,4 @@
-import { CartItemResponseDto } from 'src/modules/cart-item/dto/response/cartItem-response.dto';
+import { CartItemResponseDto } from 'src/modules/item/dto/response/cartItem-response.dto';
 import { Cart } from '../../entities/cart.entity';
 
 export class CartResponseDto {

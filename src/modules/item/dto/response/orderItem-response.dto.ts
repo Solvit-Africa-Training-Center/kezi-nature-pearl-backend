@@ -1,11 +1,11 @@
-import { OrderItem } from '../../entities/order-item.entity';
+import { Item } from '../../entities/item.entity';
 
 export class OrderItemResponseDto {
   product: object;
   quantity: number;
   unitPrice: number;
   totalPrice: number;
-  constructor(orderItem: OrderItem) {
+  constructor(orderItem: Item) {
     this.product = {
       image: orderItem.product.images
         ? orderItem.product.images[0].file.url

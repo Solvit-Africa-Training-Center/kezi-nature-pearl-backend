@@ -1,4 +1,4 @@
-import { CartItem } from '../../entities/cart-item.entity';
+import { Item } from '../../entities/item.entity';
 
 export class CartItemResponseDto {
   id: string;
@@ -6,7 +6,7 @@ export class CartItemResponseDto {
   quantity: number;
   unitPrice: number;
   totalPrice: number;
-  constructor(cartItem: CartItem) {
+  constructor(cartItem: Item) {
     this.id = cartItem.id;
     this.product = {
       id: cartItem.product.id,

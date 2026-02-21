@@ -3,17 +3,17 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { DataSource, FindOneOptions, Repository } from 'typeorm';
+import { DataSource, IsNull, Repository } from 'typeorm';
 import { Cart } from './entities/cart.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CartItemService } from '../cart-item/cart-item.service';
-import { ProductService } from '../product/product.service';
 import { CartStatus } from 'src/common/enums/product.enum';
 import { OrderService } from '../order/order.service';
 import { CartCheckoutDto } from './dto/request';
 import { PaymentService } from '../payment/payment.service';
 import { AddressService } from '../address/address.service';
 import { OrderInvoiceDto } from '../order/dto/response/order-invoice.dto copy';
+import { AddItemTocartDto } from '../item/dto/request';
+import { ItemService } from '../item/item.service';
 
 @Injectable()
 export class CartService {
@@ -24,32 +24,16 @@ export class CartService {
     private readonly orderService: OrderService,
     private readonly addressService: AddressService,
     private readonly paymentService: PaymentService,
+    private readonly itemService: ItemService,
   ) {}
 
-  async getUserCart(owner: {
-    userId?: string | null;
-    guestId?: string | null;
-  }) {
-    const { userId, guestId } = owner;
+  async checkCart(owner: { userId?: any; guestId?: any }) {
+    let { userId, guestId } = this.setUserGuestId(owner);
 
-    let cart: Cart | null = null;
-    if (userId) {
-      cart = await this.cartRepo.findOne({
-        where: {
-          userId,
-          status: CartStatus.ACTIVE,
-        },
-        relations: { items: true },
-      });
-    } else if (guestId) {
-      cart = await this.cartRepo.findOne({
-        where: {
-          guestId,
-          status: CartStatus.ACTIVE,
-        },
-        relations: { items: true },
-      });
-    }
+    let cart = await this.cartRepo.findOne({
+      where: { userId, guestId },
+      relations: { items: { product: { images: { file: true } } } },
+    });
 
     if (!cart) {
       const cartData = {
@@ -61,27 +45,62 @@ export class CartService {
       await this.cartRepo.save(cart);
     }
 
+    cart = await this.cartRepo.findOne({
+      where: { userId, guestId },
+      relations: { items: { product: { images: { file: true } } } },
+    });
+
     return cart;
   }
 
-  async checkout(userId: string, guestId: string, dto: CartCheckoutDto) {
+  async addCartItem(
+    dto: AddItemTocartDto,
+    owner: { userId?: any; guestId?: any },
+  ) {
+    const cart = await this.checkCart(owner);
+
+    if (!cart) throw new NotFoundException('Cart not found');
+
+    return await this.itemService.createItem(dto, cart);
+  }
+
+  async updateCartItem(
+    id: string,
+    quantity: number,
+    owner: { userId?: any; guestId?: any },
+  ) {
+    const cart = await this.checkCart(owner);
+
+    if (!cart) throw new NotFoundException('Cart not found');
+
+    return await this.itemService.updateItem(id, quantity, cart.id);
+  }
+
+  async deleteItemFromCart(
+    id: string,
+    owner: { userId?: string | null; guestId: string | null },
+  ) {
+    const cart = await this.checkCart(owner);
+
+    if (!cart) throw new NotFoundException('Cart not found');
+
+    return await this.itemService.deleteItem(id, cart.id);
+  }
+
+  async clearCart(owner: { userId?: string | null; guestId: string | null }) {
+    const cart = await this.checkCart(owner);
+
+    if (!cart) throw new NotFoundException('Cart not found');
+
+    await this.cartRepo.delete(cart.id);
+    return { message: 'Cart cleared' };
+  }
+
+  async checkout(owner: { userId?: any; guestId: any }, dto: CartCheckoutDto) {
     return await this.dataSource.transaction(async (manager) => {
-      const cart = await this.findOne({
-        where: { userId, guestId, status: CartStatus.ACTIVE },
-        relations: { items: true },
-        select: {
-          id: true,
-          userId: true,
-          guestId: true,
-          status: true,
-          items: {
-            productId: true,
-            quantity: true,
-            unitPrice: true,
-            totalPrice: true,
-          },
-        },
-      });
+      let { userId, guestId } = this.setUserGuestId(owner);
+
+      const cart = await this.checkCart(owner);
 
       if (!cart || !cart.items) throw new NotFoundException('Cart not found');
 
@@ -131,6 +150,8 @@ export class CartService {
         ...dto,
       });
 
+      await this.itemService.updateOrderItem(cart.items, order.id);
+
       await this.paymentService.momoPaymentService({
         orderId: order.id,
         phoneNumber: dto.phoneNumber,
@@ -157,18 +178,52 @@ export class CartService {
     });
   }
 
-  async clearCart(owner: { userId?: string | null; guestId: string | null }) {
-    const { userId, guestId } = owner;
-    let cart;
-    if (userId) cart = await this.findOne({ where: { userId } });
-    else if (guestId) cart = await this.findOne({ where: { guestId } });
+  // async getUserCart(owner: {
+  //   userId?: string | null;
+  //   guestId?: string | null;
+  // }) {
+  //   const { userId, guestId } = owner;
 
-    await this.cartRepo.delete(cart.id);
-    return { message: 'Cart cleared' };
-  }
+  //   let cart: Cart | null = null;
+  //   if (userId) {
+  //     cart = await this.cartRepo.findOne({
+  //       where: {
+  //         userId,
+  //         status: CartStatus.ACTIVE,
+  //       },
+  //       relations: { items: true },
+  //     });
+  //   } else if (guestId) {
+  //     cart = await this.cartRepo.findOne({
+  //       where: {
+  //         guestId,
+  //         status: CartStatus.ACTIVE,
+  //       },
+  //       relations: { items: true },
+  //     });
+  //   }
+
+  //   if (!cart) {
+  //     const cartData = {
+  //       userId: userId || null,
+  //       guestId: userId ? null : (guestId ?? null),
+  //       status: CartStatus.ACTIVE,
+  //     };
+  //     cart = this.cartRepo.create(cartData as Cart);
+  //     await this.cartRepo.save(cart);
+  //   }
+
+  //   return cart;
+  // }
 
   // Helper
-  async findOne(options: FindOneOptions<Cart>) {
-    return await this.cartRepo.findOne(options);
+
+  setUserGuestId(owner: { userId?: any; guestId?: any }) {
+    let { userId, guestId } = owner;
+
+    if (!userId) userId = null;
+    if (!guestId) guestId = null;
+
+    return { userId, guestId };
   }
 }

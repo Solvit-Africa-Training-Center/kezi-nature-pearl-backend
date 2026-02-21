@@ -7,12 +7,13 @@ import {
   BeforeUpdate,
 } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
-import { Cart } from '../../../modules/cart/entities/cart.entity';
-import { Product } from '../../../modules/product/entities/product.entity';
+import { Cart } from '../../cart/entities/cart.entity';
+import { Product } from '../../product/entities/product.entity';
 import { DecimalColumn } from '../../../common/decorator/decimal-column.decorator';
+import { Order } from '../../../modules/order/entities/order.entity';
 
-@Entity('cart_items')
-export class CartItem extends BaseEntity {
+@Entity('items')
+export class Item extends BaseEntity {
   @Column()
   cartId: string;
 
@@ -35,6 +36,16 @@ export class CartItem extends BaseEntity {
 
   @DecimalColumn({ name: 'total_price' })
   totalPrice: number;
+
+  @Column({ nullable: true })
+  orderId: string;
+
+  @ManyToOne(() => Order, (order) => order.items, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'orderId' })
+  order: Order;
 
   @BeforeInsert()
   @BeforeUpdate()

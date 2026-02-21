@@ -8,7 +8,7 @@ import { PaypackModule } from '../paypack/paypack.module';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Transaction, Order]), PaypackModule],
-  controllers: [TransactionController],
+  // controllers: [TransactionController],
   providers: [TransactionService],
   exports: [TransactionService],
 })

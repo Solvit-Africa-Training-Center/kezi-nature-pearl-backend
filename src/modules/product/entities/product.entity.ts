@@ -10,8 +10,7 @@ import { BaseEntity } from '../../../common/entities/base.entity';
 import { Category } from '../../../modules/category/entities/category.entity';
 import { DecimalColumn } from '../../../common/decorator/decimal-column.decorator';
 import { ProductImage } from '../../../modules/product-image/entities/product-image.entity';
-import { CartItem } from '../../../modules/cart-item/entities/cart-item.entity';
-import { OrderItem } from '../../../modules/order-item/entities/order-item.entity';
+import { Item } from '../../item/entities/item.entity';
 import { Wishlist } from '../../../modules/wishlist/entities/wishlist.entity';
 import { Review } from '../../../modules/review/entities/review.entity';
 import { InventoryLog } from '../../../modules/inventory-log/entities/inventory-log.entity';
@@ -59,11 +58,8 @@ export class Product extends BaseEntity {
   @OneToMany(() => ProductImage, (productImage) => productImage.product, {})
   images?: ProductImage[];
 
-  @OneToMany(() => CartItem, (cartItem) => cartItem.product)
-  cartItems?: CartItem[];
-
-  @OneToMany(() => OrderItem, (orderItem) => orderItem.product)
-  orderItems?: OrderItem[];
+  @OneToMany(() => Item, (item) => item.product)
+  items?: Item[];
 
   @OneToMany(() => Wishlist, (wishlist) => wishlist.product)
   wishlists?: Wishlist[];

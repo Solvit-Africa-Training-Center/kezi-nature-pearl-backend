@@ -1,7 +1,6 @@
 import { OrderStatus, PaymentStatus } from 'src/common/enums/product.enum';
 import { Order } from '../../entities/order.entity';
-import { OrderItem } from 'src/modules/order-item/entities/order-item.entity';
-import { OrderItemResponseDto } from 'src/modules/order-item/dto/response/orderItem-response.dto';
+import { OrderItemResponseDto } from 'src/modules/item/dto/response/orderItem-response.dto';
 
 export class OrderInvoiceDto {
   orderNumber: string;

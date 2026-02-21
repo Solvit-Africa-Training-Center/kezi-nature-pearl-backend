@@ -54,16 +54,11 @@ export class OrderController {
     return new OrderDetailsDto(order);
   }
 
-  @Patch(':id/cancel')
+  @Patch('cancel/id')
   @Roles(UserRole.CUSTOMER)
   @ApiOperation({ summary: 'Cancel user order by Id' })
   cancelOrder(@Param('id') id: string) {
     return this.orderService.cancelOrder(id);
-  }
-
-  @Patch(':id/cancel')
-  update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
-    return this.orderService.update(+id, updateOrderDto);
   }
 
   @Delete(':id')
@@ -77,7 +72,11 @@ export class OrderController {
   @Get('admin')
   @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Get Orders *' })
-  findAllForAdmin(@Query() query: AdminOrderFilterDto) {
-    return this.orderService.findAllForAdmin(query);
+  async findAllForAdmin() {
+    // @Query() query: AdminOrderFilterDto
+    const orders = await this.orderService.findAllForAdmin({
+      relations: { items: { product: { images: { file: true } } } },
+    });
+    return orders.map((order) => new OrderDetailsDto(order));
   }
 }
