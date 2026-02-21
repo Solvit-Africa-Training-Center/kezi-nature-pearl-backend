@@ -16,6 +16,7 @@ import { CurrentUser, Roles } from 'src/common/decorator';
 import { UserRole } from 'src/common/enums/user.enum';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { CreateRegisteredContactUsDto } from './dto/create-registeredcontact-us.dto';
+import { Payload } from 'src/util';
 
 @Controller('public-contact')
 export class ContactUsController {
@@ -31,7 +32,7 @@ export class ContactUsController {
   @Roles(UserRole.CUSTOMER)
   @ApiBearerAuth()
   async submitRegisteredMessage(
-    @CurrentUser() user,
+    @CurrentUser() user: Payload,
     @Body() dto: CreateRegisteredContactUsDto,
   ) {
     return this.contactUsService.createRegisteredContactMessage(dto, user.sub);
@@ -57,7 +58,7 @@ export class ContactUsController {
   @ApiBearerAuth()
   @Patch(':id/respond')
   respondToContact(
-    @CurrentUser() user,
+    @CurrentUser() user: Payload,
     @Param('id') id: string,
     @Body() dto: RespondContactUsDto,
   ) {

@@ -6,7 +6,7 @@ import { DecimalColumn } from '../../../common/decorator/decimal-column.decorato
 
 @Entity('order_items')
 export class OrderItem extends BaseEntity {
-  @Column()
+  @Column('uuid')
   orderId: string;
 
   @ManyToOne(() => Order, (order) => order.items, { onDelete: 'CASCADE' })

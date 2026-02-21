@@ -10,26 +10,39 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from './entities/order.entity';
 import { OrderStatus, PaymentStatus } from 'src/common/enums/product.enum';
 import { AdminOrderFilterDto } from './dto/request';
+import { OrderItemService } from '../order-item/order-item.service';
 
 @Injectable()
 export class OrderService {
   constructor(
     @InjectRepository(Order)
     private readonly orderRepo: Repository<Order>,
+    private readonly orderItemService: OrderItemService,
   ) {}
 
   async create(dto: CreateOrderDto) {
     const totalAmount = dto.items.reduce((sum, item) => {
       return sum + item.totalPrice;
     }, 0);
+
     let order = this.orderRepo.create({
-      ...dto,
+      userId: dto.userId,
+      guestId: dto.guestId,
       orderStatus: OrderStatus.PENDING,
       paymentStatus: PaymentStatus.PENDING,
       totalAmount,
     });
 
-    await this.orderRepo.save(order);
+    order = await this.orderRepo.save(order);
+
+    console.log('cart ', order);
+
+    for (const item of dto.items) {
+      await this.orderItemService.create({
+        ...item,
+        orderId: order.id,
+      });
+    }
 
     return order;
   }

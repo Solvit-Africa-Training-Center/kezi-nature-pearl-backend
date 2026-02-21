@@ -6,6 +6,7 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  Min,
 } from 'class-validator';
 import { CreateFilesDto } from 'src/modules/file/dto/request';
 
@@ -23,7 +24,6 @@ export class ProductRequestBaseDto extends CreateFilesDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsNotEmpty()
-  @IsString()
   @IsUUID()
   categoryId: string;
 
@@ -31,24 +31,28 @@ export class ProductRequestBaseDto extends CreateFilesDto {
   @IsNotEmpty()
   @Type(() => Number)
   @IsNumber()
+  @Min(1)
   price: number;
 
   @ApiProperty({ example: '100' })
   @IsNotEmpty()
   @Type(() => Number)
   @IsNumber()
+  @Min(1)
   stockQuantity: number;
 
   @ApiProperty({ example: '10' })
   @IsNotEmpty()
   @Type(() => Number)
   @IsNumber()
+  @Min(1)
   lowStockThreshold: number;
 
   @ApiProperty({ example: '50kg' })
   @IsNotEmpty()
   @Type(() => Number)
   @IsNumber()
+  @Min(1)
   weight: number;
 
   @ApiProperty({ example: 'Salt' })

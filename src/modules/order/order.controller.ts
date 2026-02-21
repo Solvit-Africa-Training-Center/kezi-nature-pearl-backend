@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Query,
+  NotFoundException,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -18,6 +19,7 @@ import { UserRole } from 'src/common/enums/user.enum';
 import { Payload } from 'src/util';
 import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { AdminOrderFilterDto } from './dto/request';
+import { OrderDetailsDto } from './dto/response/order-details.dto';
 
 @Controller('order')
 @UseGuards(AuthGuard, RolesGuard)
@@ -29,15 +31,27 @@ export class OrderController {
   @Get()
   @Roles(UserRole.CUSTOMER)
   @ApiOperation({ summary: 'Get user orders *' })
-  findAll(@CurrentUser() user: Payload) {
-    return this.orderService.findAll({ where: { userId: user.sub } });
+  async findAll(@CurrentUser() user: Payload) {
+    const orders = await this.orderService.findAll({
+      where: { userId: user.sub },
+      relations: { items: { product: { images: { file: true } } } },
+    });
+
+    return orders.map((order) => new OrderDetailsDto(order));
   }
 
   @Get('id')
   @Roles(UserRole.CUSTOMER)
   @ApiOperation({ summary: 'Get user order by Id *' })
-  findOne(@CurrentUser() user: Payload, @Param('id') id: string) {
-    return this.orderService.findOne({ where: { id, userId: user.sub } });
+  async findOne(@CurrentUser() user: Payload, @Param('id') id: string) {
+    const order = await this.orderService.findOne({
+      where: { id, userId: user.sub },
+      relations: { items: true },
+    });
+
+    if (!order) throw new NotFoundException('Order not found');
+
+    return new OrderDetailsDto(order);
   }
 
   @Patch(':id/cancel')

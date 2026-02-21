@@ -13,7 +13,7 @@ import { OrderService } from '../order/order.service';
 import { CartCheckoutDto } from './dto/request';
 import { PaymentService } from '../payment/payment.service';
 import { AddressService } from '../address/address.service';
-import { OrderInvoiceDto } from '../order/dto/response/order-invoice.dto';
+import { OrderInvoiceDto } from '../order/dto/response/order-invoice.dto copy';
 
 @Injectable()
 export class CartService {
@@ -69,6 +69,18 @@ export class CartService {
       const cart = await this.findOne({
         where: { userId, guestId, status: CartStatus.ACTIVE },
         relations: { items: true },
+        select: {
+          id: true,
+          userId: true,
+          guestId: true,
+          status: true,
+          items: {
+            productId: true,
+            quantity: true,
+            unitPrice: true,
+            totalPrice: true,
+          },
+        },
       });
 
       if (!cart || !cart.items) throw new NotFoundException('Cart not found');
