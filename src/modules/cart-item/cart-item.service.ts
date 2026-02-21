@@ -10,6 +10,7 @@ import { AddItemTocartDto, UpdateCartItemDto } from './dto/request';
 import { CartService } from '../cart/cart.service';
 import { ProductService } from '../product/product.service';
 import { Cart } from '../cart/entities/cart.entity';
+import { CartStatus } from 'src/common/enums/product.enum';
 
 @Injectable()
 export class CartItemService {
@@ -76,15 +77,17 @@ export class CartItemService {
 
     if (userId) {
       cart = await this.cartService.findOne({
-        where: { userId },
+        where: { userId, status: CartStatus.ACTIVE },
         relations: { items: true },
       });
     } else if (guestId) {
       cart = await this.cartService.findOne({
-        where: { guestId },
+        where: { guestId, status: CartStatus.ACTIVE },
         relations: { items: true },
       });
     }
+
+    console.log(cart);
 
     if (!cart) throw new NotFoundException('Cart not found');
 
@@ -92,8 +95,16 @@ export class CartItemService {
 
     if (!item) throw new NotFoundException('Cart item not found');
 
+    const existingItem = await this.cartItemRepo.findOne({
+      where: { id: item.id },
+      relations: { product: true },
+    });
+
+    if (!existingItem)
+      throw new NotFoundException('Cart existingItem not found');
+
     const { isProductAvailable, product } = await this.checkProductQuantity(
-      item.productId,
+      existingItem.productId,
       quantity,
     );
 
@@ -101,7 +112,8 @@ export class CartItemService {
       throw new BadRequestException('Insufficient Product stock');
 
     item.quantity = quantity;
-    return await this.cartItemRepo.update(id, item);
+    await this.cartItemRepo.update(id, item);
+    return { message: 'CartItem Update' };
   }
 
   async deleteItem(

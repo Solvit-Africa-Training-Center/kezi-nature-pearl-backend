@@ -1,5 +1,10 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString, ValidateNested } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsBoolean,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 import { CreateAddressDto } from 'src/modules/address/dto/request';
 import { Type } from 'class-transformer';
 
@@ -8,6 +13,11 @@ export class CartCheckoutDto {
   @ValidateNested()
   @Type(() => CreateAddressDto)
   shippingAddressSnapshot: CreateAddressDto;
+
+  @ApiPropertyOptional({ type: () => Boolean })
+  @IsOptional()
+  @IsBoolean()
+  saveAddress: boolean;
 
   @ApiProperty()
   @IsString()

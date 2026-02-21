@@ -9,6 +9,7 @@ export class OrderInvoiceDto {
   shippingAddressSnapshot: {
     fullName: string;
     phoneNumber: string;
+    email: string;
     country: string;
     state?: string;
     city?: string;
@@ -26,6 +27,9 @@ export class OrderInvoiceDto {
   finalAmount: number;
 
   items?: object;
+
+  createdAt: Date;
+
   constructor(order: Order) {
     this.orderNumber = order.orderNumber;
     this.shippingAddressSnapshot = order.shippingAddressSnapshot;
@@ -35,5 +39,6 @@ export class OrderInvoiceDto {
     this.items = order.items?.map((item) => {
       return new OrderItemResponseDto(item);
     });
+    this.createdAt = order.createdAt;
   }
 }

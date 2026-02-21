@@ -3,6 +3,7 @@ import { AddressBaseRequestDto } from './base-address.dto';
 
 export class CreateAddressDto extends PickType(AddressBaseRequestDto, [
   'fullName',
+  'email',
   'phoneNumber',
   'country',
   'state',

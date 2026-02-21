@@ -41,7 +41,7 @@ export class CartItemController {
     const userId = req['user']?.sub ?? null;
     const guestId = req['guestId'] ?? null;
 
-    await this.cartItemService.updateCartItem(id, dto.quantity, {
+    return await this.cartItemService.updateCartItem(id, dto.quantity, {
       userId,
       guestId,
     });

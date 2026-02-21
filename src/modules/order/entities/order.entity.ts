@@ -34,6 +34,7 @@ export class Order extends BaseEntity {
   shippingAddressSnapshot: {
     fullName: string;
     phoneNumber: string;
+    email: string;
     country: string;
     state?: string;
     city?: string;

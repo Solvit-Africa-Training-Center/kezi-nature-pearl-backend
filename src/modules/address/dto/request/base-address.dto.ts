@@ -1,10 +1,15 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsEmail, IsOptional, IsString } from 'class-validator';
 
 export class AddressBaseRequestDto {
   @ApiProperty({ example: 'John Doe' })
   @IsString()
   fullName: string;
+
+  @ApiProperty({ example: 'john.doe@example.com' })
+  @IsString()
+  @IsEmail()
+  email: string;
 
   @ApiProperty({ example: '+60123456789' })
   @IsString()

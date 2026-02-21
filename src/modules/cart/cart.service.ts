@@ -73,17 +73,25 @@ export class CartService {
 
       if (!cart || !cart.items) throw new NotFoundException('Cart not found');
 
+      if (userId && dto.saveAddress) {
+        const addresses = await this.addressService.findAll({
+          where: { userId },
+        });
+
+        if (addresses.length >= 3)
+          throw new BadRequestException('User can only save 3 addresses');
+
+        await this.addressService.create(userId, {
+          ...dto.shippingAddressSnapshot,
+        });
+      }
+
       const order = await this.orderService.create({
         userId,
         guestId,
         items: cart.items,
         ...dto,
       });
-
-      if (userId)
-        await this.addressService.create(userId, {
-          ...dto.shippingAddressSnapshot,
-        });
 
       await this.paymentService.momoPaymentService({
         orderId: order.id,
