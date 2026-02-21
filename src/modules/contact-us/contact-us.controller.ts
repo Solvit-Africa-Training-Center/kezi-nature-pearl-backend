@@ -8,6 +8,7 @@ import {
   UseGuards,
   Req,
   Query,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ContactUsService } from './contact-us.service';
 import { AuthGuard, OptionalAuthGuard, RolesGuard } from 'src/common/guards';
@@ -20,20 +21,25 @@ import {
   RespondContactUsDto,
 } from './dto/create-contact-us.dto';
 import { FilterContactUsDto } from './dto/filter-contact-us.dto';
+import { GuestInterceptor } from 'src/common/interceptors/guest.interceptor';
 
 @Controller('contact')
 @UseGuards(OptionalAuthGuard)
+@UseInterceptors(GuestInterceptor)
 @ApiBearerAuth()
 export class ContactUsController {
   constructor(private readonly contactUsService: ContactUsService) {}
 
   @Post()
   @ApiOperation({ summary: 'Send Contact Message' })
-  submitMessage(@Req() req: Request, @Body() dto: CreateContactUsDto) {
+  async submitMessage(@Req() req: Request, @Body() dto: CreateContactUsDto) {
     const userId = req['user']?.sub ?? null;
     const guestId = req['guestId'] ?? null;
 
-    return this.contactUsService.createContactMessage({ userId, guestId }, dto);
+    return await this.contactUsService.createContactMessage(
+      { userId, guestId },
+      dto,
+    );
   }
 
   @Get()

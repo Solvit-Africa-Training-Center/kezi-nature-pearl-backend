@@ -1,15 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { UpdateContactUsDto } from './dto/update-contact-us.dto';
-import { ContactSubjectEnum, ContactUs } from './entities/contact-us.entity';
+import { ContactUs } from './entities/contact-us.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  FindManyOptions,
-  FindOneOptions,
-  FindOptionsWhere,
-  IsNull,
-  Not,
-  Repository,
-} from 'typeorm';
+import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { ContactUsStatus } from 'src/common/enums/product.enum';
 import { NotFoundException } from '@nestjs/common';
 import { UserService } from '../user/user.service';
@@ -30,6 +22,8 @@ export class ContactUsService {
     dto: CreateContactUsDto,
   ): Promise<{ message: string }> {
     const { userId, guestId } = setUserGuestId(owner);
+
+    console.log('GuestId ', guestId);
 
     if (userId) {
       const user = await this.userService.findOne({ where: { id: userId } });
