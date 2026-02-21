@@ -125,12 +125,12 @@ export class CartItemService {
     let cart: Cart | null = null;
     if (userId) {
       cart = await this.cartService.findOne({
-        where: { userId },
+        where: { userId, status: CartStatus.ACTIVE },
         relations: { items: true },
       });
     } else if (guestId) {
       cart = await this.cartService.findOne({
-        where: { guestId },
+        where: { guestId, status: CartStatus.ACTIVE },
         relations: { items: true },
       });
     }

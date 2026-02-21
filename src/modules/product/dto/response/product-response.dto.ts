@@ -9,6 +9,7 @@ export class ProductResponseDto {
   price: number;
   stockQuantity: number;
   ingredients: string;
+  createdAt: Date;
 
   constructor(product: Product) {
     this.id = product.id;
@@ -25,5 +26,6 @@ export class ProductResponseDto {
     this.price = product.price;
     this.stockQuantity = product.stockQuantity;
     this.ingredients = product.ingredients;
+    this.createdAt = product.createdAt;
   }
 }

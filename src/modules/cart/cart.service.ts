@@ -73,17 +73,43 @@ export class CartService {
 
       if (!cart || !cart.items) throw new NotFoundException('Cart not found');
 
-      if (userId && dto.saveAddress) {
-        const addresses = await this.addressService.findAll({
-          where: { userId },
-        });
+      if (!dto.addressId && !dto.shippingAddressSnapshot)
+        throw new BadRequestException('No shipping address provided');
 
-        if (addresses.length >= 3)
-          throw new BadRequestException('User can only save 3 addresses');
+      if (userId) {
+        if (dto.addressId) {
+          const address = await this.addressService.findOne({
+            where: { id: dto.addressId, userId },
+            relations: { user: true },
+          });
 
-        await this.addressService.create(userId, {
-          ...dto.shippingAddressSnapshot,
-        });
+          if (!address) throw new NotFoundException('Address not found');
+
+          dto.shippingAddressSnapshot = {
+            fullName: address.fullName,
+            phoneNumber: address.phoneNumber,
+            email: address.user.email,
+            country: address.country,
+            state: address.state ?? '',
+            city: address.city ?? '',
+            province: address.province ?? '',
+            district: address.district ?? '',
+            sector: address.sector ?? '',
+            addressLine1: address.addressLine1 ?? '',
+            postalCode: address.postalCode ?? '',
+          };
+        } else if (dto.saveAddress && dto.shippingAddressSnapshot) {
+          const addresses = await this.addressService.findAll({
+            where: { userId },
+          });
+
+          if (addresses.length >= 3)
+            throw new BadRequestException('User can only save 3 addresses');
+
+          await this.addressService.create(userId, {
+            ...dto.shippingAddressSnapshot,
+          });
+        }
       }
 
       const order = await this.orderService.create({
