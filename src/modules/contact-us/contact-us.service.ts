@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { CreateContactUsDto } from './dto/create-publiccontact-us.dto';
 import { UpdateContactUsDto } from './dto/update-contact-us.dto';
-import { ContactUs } from './entities/contact-us.entity';
+import { ContactSubjectEnum, ContactUs } from './entities/contact-us.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   FindManyOptions,
@@ -13,9 +12,9 @@ import {
 } from 'typeorm';
 import { ContactUsStatus } from 'src/common/enums/product.enum';
 import { NotFoundException } from '@nestjs/common';
-import { CreateRegisteredContactUsDto } from './dto/create-registeredcontact-us.dto';
 import { UserService } from '../user/user.service';
-import { MailService } from 'src/util';
+import { MailService, setUserGuestId } from 'src/util';
+import { CreateContactUsDto } from './dto/create-contact-us.dto';
 
 @Injectable()
 export class ContactUsService {
@@ -26,52 +25,62 @@ export class ContactUsService {
     private readonly mailService: MailService,
   ) {}
 
-  async createPublicContactMessage(
+  async createContactMessage(
+    owner: { userId?: any; guestId?: any },
     dto: CreateContactUsDto,
   ): Promise<{ message: string }> {
-    const contactMessage = this.contactRepo.create(dto);
+    const { userId, guestId } = setUserGuestId(owner);
 
-    await this.contactRepo.save(contactMessage);
+    if (userId) {
+      const user = await this.userService.findOne({ where: { id: userId } });
+
+      if (!user) throw new NotFoundException('User not found');
+
+      const contactMessage = this.contactRepo.create({
+        userId,
+        name: user.fullName,
+        email: user.email,
+        subject: dto.subject,
+        message: dto.message,
+        status: ContactUsStatus.NEW,
+      });
+      await this.contactRepo.save(contactMessage);
+    } else if (guestId) {
+      const contactMessage = this.contactRepo.create({
+        guestId,
+        name: dto.name,
+        email: dto.email,
+        subject: dto.subject,
+        message: dto.message,
+        status: ContactUsStatus.NEW,
+      });
+      await this.contactRepo.save(contactMessage);
+    }
 
     return {
       message: 'Contact message submitted successfully',
     };
   }
 
-  async createRegisteredContactMessage(
-    dto: CreateRegisteredContactUsDto,
-    userId: string,
-  ): Promise<{ message: string }> {
-    const user = await this.userService.findOne({ where: { id: userId } });
-
-    if (!user) throw new NotFoundException('User not found');
-
-    const contactMessage = this.contactRepo.create({
-      ...dto,
-      userId: user.id,
-      name: user.fullName,
-      email: user.email,
-      phone: user.phoneNumber,
-    });
-
-    await this.contactRepo.save(contactMessage);
-
-    return { message: 'Contact message submitted successfully' };
-  }
-
-  async getAllPublicMessages(
+  async getAllMessages(
     options?: FindManyOptions<ContactUs>,
   ): Promise<ContactUs[]> {
+    const cleanedWhere = options?.where
+      ? Object.fromEntries(
+          Object.entries(options.where).filter(
+            ([_, value]) => value !== undefined,
+          ),
+        )
+      : undefined;
+
     return this.contactRepo.find({
       ...options,
-      where: { userId: IsNull() },
+      where: cleanedWhere,
       order: { createdAt: 'ASC' },
     });
   }
 
-  async getPublicMessageById(
-    options: FindOneOptions<ContactUs>,
-  ): Promise<ContactUs> {
+  async getMessageById(options: FindOneOptions<ContactUs>): Promise<ContactUs> {
     const message = await this.contactRepo.findOne({
       ...options,
     });
@@ -81,16 +90,6 @@ export class ContactUsService {
     }
 
     return message;
-  }
-
-  async getAllRegisteredMessages(
-    options?: FindManyOptions<ContactUs>,
-  ): Promise<ContactUs[]> {
-    return this.contactRepo.find({
-      ...options,
-      where: { userId: Not(IsNull()) },
-      order: { createdAt: 'ASC' },
-    });
   }
 
   async respondToMessage(
@@ -122,12 +121,5 @@ export class ContactUsService {
     });
 
     return { message: 'Contact message resolved successfully' };
-  }
-
-  async getMessagesByUser(userId: string): Promise<ContactUs[]> {
-    return this.contactRepo.find({
-      where: { userId },
-      order: { createdAt: 'ASC' },
-    });
   }
 }

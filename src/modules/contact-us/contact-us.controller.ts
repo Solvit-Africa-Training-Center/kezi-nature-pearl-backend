@@ -5,55 +5,55 @@ import {
   Body,
   Param,
   Patch,
-  BadRequestException,
   UseGuards,
+  Req,
+  Query,
 } from '@nestjs/common';
 import { ContactUsService } from './contact-us.service';
-import { CreateContactUsDto } from './dto/create-publiccontact-us.dto';
-import { RespondContactUsDto } from './dto/create-publiccontact-us.dto';
-import { AuthGuard, RolesGuard } from 'src/common/guards';
+import { AuthGuard, OptionalAuthGuard, RolesGuard } from 'src/common/guards';
 import { CurrentUser, Roles } from 'src/common/decorator';
 import { UserRole } from 'src/common/enums/user.enum';
-import { ApiBearerAuth } from '@nestjs/swagger';
-import { CreateRegisteredContactUsDto } from './dto/create-registeredcontact-us.dto';
+import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { Payload } from 'src/util';
+import {
+  CreateContactUsDto,
+  RespondContactUsDto,
+} from './dto/create-contact-us.dto';
+import { FilterContactUsDto } from './dto/filter-contact-us.dto';
 
-@Controller('public-contact')
+@Controller('contact')
+@UseGuards(OptionalAuthGuard)
+@ApiBearerAuth()
 export class ContactUsController {
   constructor(private readonly contactUsService: ContactUsService) {}
 
   @Post()
-  submitMessage(@Body() dto: CreateContactUsDto) {
-    return this.contactUsService.createPublicContactMessage(dto);
+  @ApiOperation({ summary: 'Send Contact Message' })
+  submitMessage(@Req() req: Request, @Body() dto: CreateContactUsDto) {
+    const userId = req['user']?.sub ?? null;
+    const guestId = req['guestId'] ?? null;
+
+    return this.contactUsService.createContactMessage({ userId, guestId }, dto);
   }
 
-  @Post('registered')
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles(UserRole.CUSTOMER)
-  @ApiBearerAuth()
-  async submitRegisteredMessage(
-    @CurrentUser() user: Payload,
-    @Body() dto: CreateRegisteredContactUsDto,
-  ) {
-    return this.contactUsService.createRegisteredContactMessage(dto, user.sub);
+  @Get()
+  @ApiOperation({ summary: 'Get All Contact Messages' })
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
+  getAllMessages(@Query() query: FilterContactUsDto) {
+    return this.contactUsService.getAllMessages({ where: { ...query } });
   }
 
-  @Get('public')
-  getAllPublicMessages() {
-    return this.contactUsService.getAllPublicMessages();
-  }
-
-  @Get('registered')
-  getAllMessages() {
-    return this.contactUsService.getAllRegisteredMessages();
-  }
-
-  @Get(':id')
-  getPublicMessageById(@Param('id') id: string) {
-    return this.contactUsService.getPublicMessageById({ where: { id } });
-  }
+  // @Get(':id')
+  // @ApiOperation({ summary: 'Get Contact Message by Id' })
+  // @UseGuards(RolesGuard)
+  // @Roles(UserRole.ADMIN)
+  // getMessageById(@Param('id') id: string) {
+  //   return this.contactUsService.getMessageById({ where: { id } });
+  // }
 
   @UseGuards(AuthGuard, RolesGuard)
+  @ApiOperation({ summary: 'Respond to Contact Message' })
   @Roles(UserRole.ADMIN)
   @ApiBearerAuth()
   @Patch(':id/respond')

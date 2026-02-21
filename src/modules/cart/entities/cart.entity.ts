@@ -1,19 +1,10 @@
-import {
-  Entity,
-  Column,
-  ManyToOne,
-  OneToMany,
-  JoinColumn,
-  Index,
-} from 'typeorm';
+import { Entity, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { User } from '../../../modules/user/entities/user.entity';
 import { CartStatus } from '../../../common/enums/product.enum';
 import { Item } from '../../item/entities/item.entity';
 
 @Entity('carts')
-// @Index(['userId', 'status']) // Index for finding active carts
-// @Index(['guestId', 'status']) // Index for guest carts
 export class Cart extends BaseEntity {
   @Column({ type: 'uuid', nullable: true })
   userId: string | null = null;

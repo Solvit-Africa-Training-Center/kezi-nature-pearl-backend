@@ -33,9 +33,7 @@ export class ItemService {
 
     if (existingItem) {
       existingItem.quantity += dto.quantity;
-      await this.itemRepo.update(existingItem.id, {
-        quantity: existingItem.quantity,
-      });
+      await this.updateItem(existingItem.id, existingItem.quantity, cart.id);
     } else {
       const item = this.itemRepo.create({
         cartId: cart.id,

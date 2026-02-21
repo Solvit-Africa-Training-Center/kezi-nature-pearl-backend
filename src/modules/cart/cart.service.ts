@@ -14,6 +14,7 @@ import { AddressService } from '../address/address.service';
 import { OrderInvoiceDto } from '../order/dto/response/order-invoice.dto copy';
 import { AddItemTocartDto } from '../item/dto/request';
 import { ItemService } from '../item/item.service';
+import { setUserGuestId } from 'src/util';
 
 @Injectable()
 export class CartService {
@@ -28,7 +29,7 @@ export class CartService {
   ) {}
 
   async checkCart(owner: { userId?: any; guestId?: any }) {
-    let { userId, guestId } = this.setUserGuestId(owner);
+    let { userId, guestId } = setUserGuestId(owner);
 
     let cart = await this.cartRepo.findOne({
       where: { userId, guestId },
@@ -48,6 +49,11 @@ export class CartService {
     cart = await this.cartRepo.findOne({
       where: { userId, guestId },
       relations: { items: { product: { images: { file: true } } } },
+      order: {
+        items: {
+          createdAt: 'DESC',
+        },
+      },
     });
 
     return cart;
@@ -98,7 +104,7 @@ export class CartService {
 
   async checkout(owner: { userId?: any; guestId: any }, dto: CartCheckoutDto) {
     return await this.dataSource.transaction(async (manager) => {
-      let { userId, guestId } = this.setUserGuestId(owner);
+      let { userId, guestId } = setUserGuestId(owner);
 
       const cart = await this.checkCart(owner);
 
@@ -176,54 +182,5 @@ export class CartService {
             message: 'Checkout succesful. No invoice',
           };
     });
-  }
-
-  // async getUserCart(owner: {
-  //   userId?: string | null;
-  //   guestId?: string | null;
-  // }) {
-  //   const { userId, guestId } = owner;
-
-  //   let cart: Cart | null = null;
-  //   if (userId) {
-  //     cart = await this.cartRepo.findOne({
-  //       where: {
-  //         userId,
-  //         status: CartStatus.ACTIVE,
-  //       },
-  //       relations: { items: true },
-  //     });
-  //   } else if (guestId) {
-  //     cart = await this.cartRepo.findOne({
-  //       where: {
-  //         guestId,
-  //         status: CartStatus.ACTIVE,
-  //       },
-  //       relations: { items: true },
-  //     });
-  //   }
-
-  //   if (!cart) {
-  //     const cartData = {
-  //       userId: userId || null,
-  //       guestId: userId ? null : (guestId ?? null),
-  //       status: CartStatus.ACTIVE,
-  //     };
-  //     cart = this.cartRepo.create(cartData as Cart);
-  //     await this.cartRepo.save(cart);
-  //   }
-
-  //   return cart;
-  // }
-
-  // Helper
-
-  setUserGuestId(owner: { userId?: any; guestId?: any }) {
-    let { userId, guestId } = owner;
-
-    if (!userId) userId = null;
-    if (!guestId) guestId = null;
-
-    return { userId, guestId };
   }
 }

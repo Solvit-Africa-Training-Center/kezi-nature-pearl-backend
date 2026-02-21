@@ -1,5 +1,12 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { ContactSubjectEnum } from '../entities/contact-us.entity';
 
 export class CreateContactUsDto {
   @ApiProperty({ description: 'Name of the person submitting the message' })
@@ -12,15 +19,12 @@ export class CreateContactUsDto {
   @IsNotEmpty()
   email: string;
 
-  @ApiProperty({ description: 'Phone number (optional)', required: false })
-  @IsOptional()
-  @IsString()
-  phone?: string;
-
-  @ApiProperty({ description: 'Subject of the contact message' })
-  @IsString()
-  @IsNotEmpty()
-  subject: string;
+  @ApiProperty({
+    enum: ContactSubjectEnum,
+    default: ContactSubjectEnum.SUPPORT,
+  })
+  @IsEnum(ContactSubjectEnum)
+  subject: ContactSubjectEnum;
 
   @ApiProperty({ description: 'Content of the contact message' })
   @IsString()

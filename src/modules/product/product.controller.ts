@@ -47,6 +47,7 @@ export class ProductController {
     return (
       await this.productService.findAll({
         relations: { images: { file: true }, category: { image: true } },
+        order: { createdAt: 'DESC' },
       })
     ).map((product) => {
       return new ProductResponseDto(product);

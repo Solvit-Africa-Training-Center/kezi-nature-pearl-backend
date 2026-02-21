@@ -1,41 +1,42 @@
 import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { ContactUsStatus } from '../../../common/enums/product.enum';
 import { User } from '../../../modules/user/entities/user.entity';
+
+export enum ContactSubjectEnum {
+  GENERAL_INQUIRY = 'General Inquiry',
+  SUPPORT = 'Support',
+  FEEDBACK = 'Feedback',
+  TESTIMONY = 'Testimony',
+}
 
 @Entity('contact_us')
 @Index(['status', 'createdAt'])
 export class ContactUs extends BaseEntity {
   @Column({ type: 'uuid', nullable: true })
-  @IsOptional()
-  userId?: string;
+  userId: string | null = null;
 
-  @ManyToOne(() => User, (user) => user.contactSubmissions, {
-    nullable: true,
-  })
+  @ManyToOne(() => User, (user) => user.contactSubmissions, { nullable: true })
   @JoinColumn({ name: 'userId' })
-  user?: User;
+  user: User | null = null;
+
+  @Column({ type: 'uuid', nullable: true })
+  guestId: string | null = null;
 
   @Column({ nullable: true })
-  @IsString()
-  name?: string;
+  name: string;
 
   @Column()
-  @IsString()
   email: string;
 
-  @Column({ nullable: true })
-  @IsOptional()
-  @IsString()
-  phone?: string;
-
-  @Column()
-  @IsString()
-  subject: string;
+  @Column({
+    type: 'enum',
+    enum: ContactSubjectEnum,
+    default: ContactSubjectEnum.SUPPORT,
+  })
+  subject: ContactSubjectEnum;
 
   @Column('text')
-  @IsString()
   message: string;
 
   @Column({
@@ -43,22 +44,18 @@ export class ContactUs extends BaseEntity {
     enum: ContactUsStatus,
     default: ContactUsStatus.NEW,
   })
-  @IsEnum(ContactUsStatus)
   status: ContactUsStatus;
 
   @Column('text', { nullable: true })
-  @IsOptional()
-  @IsString()
-  response?: string;
+  response: string;
 
   @Column({ type: 'uuid', nullable: true })
-  @IsOptional()
-  respondedBy?: string;
+  respondedBy: string;
 
   @ManyToOne(() => User, { nullable: true })
   @JoinColumn({ name: 'respondedBy' })
-  respondedByUser?: User;
+  respondedByUser: User;
 
   @Column({ name: 'responded_at', type: 'timestamptz', nullable: true })
-  respondedAt?: Date;
+  respondedAt: Date;
 }
