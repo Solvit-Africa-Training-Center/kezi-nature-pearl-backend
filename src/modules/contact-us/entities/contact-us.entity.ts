@@ -11,7 +11,6 @@ export enum ContactSubjectEnum {
 }
 
 @Entity('contact_us')
-@Index(['status', 'createdAt'])
 export class ContactUs extends BaseEntity {
   @Column({ type: 'uuid', nullable: true })
   userId: string | null = null;
