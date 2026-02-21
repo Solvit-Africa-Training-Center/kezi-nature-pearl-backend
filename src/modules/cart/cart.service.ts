@@ -47,7 +47,7 @@ export class CartService {
     }
 
     cart = await this.cartRepo.findOne({
-      where: { userId, guestId },
+      where: { userId, guestId, status: CartStatus.ACTIVE },
       relations: { items: { product: { images: { file: true } } } },
       order: {
         items: {
