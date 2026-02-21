@@ -62,7 +62,7 @@ export class ContactUsController {
   @ApiOperation({ summary: 'Respond to Contact Message' })
   @Roles(UserRole.ADMIN)
   @ApiBearerAuth()
-  @Patch(':id/respond')
+  @Patch('respond/id')
   respondToContact(
     @CurrentUser() user: Payload,
     @Param('id') id: string,

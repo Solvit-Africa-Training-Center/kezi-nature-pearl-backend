@@ -30,7 +30,7 @@ export class CartController {
   // User
 
   @Get()
-  @ApiOperation({ summary: 'Get User cart *' })
+  @ApiOperation({ summary: 'Get User cart ' })
   async findOne(@Req() req: Request) {
     const userId = req['user']?.sub ?? null;
     const guestId = req['guestId'] ?? null;
@@ -43,7 +43,7 @@ export class CartController {
   }
 
   @Post('item/add')
-  @ApiOperation({ summary: 'Add product to cart *' })
+  @ApiOperation({ summary: 'Add product to cart ' })
   async addItem(@Req() req: Request, @Body() dto: AddItemTocartDto) {
     const userId = req['user']?.sub ?? null;
     const guestId = req['guestId'] ?? null;
@@ -52,7 +52,7 @@ export class CartController {
   }
 
   @Patch('item/update/:id')
-  @ApiOperation({ summary: 'Update product in cart quantity *' })
+  @ApiOperation({ summary: 'Update product in cart quantity ' })
   async updateItem(
     @Req() req: Request,
     @Param('id') id: string,
@@ -70,7 +70,7 @@ export class CartController {
   }
 
   @Delete('item/remove/:id')
-  @ApiOperation({ summary: 'Remove item from cart *' })
+  @ApiOperation({ summary: 'Remove item from cart ' })
   async deleteItem(@Req() req: Request, @Param('id') id: string) {
     const userId = req['user']?.sub ?? null;
     const guestId = req['guestId'] ?? null;
@@ -79,7 +79,7 @@ export class CartController {
   }
 
   @Delete('clear')
-  @ApiOperation({ summary: 'Clear cart *' })
+  @ApiOperation({ summary: 'Clear cart ' })
   async clearCart(@Req() req: Request) {
     const userId = req['user']?.sub ?? null;
     const guestId = req['guestId'] ?? null;
@@ -88,7 +88,7 @@ export class CartController {
   }
 
   @Post('check-out')
-  @ApiOperation({ summary: 'Check out Cart *' })
+  @ApiOperation({ summary: 'Check out Cart ' })
   async checkout(@Req() req: Request, @Body() dto: CartCheckoutDto) {
     const userId = req['user']?.sub ?? null;
     const guestId = req['guestId'] ?? null;
