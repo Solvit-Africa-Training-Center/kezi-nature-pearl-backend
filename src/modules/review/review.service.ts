@@ -20,12 +20,13 @@ export class ReviewService {
 
   async createReview(
     owner: { userId?: string | null; guestId?: string | null },
+    productId: string,
     dto: CreateReviewDto,
-  ): Promise<Review> {
+  ) {
     const { userId, guestId } = setUserGuestId(owner);
 
     const product = await this.productRepo.findOne({
-      where: { id: dto.productId },
+      where: { id: productId },
     });
 
     if (!product) {
@@ -40,24 +41,61 @@ export class ReviewService {
       comment: dto.comment,
     });
 
-    return await this.reviewRepo.save(review);
+    await this.reviewRepo.save(review);
+    return { message: 'Product review made' };
   }
 
-  async getUserReview(userId: string): Promise<Review[]> {
-    return this.reviewRepo.find({
-      where: { user: { id: userId } },
+  async getProductReview(productId: string) {
+    const reviews = await this.reviewRepo.find({
+      where: { productId },
+      relations: { user: true },
       order: { createdAt: 'ASC' },
     });
+
+    return reviews.map((review) => ({
+      id: review.id,
+      rating: review.rating,
+      comment: review.comment,
+      createdAt: review.createdAt,
+      isVerifiedPurchase: review.isVerifiedPurchase,
+      reviewer: review.user
+        ? {
+            id: review.user.id,
+            name: review.user.fullName,
+          }
+        : {
+            guestId: review.guestId,
+          },
+    }));
   }
 
-  updateReview() {}
+  async updateReview(
+    owner: { userId?: string | null; guestId?: string | null },
+    id: string,
+    dto: UpdateReviewDto,
+  ) {
+    const { userId, guestId } = setUserGuestId(owner);
+
+    const review = await this.reviewRepo.findOne({
+      where: { id, userId, guestId },
+    });
+
+    if (!review) throw new NotFoundException('Review not found');
+
+    Object.assign(review, dto);
+
+    await this.reviewRepo.update(review.id, review);
+    return { message: 'Review Updated' };
+  }
 
   async removeReview(
-    userId: string,
-    reviewId: string,
+    owner: { userId?: string | null; guestId?: string | null },
+    id: string,
   ): Promise<{ message: string }> {
+    const { userId, guestId } = setUserGuestId(owner);
+
     const review = await this.reviewRepo.findOne({
-      where: { id: reviewId, user: { id: userId } },
+      where: { id, userId, guestId },
     });
 
     if (!review) throw new NotFoundException('Review not found');

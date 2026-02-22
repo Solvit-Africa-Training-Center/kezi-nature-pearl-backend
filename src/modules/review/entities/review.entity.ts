@@ -1,17 +1,11 @@
-import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
-import {
-  IsBoolean,
-  IsInt,
-  IsOptional,
-  IsString,
-  Max,
-  Min,
-} from 'class-validator';
+import { Entity, Column, ManyToOne, JoinColumn, Unique } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { User } from '../../../modules/user/entities/user.entity';
 import { Product } from '../../../modules/product/entities/product.entity';
 
 @Entity('reviews')
+@Unique(['productId', 'userId'])
+@Unique(['productId', 'guestId'])
 export class Review extends BaseEntity {
   @Column({ nullable: true })
   userId: string | null = null;
@@ -33,18 +27,12 @@ export class Review extends BaseEntity {
   product: Product;
 
   @Column('int')
-  @IsInt()
-  @Min(1)
-  @Max(5)
   rating: number;
 
   @Column('text', { nullable: true })
-  @IsOptional()
-  @IsString()
   comment: string;
 
   @Column({ name: 'is_verified_purchase', default: false })
-  @IsBoolean()
   isVerifiedPurchase: boolean;
 
   // @Column({

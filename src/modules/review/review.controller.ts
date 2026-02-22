@@ -17,6 +17,7 @@ import { AuthGuard, OptionalAuthGuard, RolesGuard } from 'src/common/guards';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UserRole } from 'src/common/enums/user.enum';
 import { GuestInterceptor } from 'src/common/interceptors/guest.interceptor';
+import { UpdateReviewDto } from './dto/update-review.dto';
 
 @Controller('reviews')
 @UseGuards(OptionalAuthGuard)
@@ -25,28 +26,33 @@ import { GuestInterceptor } from 'src/common/interceptors/guest.interceptor';
 export class ReviewController {
   constructor(private readonly reviewService: ReviewService) {}
 
-  @Post()
-  createReview(@Req() req: Request, @Body() dto: CreateReviewDto) {
+  @Post(':productId')
+  createReview(
+    @Req() req: Request,
+    @Param('productId') productId: string,
+    @Body() dto: CreateReviewDto,
+  ) {
     const userId = req['user']?.sub ?? null;
     const guestId = req['guestId'] ?? null;
 
-    return this.reviewService.createReview(userId, dto);
+    return this.reviewService.createReview({ userId, guestId }, productId, dto);
   }
 
   @Get('product/:productId')
-  getProductReviews(@Req() req: Request) {
-    const userId = req['user']?.sub ?? null;
-    const guestId = req['guestId'] ?? null;
-
-    return this.reviewService.getUserReview(userId);
+  async getProductReviews(@Param('productId') productId: string) {
+    return await this.reviewService.getProductReview(productId);
   }
 
-  @Patch('')
-  updateReview(@Req() req: Request) {
+  @Patch(':id')
+  async updateReview(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Body() dto: UpdateReviewDto,
+  ) {
     const userId = req['user']?.sub ?? null;
     const guestId = req['guestId'] ?? null;
 
-    return this.reviewService.updateReview();
+    return await this.reviewService.updateReview({ userId, guestId }, id, dto);
   }
 
   @Delete(':id')
@@ -54,6 +60,6 @@ export class ReviewController {
     const userId = req['user']?.sub ?? null;
     const guestId = req['guestId'] ?? null;
 
-    return this.reviewService.removeReview(userId, id);
+    return this.reviewService.removeReview({ userId, guestId }, id);
   }
 }

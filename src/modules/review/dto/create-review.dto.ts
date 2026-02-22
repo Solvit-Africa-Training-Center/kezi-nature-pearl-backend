@@ -1,17 +1,7 @@
-import { IsUUID, IsNotEmpty } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional, IsEnum, IsInt, Min, Max } from 'class-validator';
-import { SkinType } from '../../../common/enums/user.enum';
-// import { Min } from "class-validator";
+import { IsString, IsInt, Min, Max } from 'class-validator';
 
 export class CreateReviewDto {
-  @ApiProperty({
-    description: 'Id of the product to be reviewed',
-  })
-  @IsUUID()
-  @IsNotEmpty()
-  productId: string;
-
   @ApiProperty({ description: 'Rating between 1 and 5' })
   @IsInt()
   @Min(1)

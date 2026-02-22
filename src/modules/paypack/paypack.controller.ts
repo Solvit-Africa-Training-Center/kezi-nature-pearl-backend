@@ -30,9 +30,9 @@ export class PaypackController {
   }
 
   // Handles HEAD request (Paypack often sends this first)
-  @Head()
-  @HttpCode(HttpStatus.OK)
-  headCheck() {
-    return;
-  }
+  // @Head()
+  // @HttpCode(HttpStatus.OK)
+  // headCheck() {
+  //   return;
+  // }
 }
