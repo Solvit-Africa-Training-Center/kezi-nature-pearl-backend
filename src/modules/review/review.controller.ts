@@ -8,6 +8,7 @@ import {
   UseGuards,
   UseInterceptors,
   Req,
+  Patch,
 } from '@nestjs/common';
 import { ReviewService } from './review.service';
 import { CreateReviewDto } from './dto/create-review.dto';
@@ -24,6 +25,14 @@ import { GuestInterceptor } from 'src/common/interceptors/guest.interceptor';
 export class ReviewController {
   constructor(private readonly reviewService: ReviewService) {}
 
+  @Post()
+  createReview(@Req() req: Request, @Body() dto: CreateReviewDto) {
+    const userId = req['user']?.sub ?? null;
+    const guestId = req['guestId'] ?? null;
+
+    return this.reviewService.createReview(userId, dto);
+  }
+
   @Get('product/:productId')
   getProductReviews(@Req() req: Request) {
     const userId = req['user']?.sub ?? null;
@@ -32,12 +41,12 @@ export class ReviewController {
     return this.reviewService.getUserReview(userId);
   }
 
-  @Post()
-  createReview(@Req() req: Request, @Body() dto: CreateReviewDto) {
+  @Patch('')
+  updateReview(@Req() req: Request) {
     const userId = req['user']?.sub ?? null;
     const guestId = req['guestId'] ?? null;
 
-    return this.reviewService.createReview(userId, dto);
+    return this.reviewService.updateReview();
   }
 
   @Delete(':id')

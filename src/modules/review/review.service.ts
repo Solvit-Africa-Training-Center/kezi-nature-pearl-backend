@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Review } from './entities/review.entity';
 import { Product } from '../product/entities/product.entity';
 import { BadRequestException } from '@nestjs/common';
+import { setUserGuestId } from 'src/util';
 
 @Injectable()
 export class ReviewService {
@@ -17,13 +18,12 @@ export class ReviewService {
     private readonly productRepo: Repository<Product>,
   ) {}
 
-  async getUserReview(userId: string): Promise<Review[]> {
-    return this.reviewRepo.find({
-      where: { user: { id: userId } },
-      order: { createdAt: 'ASC' },
-    });
-  }
-  async createReview(userId: string, dto: CreateReviewDto): Promise<Review> {
+  async createReview(
+    owner: { userId?: string | null; guestId?: string | null },
+    dto: CreateReviewDto,
+  ): Promise<Review> {
+    const { userId, guestId } = setUserGuestId(owner);
+
     const product = await this.productRepo.findOne({
       where: { id: dto.productId },
     });
@@ -32,31 +32,32 @@ export class ReviewService {
       throw new NotFoundException('product not found');
     }
 
-    const existing = await this.reviewRepo.findOne({
-      where: { userId, productId: dto.productId },
-    });
-
-    if (existing) {
-      throw new BadRequestException('you have already reviewed a product');
-    }
     const review = this.reviewRepo.create({
       userId,
+      guestId,
       productId: product.id,
       rating: dto.rating,
-      title: dto.title,
       comment: dto.comment,
-      skinType: dto.skinType,
     });
 
     return await this.reviewRepo.save(review);
   }
+
+  async getUserReview(userId: string): Promise<Review[]> {
+    return this.reviewRepo.find({
+      where: { user: { id: userId } },
+      order: { createdAt: 'ASC' },
+    });
+  }
+
+  updateReview() {}
 
   async removeReview(
     userId: string,
     reviewId: string,
   ): Promise<{ message: string }> {
     const review = await this.reviewRepo.findOne({
-      where: { id: reviewId, user: { id: userId } }, 
+      where: { id: reviewId, user: { id: userId } },
     });
 
     if (!review) throw new NotFoundException('Review not found');

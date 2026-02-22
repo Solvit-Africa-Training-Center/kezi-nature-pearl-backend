@@ -1,15 +1,38 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Head,
+  Headers,
+  Body,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { PaypackService } from './paypack.service';
-import { ApiExcludeEndpoint } from '@nestjs/swagger';
 
-@Controller('webhooks/paypack')
+@Controller('webhooks/paypack') // Keep this
 export class PaypackController {
   constructor(private readonly paypackService: PaypackService) {}
+  // Handles real webhook POSTs
+  @Post()
+  @HttpCode(HttpStatus.OK) // Return 200 so Paypack knows we received it
+  async handleWebhook(
+    @Headers() headers: Record<string, string>,
+    @Body() payload: any,
+  ) {
+    console.log('--- PAYPACK WEBHOOK RECEIVED ---');
+    console.log('Headers:', headers);
+    console.log('Payload:', payload);
 
-  @Get()
-  @ApiExcludeEndpoint()
-  async handleWebhook(@Body() payload: any) {
-    await this.paypackService.handlePaypackWebhook(payload);
-    return { message: 'Webhook received' };
+    // Process the webhook safely
+    // await this.paypackService.handlePaypackWebhook(payload);
+
+    return { received: true };
+  }
+
+  // Handles HEAD request (Paypack often sends this first)
+  @Head()
+  @HttpCode(HttpStatus.OK)
+  headCheck() {
+    return;
   }
 }
