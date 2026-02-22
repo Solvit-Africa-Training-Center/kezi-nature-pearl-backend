@@ -24,13 +24,14 @@ export class PaypackService {
 
   constructor(
     private readonly config: ConfigService,
-    @InjectRepository(Payment)
-    private readonly paymentRepo: Repository<Payment>,
 
-    @InjectRepository(Order)
-    private readonly orderRepo: Repository<Order>,
+    // @InjectRepository(Payment)
+    // private readonly paymentRepo: Repository<Payment>,
 
-    private readonly logger: LoggerService,
+    // @InjectRepository(Order)
+    // private readonly orderRepo: Repository<Order>,
+
+    // private readonly logger: LoggerService,
   ) {
     const cfg = this.config.get('paypack') as {
       key: string;
@@ -85,64 +86,43 @@ export class PaypackService {
     return response.data;
   }
 
-  async handlePaypackWebhook(payload: any) {
-    const { reference, status, paidAt } = payload;
+  // async handlePaypackWebhook(payload: any) {
+  //   const { reference, status, paidAt } = payload;
 
-    console.log(payload);
+  //   console.log(payload);
 
-    const payment = await this.paymentRepo.findOne({
-      where: { transactionId: reference },
-      relations: ['order'],
-    });
+  //   const payment = await this.paymentRepo.findOne({
+  //     where: { transactionId: reference },
+  //     relations: ['order'],
+  //   });
 
-    if (!payment) return;
+  //   if (!payment) return;
 
-    if (status === 'SUCCESS') {
-      payment.paymentStatus = PaymentStatus.PAID;
-      payment.paidAt = paidAt ? new Date(paidAt) : new Date();
-      payment.gatewayResponse = payload;
+  //   if (status === 'SUCCESS') {
+  //     payment.paymentStatus = PaymentStatus.PAID;
+  //     payment.paidAt = paidAt ? new Date(paidAt) : new Date();
+  //     payment.gatewayResponse = payload;
 
-      if (payment.order) {
-        payment.order.paymentStatus = PaymentStatus.PAID;
+  //     if (payment.order) {
+  //       payment.order.paymentStatus = PaymentStatus.PAID;
 
-        payment.order.orderStatus = OrderStatus.CONFIRMED;
-      }
-    }
+  //       payment.order.orderStatus = OrderStatus.CONFIRMED;
+  //     }
+  //   }
 
-    if (status === 'FAILED') {
-      payment.paymentStatus = PaymentStatus.FAILED;
-      payment.gatewayResponse = payload;
+  //   if (status === 'FAILED') {
+  //     payment.paymentStatus = PaymentStatus.FAILED;
+  //     payment.gatewayResponse = payload;
 
-      if (payment.order) {
-        payment.order.paymentStatus = PaymentStatus.FAILED;
-      }
-    }
+  //     if (payment.order) {
+  //       payment.order.paymentStatus = PaymentStatus.FAILED;
+  //     }
+  //   }
 
-    await this.paymentRepo.save(payment);
+  //   await this.paymentRepo.save(payment);
 
-    if (payment.order) {
-      await this.orderRepo.save(payment.order);
-    }
-  }
-
-  // async create(dto: CreatePaypackDto) {
-  //   await this.requestPayment(dto.amount, dto.phone);
-  //   return { message: 'Request sent' };
-  // }
-
-  // findAll() {
-  //   return `This action returns all paypack`;
-  // }
-
-  // findOne(id: number) {
-  //   return `This action returns a #${id} paypack`;
-  // }
-
-  // update(id: number, updatePaypackDto: UpdatePaypackDto) {
-  //   return `This action updates a #${id} paypack`;
-  // }
-
-  // remove(id: number) {
-  //   return `This action removes a #${id} paypack`;
+  //   if (payment.order) {
+  //     await this.orderRepo.save(payment.order);
+  //   }
   // }
 }
