@@ -25,7 +25,7 @@ export class User extends BaseEntity {
   @Column({ unique: true })
   email: string;
 
-  @Column()
+  @Column({ nullable: true })
   @Exclude()
   password: string;
 
@@ -46,6 +46,12 @@ export class User extends BaseEntity {
 
   @Column({ name: 'last_login_at', type: 'timestamptz', nullable: true })
   lastLoginAt?: Date;
+
+  @Column({ nullable: true })
+  googleId: string;
+
+  @Column({ nullable: true })
+  provider: string;
 
   // Relations
   @OneToOne(() => UserPreferences, (preferences) => preferences.user, {

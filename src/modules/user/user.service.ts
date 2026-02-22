@@ -16,6 +16,7 @@ import { comparehashContent, hashContent } from 'src/util';
 import { UserProfile, UserProfiles } from './dto/response';
 import { FileService } from '../file/file.service';
 import { FileType } from 'src/common/enums/product.enum';
+import { CreateUserDto } from './dto/request/create-user.dto';
 
 @Injectable()
 export class UserService {
@@ -25,7 +26,7 @@ export class UserService {
     private readonly fileService: FileService,
   ) {}
 
-  async create(dto: RegisterDto) {
+  async create(dto: CreateUserDto) {
     if (dto.password) dto.password = await hashContent(dto.password);
 
     return await this.userRepo.save(dto);

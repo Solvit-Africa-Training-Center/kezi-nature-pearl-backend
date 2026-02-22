@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
@@ -18,9 +19,13 @@ import { RefreshTokenDto, ResetPassword } from './dto/request';
 import { comparehashContent } from 'src/util/lib';
 import { RedisService } from 'src/shared/redis/redis.service';
 import { LoggerService } from 'src/common/logger/logger.service';
+import { OAuth2Client } from 'google-auth-library';
 
 @Injectable()
 export class AuthService {
+  private client: OAuth2Client;
+  private googleClientId: string;
+
   constructor(
     private readonly userService: UserService,
     private readonly tokenService: TokenService,
@@ -30,6 +35,17 @@ export class AuthService {
     private logger: LoggerService,
   ) {
     this.logger.setContext(AuthService.name);
+
+    const googleClientId = this.configService.get<string>(
+      'server.googleClientId',
+    );
+
+    if (!googleClientId) {
+      throw new Error('GOOGLE_CLIENT_ID is not defined');
+    }
+
+    this.client = new OAuth2Client(googleClientId);
+    this.googleClientId = googleClientId;
   }
 
   async register(dto: RegisterDto) {
@@ -68,6 +84,8 @@ export class AuthService {
     const user = await this.userService.findOne({
       where: { email: dto.email },
     });
+
+    if (!dto.password) throw new BadRequestException('Password is required');
 
     if (!user || !(await comparehashContent(dto.password, user.password))) {
       throw new UnauthorizedException('Invalid credentials');
@@ -116,6 +134,38 @@ export class AuthService {
     } catch (error) {
       throw new InternalServerErrorException('Login failed. Please try again.');
     }
+  }
+
+  async googleLogin(idToken: string) {
+    const payload = await this.verifyGoogleToken(idToken);
+
+    if (!payload?.email) {
+      throw new UnauthorizedException('Invalid Google token');
+    }
+
+    let user = await this.userService.findOne({
+      where: { email: payload.email },
+    });
+
+    if (!user) {
+      user = await this.userService.create({
+        email: payload.email,
+        fullName: payload.name,
+        googleId: payload.sub,
+        provider: 'google',
+        verifiedAt: new Date(),
+      });
+    }
+
+    const tokens = this.tokenService.generateToken(
+      { sub: user.id, email: user.email, role: user.role },
+      [tokenTypeEnum.ACCESS, tokenTypeEnum.REFRESH],
+    );
+
+    return {
+      message: 'Loggin successful',
+      ...tokens,
+    };
   }
 
   async resendVerification(email: string) {
@@ -265,4 +315,15 @@ export class AuthService {
     await this.redisService.del([`refresh_token:${id}`]);
     return { message: 'Logged out' };
   }
+
+  //helper
+
+  verifyGoogleToken = async (idToken: string) => {
+    const ticket = await this.client.verifyIdToken({
+      idToken,
+      audience: this.googleClientId,
+    });
+
+    return ticket.getPayload();
+  };
 }

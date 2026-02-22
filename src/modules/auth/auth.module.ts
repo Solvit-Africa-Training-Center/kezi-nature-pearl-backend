@@ -17,7 +17,3 @@ import { MailService } from 'src/util/mail.service';
   providers: [AuthService, TokenService, MailService],
 })
 export class AuthModule {}
-
-
-
-

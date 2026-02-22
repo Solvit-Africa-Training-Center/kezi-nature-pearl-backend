@@ -15,6 +15,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  GoogleAuthDto,
   LoginDto,
   RefreshTokenDto,
   RegisterDto,
@@ -41,6 +42,12 @@ export class AuthController {
   @ApiOperation({ summary: 'User Login' })
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
+  }
+
+  @Post('google')
+  @ApiOperation({ summary: 'User Google Authentication' })
+  googleLogin(@Body() dto: GoogleAuthDto) {
+    return this.authService.googleLogin(dto.idToken);
   }
 
   @Post('resend-verification')

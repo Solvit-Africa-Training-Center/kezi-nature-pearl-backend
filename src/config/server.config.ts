@@ -25,4 +25,6 @@ export default registerAs('server', () => ({
   },
 
   host: process.env.BACKEND_SOURCE,
+
+  googleClientId: process.env.GOOGLE_CLIENT_ID,
 }));
