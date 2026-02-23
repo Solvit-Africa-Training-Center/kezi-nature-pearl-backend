@@ -1,11 +1,4 @@
-import {
-  Entity,
-  Column,
-  ManyToOne,
-  JoinColumn,
-  Index,
-  OneToOne,
-} from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import {
   PaymentMethod,
@@ -13,6 +6,7 @@ import {
 } from '../../../common/enums/product.enum';
 import { Order } from '../../../modules/order/entities/order.entity';
 import { DecimalColumn } from '../../../common/decorator/decimal-column.decorator';
+import { Transaction } from '../../../modules/transaction/entities/transaction.entity';
 
 @Entity('payments')
 export class Payment extends BaseEntity {
@@ -31,24 +25,21 @@ export class Payment extends BaseEntity {
   paymentMethod: PaymentMethod;
 
   @Column({
-    name: 'payment_status',
+    name: 'status',
     type: 'enum',
     enum: PaymentStatus,
     default: PaymentStatus.PENDING,
   })
-  paymentStatus: PaymentStatus;
+  status: PaymentStatus;
 
   @DecimalColumn()
   amount: number;
 
-  @Column({ name: 'transaction_id', unique: true })
-  transactionId: string;
+  @OneToMany(() => Transaction, (transaction) => transaction.payment)
+  transactions: Transaction[];
 
   @Column({ name: 'payment_gateway' })
   paymentGateway: string;
-
-  @Column('jsonb', { name: 'gateway_response', nullable: true })
-  gatewayResponse?: Record<string, any>;
 
   @Column({ name: 'paid_at', type: 'timestamptz', nullable: true })
   paidAt?: Date;

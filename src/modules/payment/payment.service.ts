@@ -1,12 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindManyOptions, Repository } from 'typeorm';
 import { Payment } from './entities/payment.entity';
-import { UpdatePaymentDto } from './dto/update-payment.dto';
-import { Order } from '../order/entities/order.entity';
 import { PaymentMethod, PaymentStatus } from 'src/common/enums/product.enum';
 import { TransactionService } from '../transaction/transaction.service';
 import { MomoPaymentDto } from './dto/create-payment.dto';
+import { TransactionStatus } from '../transaction/entities/transaction.entity';
 
 @Injectable()
 export class PaymentService {
@@ -14,65 +13,58 @@ export class PaymentService {
     @InjectRepository(Payment)
     private readonly paymentRepo: Repository<Payment>,
 
-    @InjectRepository(Order)
-    private readonly orderRepo: Repository<Order>,
     private readonly transactionService: TransactionService,
   ) {}
 
-  async momoPaymentService(dto: MomoPaymentDto): Promise<Payment> {
-    const order = await this.orderRepo.findOne({ where: { id: dto.orderId } });
-
-    if (!order) throw new NotFoundException('Order not found');
-
-    const { transaction, gatewayResponse } =
-      await this.transactionService.createTransaction({
-        orderId: order.id,
-        phoneNumber: dto.phoneNumber,
-      });
-
-    const payment = this.paymentRepo.create({
+  async momoPaymentService(dto: MomoPaymentDto) {
+    let payment = this.paymentRepo.create({
       ...dto,
-      order,
-      transactionId: transaction.id,
-      gatewayResponse,
-      amount: order.finalAmount,
+      orderId: dto.orderId,
+      amount: dto.amount,
       paymentGateway: 'PayPack',
       paymentMethod: PaymentMethod.MOMO,
-      paymentStatus: PaymentStatus.PENDING,
+      status: PaymentStatus.PENDING,
     });
 
-    return this.paymentRepo.save(payment);
+    payment = await this.paymentRepo.save(payment);
+
+    await this.transactionService.createTransaction({
+      paymentId: payment.id,
+      amount: dto.amount,
+      phoneNumber: dto.phoneNumber,
+    });
+
+    return payment;
   }
 
-  // async updatePaymentStatus(
-  //   transactionId: string,
-  //   status: PaymentStatus,
-  // ): Promise<Payment> {
-  //   const payment = await this.paymentRepo.findOne({
-  //     where: { transactionId },
-  //     relations: ['order'],
-  //   });
+  async getPayment(options?: FindManyOptions<Payment>) {
+    const payments = await this.paymentRepo.find({
+      ...options,
+      relations: { transactions: true },
+    });
 
-  //   if (!payment) throw new NotFoundException('Payment not found');
+    for (const payment of payments) {
+      if (payment.status === PaymentStatus.PENDING) {
+        const transaction = await this.transactionService.getTransaction({
+          where: { paymentId: payment.id },
+        });
 
-  //   payment.paymentStatus = status;
-  //   if (status === PaymentStatus.PAID) {
-  //     payment.paidAt = new Date();
-  //     payment.order.paymentStatus = PaymentStatus.PAID;
-  //     await this.orderRepo.save(payment.order);
-  //   }
+        if (!transaction) continue;
 
-  //   return this.paymentRepo.save(payment);
-  // }
+        if (transaction.status === TransactionStatus.SUCCESS)
+          await this.paymentRepo.update(payment.id, {
+            status: PaymentStatus.PAID,
+          });
+        else if (transaction.status === TransactionStatus.FAILED)
+          await this.paymentRepo.update(payment.id, {
+            status: PaymentStatus.FAILED,
+          });
+      }
+    }
 
-  // async getPaymentByTransaction(transactionId: string): Promise<Payment> {
-  //   const payment = await this.paymentRepo.findOne({
-  //     where: { transactionId },
-  //     relations: ['order'],
-  //   });
-
-  //   if (!payment) throw new NotFoundException('Payment not found');
-
-  //   return payment;
-  // }
+    return await this.paymentRepo.find({
+      ...options,
+      relations: { transactions: true },
+    });
+  }
 }

@@ -8,7 +8,7 @@ import {
   DeleteDateColumn,
 } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
-import { OrderStatus, PaymentStatus } from '../../../common/enums/product.enum';
+import { OrderStatus } from '../../../common/enums/product.enum';
 import { User } from '../../../modules/user/entities/user.entity';
 import { DecimalColumn } from '../../../common/decorator/decimal-column.decorator';
 import { Payment } from '../../../modules/payment/entities/payment.entity';
@@ -51,13 +51,6 @@ export class Order extends BaseEntity {
     default: OrderStatus.PENDING,
   })
   orderStatus: OrderStatus;
-
-  @Column({
-    type: 'enum',
-    enum: PaymentStatus,
-    default: PaymentStatus.PENDING,
-  })
-  paymentStatus: PaymentStatus;
 
   @DecimalColumn({ name: 'total_amount' })
   totalAmount: number;
@@ -111,9 +104,9 @@ export class Order extends BaseEntity {
   }
 
   // Helper methods
-  get isPaid(): boolean {
-    return this.paymentStatus === PaymentStatus.PAID;
-  }
+  // get isPaid(): boolean {
+  //   return this.paymentStatus === PaymentStatus.PAID;
+  // }
 
   get isDelivered(): boolean {
     return this.orderStatus === OrderStatus.DELIVERED;
@@ -123,9 +116,9 @@ export class Order extends BaseEntity {
     return this.orderStatus === OrderStatus.CANCELLED;
   }
 
-  get isRefunded(): boolean {
-    return this.paymentStatus === PaymentStatus.REFUNDED;
-  }
+  // get isRefunded(): boolean {
+  //   return this.paymentStatus === PaymentStatus.REFUNDED;
+  // }
 
   get isProcessing(): boolean {
     return [

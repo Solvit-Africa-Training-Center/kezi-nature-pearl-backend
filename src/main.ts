@@ -4,6 +4,8 @@ import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
+import { scheduleTransactionSync } from './cron';
+import { PaymentService } from './modules/payment/payment.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -21,6 +23,9 @@ async function bootstrap() {
   const port: number = Number(configService.get<number>('server.port'));
   const prefix: string = String(configService.get<string>('server.prefix'));
   const host: string = String(configService.get<string>('server.host'));
+
+  const paymentService = app.get(PaymentService);
+  scheduleTransactionSync(paymentService);
 
   app.enableCors({
     origin: true,

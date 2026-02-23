@@ -21,7 +21,7 @@ export class OrderInvoiceDto {
 
   orderStatus: OrderStatus;
 
-  paymentStatus: PaymentStatus;
+  paymentStatus: string[];
 
   finalAmount: number;
 
@@ -33,7 +33,9 @@ export class OrderInvoiceDto {
     this.orderNumber = order.orderNumber;
     this.shippingAddressSnapshot = order.shippingAddressSnapshot;
     this.orderStatus = order.orderStatus;
-    this.paymentStatus = order.paymentStatus;
+    // this.paymentStatus = order.payments?.map((payment) => {
+    //   return payment.paymentStatus;
+    // });
     this.finalAmount = order.finalAmount;
     this.items = order.items?.map((item) => {
       return new OrderItemResponseDto(item);

@@ -1,17 +1,7 @@
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
-import { CreatePaypackDto } from './dto/create-paypack.dto';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Payment } from '../payment/entities/payment.entity';
-import { Repository } from 'typeorm';
-import { Order } from '../order/entities/order.entity';
-import { OrderStatus, PaymentStatus } from 'src/common/enums/product.enum';
-import { LoggerService } from 'src/common/logger/logger.service';
+import { TransactionStatus } from '../transaction/entities/transaction.entity';
 
 @Injectable()
 export class PaypackService {
@@ -22,17 +12,7 @@ export class PaypackService {
     currency: string;
   };
 
-  constructor(
-    private readonly config: ConfigService,
-
-    // @InjectRepository(Payment)
-    // private readonly paymentRepo: Repository<Payment>,
-
-    // @InjectRepository(Order)
-    // private readonly orderRepo: Repository<Order>,
-
-    // private readonly logger: LoggerService,
-  ) {
+  constructor(private readonly config: ConfigService) {
     const cfg = this.config.get('paypack') as {
       key: string;
       secret: string;
@@ -84,6 +64,27 @@ export class PaypackService {
     );
 
     return response.data;
+  }
+
+  async findPayment(ref: string, status: TransactionStatus) {
+    const token = await this.login();
+
+    const endpoint = `${this.paypackConfig.url}/events/transactions`;
+
+    const response = await axios.get(endpoint, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      params: { ref },
+    });
+
+    const transactions = response.data.transactions || [];
+
+    const transaction = transactions.find(
+      (transaction: any) => transaction.data.status !== status,
+    );
+
+    return transaction ? transaction.data : null;
   }
 
   // async handlePaypackWebhook(payload: any) {

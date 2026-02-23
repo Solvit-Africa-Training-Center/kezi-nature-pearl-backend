@@ -160,6 +160,7 @@ export class CartService {
 
       await this.paymentService.momoPaymentService({
         orderId: order.id,
+        amount: order.finalAmount,
         phoneNumber: dto.phoneNumber,
       });
 

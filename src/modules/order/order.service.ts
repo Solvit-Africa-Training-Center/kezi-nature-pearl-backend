@@ -8,16 +8,13 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from './entities/order.entity';
-import { OrderStatus, PaymentStatus } from 'src/common/enums/product.enum';
-import { AdminOrderFilterDto } from './dto/request';
-import { ItemService } from '../item/item.service';
+import { OrderStatus } from 'src/common/enums/product.enum';
 
 @Injectable()
 export class OrderService {
   constructor(
     @InjectRepository(Order)
     private readonly orderRepo: Repository<Order>,
-    private readonly itemService: ItemService,
   ) {}
 
   async create(dto: CreateOrderDto) {
@@ -30,7 +27,6 @@ export class OrderService {
     let order = this.orderRepo.create({
       ...rest,
       orderStatus: OrderStatus.PENDING,
-      paymentStatus: PaymentStatus.PENDING,
       totalAmount,
     });
 
@@ -67,8 +63,13 @@ export class OrderService {
     return { message: 'Order cancelled' };
   }
 
-  update(id: number, updateOrderDto: UpdateOrderDto) {
-    return `This action updates a #${id} order`;
+  async update(paymentId: string, dto: UpdateOrderDto) {
+    const order = await this.findOne({
+      where: { payments: { id: paymentId } },
+    });
+    if (!order) throw new NotFoundException('Order not found');
+
+    return await this.orderRepo.update(order.id, dto);
   }
 
   async remove(id: string) {

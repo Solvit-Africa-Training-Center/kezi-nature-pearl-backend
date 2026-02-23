@@ -8,7 +8,6 @@ import { Cart } from '../../../modules/cart/entities/cart.entity';
 import { Order } from '../../../modules/order/entities/order.entity';
 import { Review } from '../../../modules/review/entities/review.entity';
 import { Wishlist } from '../../../modules/wishlist/entities/wishlist.entity';
-import { Notification } from '../../../modules/notification/entities/notification.entity';
 import { InventoryLog } from '../../../modules/inventory-log/entities/inventory-log.entity';
 import { ContactUs } from '../../../modules/contact-us/entities/contact-us.entity';
 import { File } from '../../../modules/file/entities/file.entity';
@@ -73,9 +72,6 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Wishlist, (wishlist) => wishlist.user)
   wishlists?: Wishlist[];
-
-  @OneToMany(() => Notification, (notification) => notification.user)
-  notifications?: Notification[];
 
   @OneToMany(() => InventoryLog, (log) => log.createdByUser)
   inventoryLogs?: InventoryLog[];

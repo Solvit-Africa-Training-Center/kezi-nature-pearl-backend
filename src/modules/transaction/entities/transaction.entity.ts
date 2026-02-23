@@ -1,14 +1,6 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  CreateDateColumn,
-  UpdateDateColumn,
-  JoinColumn,
-} from 'typeorm';
-import { Order } from '../../../modules/order/entities/order.entity';
+import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
+import { Payment } from '../../../modules/payment/entities/payment.entity';
 
 export enum TransactionStatus {
   PENDING = 'pending',
@@ -18,9 +10,20 @@ export enum TransactionStatus {
 
 @Entity('transactions')
 export class Transaction extends BaseEntity {
-  @ManyToOne(() => Order, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'orderId' })
-  order: Order;
+  @Column()
+  paymentId: string;
+
+  @ManyToOne(() => Payment, (payment) => payment.transactions, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'paymentId' })
+  payment: Payment;
+
+  @Column({ unique: true })
+  reference: string;
+
+  @Column()
+  kind: string;
 
   @Column('decimal', { precision: 10, scale: 2 })
   amount: number;
@@ -32,6 +35,6 @@ export class Transaction extends BaseEntity {
   })
   status: TransactionStatus;
 
-  @Column({ unique: true, nullable: true })
-  reference?: string;
+  @Column()
+  provider: string;
 }

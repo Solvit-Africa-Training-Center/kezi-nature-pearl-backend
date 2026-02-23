@@ -1,40 +1,16 @@
-import { Entity, Column, OneToOne, JoinColumn } from 'typeorm';
-import { IsEnum, IsOptional, IsArray, IsString } from 'class-validator';
+import { Entity, Column, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
-import { SkinType } from '../../../common/enums/user.enum';
 import { User } from '../../../modules/user/entities/user.entity';
 
 @Entity('user_preferences')
 export class UserPreferences extends BaseEntity {
-  @Column({ unique: true })
-  userId: string;
+  @Column({ type: 'uuid', nullable: true })
+  userId: string | null = null;
 
-  @OneToOne(() => User, (user) => user.preferences, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, (user) => user.preferences, { nullable: true })
   @JoinColumn({ name: 'userId' })
-  user: User;
+  user: User | null = null;
 
-  @Column({
-    name: 'skin_type',
-    type: 'enum',
-    enum: SkinType,
-    nullable: true,
-  })
-  @IsEnum(SkinType)
-  @IsOptional()
-  skinType?: SkinType;
-
-  @Column({ name: 'skin_tone', nullable: true })
-  @IsOptional()
-  @IsString()
-  skinTone?: string;
-
-  @Column('jsonb', { nullable: true })
-  @IsOptional()
-  @IsArray()
-  allergies?: string[];
-
-  @Column('uuid', { name: 'preferred_categories', array: true, nullable: true })
-  @IsOptional()
-  @IsArray()
-  preferredCategories?: string[];
+  @Column({ type: 'uuid', nullable: true })
+  guestId: string | null = null;
 }

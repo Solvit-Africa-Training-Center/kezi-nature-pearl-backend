@@ -29,7 +29,6 @@ import { ReviewModule } from './modules/review/review.module';
 import { CouponModule } from './modules/coupon/coupon.module';
 import { OrderCouponModule } from './modules/order-coupon/order-coupon.module';
 import { InventoryLogModule } from './modules/inventory-log/inventory-log.module';
-import { NotificationModule } from './modules/notification/notification.module';
 import { ContactUsModule } from './modules/contact-us/contact-us.module';
 import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
@@ -82,6 +81,8 @@ import { PaymentModule } from './modules/payment/payment.module';
     OrderModule, // ( Done )
 
     PaymentModule,
+    TransactionModule,
+
     // UserPreferencesModule,
 
     ContactUsModule,
@@ -91,7 +92,6 @@ import { PaymentModule } from './modules/payment/payment.module';
     // OrderCouponModule,
     // InventoryLogModule,
     // NotificationModule,
-    TransactionModule,
   ],
   providers: [
     {

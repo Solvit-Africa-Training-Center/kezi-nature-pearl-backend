@@ -36,6 +36,8 @@ export class WishlistService {
       where: { user: { id: userId }, product: { id: productId } },
     });
 
+    console.log(existing);
+
     if (existing) throw new BadRequestException('Product already in wishlist');
 
     const wishlistItem = this.wishlistRepo.create({
