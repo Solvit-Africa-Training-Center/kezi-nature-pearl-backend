@@ -46,24 +46,53 @@ export class OrderService {
     return await this.orderRepo.findOne(options);
   }
 
-  async cancelOrder(id: string) {
+  async updateOrderStatus(id: string, status: OrderStatus) {
     const order = await this.findOne({ where: { id } });
 
     if (!order) throw new NotFoundException('Order not found');
 
-    if (
-      order.status === OrderStatus.DELIVERED ||
-      order.status === OrderStatus.CANCELLED
-    )
-      throw new BadRequestException(
-        'Order cannot be cancelled because it is already delivered or cancelled.',
-      );
+    if (status === OrderStatus.CANCELLED) {
+      if (
+        order.status === OrderStatus.DELIVERED ||
+        order.status === OrderStatus.CANCELLED
+      )
+        throw new BadRequestException(
+          'Order cannot be cancelled because it is already delivered or cancelled.',
+        );
 
-    await this.orderRepo.update(order.id, {
-      status: OrderStatus.CANCELLED,
-    });
+      await this.orderRepo.update(order.id, {
+        status: OrderStatus.DELIVERED,
+      });
+    } else if (status === OrderStatus.PROCESSED) {
+      if (order.status !== OrderStatus.CONFIRMED)
+        throw new BadRequestException(
+          `Order cannot be processed because it's status is not confirmed`,
+        );
 
-    return { message: 'Order cancelled' };
+      await this.orderRepo.update(order.id, {
+        status: OrderStatus.PROCESSED,
+      });
+    } else if (status === OrderStatus.SHIPPED) {
+      if (order.status !== OrderStatus.PROCESSED)
+        throw new BadRequestException(
+          `Order cannot be shipped because it's status is not processed`,
+        );
+
+      await this.orderRepo.update(order.id, {
+        status: OrderStatus.SHIPPED,
+      });
+    } else if (status === OrderStatus.DELIVERED) {
+      if (order.status !== OrderStatus.SHIPPED)
+        throw new BadRequestException(
+          'Order cannot be delivered because it is not shipped.',
+        );
+
+      await this.orderRepo.update(order.id, {
+        status: OrderStatus.DELIVERED,
+      });
+    }
+
+    return { message: `Order ${status}` };
   }
 
   async update(paymentId: string, dto: UpdateOrderDto) {
@@ -132,7 +161,6 @@ export class OrderService {
   }
 
   //
-
   async checkOrders() {
     const orders = await this.findAll({
       where: { status: OrderStatus.PENDING },

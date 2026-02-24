@@ -14,7 +14,7 @@ export enum CartStatus {
 export enum OrderStatus {
   PENDING = 'pending',
   CONFIRMED = 'confirmed',
-  PROCESSING = 'processing',
+  PROCESSED = 'processed',
   SHIPPED = 'shipped',
   DELIVERED = 'delivered',
   CANCELLED = 'cancelled',

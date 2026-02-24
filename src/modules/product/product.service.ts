@@ -1,17 +1,7 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProductDto } from './dto/request/create-product.dto';
 import { UpdateProductDto } from './dto/request/update-product.dto';
-import {
-  DataSource,
-  EntityManager,
-  FindManyOptions,
-  FindOneOptions,
-  Repository,
-} from 'typeorm';
+import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { Product } from './entities/product.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProductImageService } from '../product-image/product-image.service';
@@ -33,7 +23,8 @@ export class ProductService {
   }
 
   async findAll(options?: FindManyOptions<Product>) {
-    return await this.productRepo.find(options);
+    const product = await this.productRepo.find(options);
+    return product;
   }
 
   async findOne(option: FindOneOptions<Product>) {

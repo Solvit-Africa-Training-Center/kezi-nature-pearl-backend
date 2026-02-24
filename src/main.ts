@@ -5,9 +5,9 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 import { scheduleTransactionSync } from './cron';
-import { PaymentService } from './modules/payment/payment.service';
 import { LoggerService } from './common/logger/logger.service';
 import { OrderService } from './modules/order/order.service';
+import { SeederService } from './database/seeders/seeder.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -23,6 +23,8 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
   const logger = app.get(LoggerService);
+  const seeder = app.get(SeederService);
+  await seeder.seedAll();
 
   const port: number = Number(configService.get<number>('server.port'));
   const prefix: string = String(configService.get<string>('server.prefix'));

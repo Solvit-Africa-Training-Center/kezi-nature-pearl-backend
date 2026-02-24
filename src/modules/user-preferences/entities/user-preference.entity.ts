@@ -13,4 +13,7 @@ export class UserPreferences extends BaseEntity {
 
   @Column({ type: 'uuid', nullable: true })
   guestId: string | null = null;
+
+  @Column({ length: 3, name: 'preferred_currency', default: 'USD' })
+  preferredCurrency: string;
 }

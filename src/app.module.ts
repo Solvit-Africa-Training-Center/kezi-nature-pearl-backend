@@ -37,6 +37,9 @@ import { LoggerModule } from './common/logger/logger.module';
 import { TransactionModule } from './modules/transaction/transaction.module';
 import { PaypackModule } from './modules/paypack/paypack.module';
 import { PaymentModule } from './modules/payment/payment.module';
+import { CurrencyModule } from './modules/currencies/currencies.module';
+import { SeederService } from './database/seeders/seeder.service';
+import { SeederModule } from './database/seeders/seeder.module';
 
 @Module({
   imports: [
@@ -82,16 +85,21 @@ import { PaymentModule } from './modules/payment/payment.module';
 
     PaymentModule,
     TransactionModule,
-
-    // UserPreferencesModule,
-
-    ContactUsModule,
     WishlistModule,
     ReviewModule,
+
+    ContactUsModule,
+
+    CurrencyModule,
+
+    UserPreferencesModule,
     // CouponModule,
     // OrderCouponModule,
     // InventoryLogModule,
     // NotificationModule,
+
+    // seeder
+    SeederModule,
   ],
   providers: [
     {

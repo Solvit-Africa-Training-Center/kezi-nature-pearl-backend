@@ -123,7 +123,7 @@ export class Order extends BaseEntity {
   get isProcessing(): boolean {
     return [
       OrderStatus.CONFIRMED,
-      OrderStatus.PROCESSING,
+      OrderStatus.PROCESSED,
       OrderStatus.SHIPPED,
     ].includes(this.status);
   }

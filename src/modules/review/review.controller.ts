@@ -12,10 +12,8 @@ import {
 } from '@nestjs/common';
 import { ReviewService } from './review.service';
 import { CreateReviewDto } from './dto/create-review.dto';
-import { CurrentUser, Roles } from 'src/common/decorator';
-import { AuthGuard, OptionalAuthGuard, RolesGuard } from 'src/common/guards';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { UserRole } from 'src/common/enums/user.enum';
+import { OptionalAuthGuard } from 'src/common/guards';
+import { ApiBearerAuth } from '@nestjs/swagger';
 import { GuestInterceptor } from 'src/common/interceptors/guest.interceptor';
 import { UpdateReviewDto } from './dto/update-review.dto';
 
