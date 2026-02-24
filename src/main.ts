@@ -6,6 +6,8 @@ import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 import { scheduleTransactionSync } from './cron';
 import { PaymentService } from './modules/payment/payment.service';
+import { LoggerService } from './common/logger/logger.service';
+import { OrderService } from './modules/order/order.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -20,12 +22,14 @@ async function bootstrap() {
   app.use(cookieParser());
 
   const configService = app.get(ConfigService);
+  const logger = app.get(LoggerService);
+
   const port: number = Number(configService.get<number>('server.port'));
   const prefix: string = String(configService.get<string>('server.prefix'));
   const host: string = String(configService.get<string>('server.host'));
 
-  const paymentService = app.get(PaymentService);
-  scheduleTransactionSync(paymentService);
+  const orderService = app.get(OrderService);
+  scheduleTransactionSync(orderService, logger);
 
   app.enableCors({
     origin: true,
@@ -48,8 +52,8 @@ async function bootstrap() {
   // }
 
   await app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-    console.log(`Swagger docs at ${host}/${prefix}/docs`);
+    logger.log(`Server running on port ${port}`);
+    logger.log(`Swagger docs at ${host}/${prefix}/docs`);
   });
 }
 bootstrap();

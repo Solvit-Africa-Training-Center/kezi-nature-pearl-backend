@@ -34,18 +34,18 @@ export class TransactionService {
     return transaction;
   }
 
-  async getTransaction(options: FindOneOptions<Transaction>) {
-    const transaction = await this.transactionRepo.findOne(options);
+  async getTransaction(paymentId: string): Promise<Transaction[]> {
+    const transactions = await this.transactionRepo.find({
+      where: { paymentId, status: TransactionStatus.PENDING },
+    });
 
-    if (!transaction) return;
-
-    if (transaction.status === TransactionStatus.PENDING) {
+    for (const transaction of transactions) {
       const gatewayResponse = await this.paypackService.findPayment(
         transaction.reference,
         transaction.status,
       );
 
-      if (!gatewayResponse) return transaction;
+      if (!gatewayResponse) return [];
 
       const latestStatus = gatewayResponse.status;
 
@@ -56,6 +56,8 @@ export class TransactionService {
       }
     }
 
-    return transaction;
+    return await this.transactionRepo.find({
+      where: { paymentId },
+    });
   }
 }

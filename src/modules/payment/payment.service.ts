@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindManyOptions, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Payment } from './entities/payment.entity';
 import { PaymentMethod, PaymentStatus } from 'src/common/enums/product.enum';
 import { TransactionService } from '../transaction/transaction.service';
@@ -37,34 +37,31 @@ export class PaymentService {
     return payment;
   }
 
-  async getPayment(options?: FindManyOptions<Payment>) {
+  async getPayment(orderId: string) {
     const payments = await this.paymentRepo.find({
-      ...options,
-      relations: { transactions: true },
+      where: { orderId, status: PaymentStatus.PENDING },
     });
 
     for (const payment of payments) {
-      if (payment.status === PaymentStatus.PENDING) {
-        const transaction = await this.transactionService.getTransaction({
-          where: { paymentId: payment.id },
-        });
+      const transactions = await this.transactionService.getTransaction(
+        payment.id,
+      );
 
-        if (!transaction) continue;
-
-        if (transaction.status === TransactionStatus.SUCCESS)
+      for (const transaction of transactions) {
+        if (transaction.status === TransactionStatus.SUCCESS) {
           await this.paymentRepo.update(payment.id, {
             status: PaymentStatus.PAID,
           });
-        else if (transaction.status === TransactionStatus.FAILED)
+        } else if (transaction.status === TransactionStatus.FAILED) {
+          console.log('failed');
+
           await this.paymentRepo.update(payment.id, {
             status: PaymentStatus.FAILED,
           });
+        }
       }
     }
 
-    return await this.paymentRepo.find({
-      ...options,
-      relations: { transactions: true },
-    });
+    return await this.paymentRepo.find({ where: { orderId } });
   }
 }

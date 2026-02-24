@@ -8,13 +8,16 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from './entities/order.entity';
-import { OrderStatus } from 'src/common/enums/product.enum';
+import { OrderStatus, PaymentStatus } from 'src/common/enums/product.enum';
+import { PaymentService } from '../payment/payment.service';
 
 @Injectable()
 export class OrderService {
   constructor(
     @InjectRepository(Order)
     private readonly orderRepo: Repository<Order>,
+
+    private readonly paymentRepo: PaymentService,
   ) {}
 
   async create(dto: CreateOrderDto) {
@@ -26,7 +29,7 @@ export class OrderService {
 
     let order = this.orderRepo.create({
       ...rest,
-      orderStatus: OrderStatus.PENDING,
+      status: OrderStatus.PENDING,
       totalAmount,
     });
 
@@ -49,15 +52,15 @@ export class OrderService {
     if (!order) throw new NotFoundException('Order not found');
 
     if (
-      order.orderStatus === OrderStatus.DELIVERED ||
-      order.orderStatus === OrderStatus.CANCELLED
+      order.status === OrderStatus.DELIVERED ||
+      order.status === OrderStatus.CANCELLED
     )
       throw new BadRequestException(
         'Order cannot be cancelled because it is already delivered or cancelled.',
       );
 
     await this.orderRepo.update(order.id, {
-      orderStatus: OrderStatus.CANCELLED,
+      status: OrderStatus.CANCELLED,
     });
 
     return { message: 'Order cancelled' };
@@ -125,6 +128,34 @@ export class OrderService {
     return await this.orderRepo.find({
       ...filter,
       withDeleted: true,
+    });
+  }
+
+  //
+
+  async checkOrders() {
+    const orders = await this.findAll({
+      where: { status: OrderStatus.PENDING },
+      relations: { payments: true },
+    });
+
+    for (const order of orders) {
+      const payments = await this.paymentRepo.getPayment(order.id);
+
+      for (const payment of payments) {
+        if (payment.status === PaymentStatus.PAID)
+          await this.orderRepo.update(order.id, {
+            status: OrderStatus.CONFIRMED,
+          });
+
+        if (payment.status === PaymentStatus.FAILED)
+          await this.orderRepo.update(order.id, {
+            status: OrderStatus.CANCELLED,
+          });
+      }
+    }
+    return await this.findAll({
+      relations: { payments: true },
     });
   }
 }

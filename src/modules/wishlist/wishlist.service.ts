@@ -1,6 +1,4 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { CreateWishlistDto } from './dto/create-wishlist.dto';
-import { UpdateWishlistDto } from './dto/update-wishlist.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Wishlist } from './entities/wishlist.entity';
 import { Repository } from 'typeorm';
@@ -35,8 +33,6 @@ export class WishlistService {
     const existing = await this.wishlistRepo.findOne({
       where: { user: { id: userId }, product: { id: productId } },
     });
-
-    console.log(existing);
 
     if (existing) throw new BadRequestException('Product already in wishlist');
 

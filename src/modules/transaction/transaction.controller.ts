@@ -13,8 +13,8 @@ import { TransactionSearchDto } from './dto/request/search-query.dto';
 export class TransactionController {
   constructor(private readonly transactionService: TransactionService) {}
 
-  @Get()
-  getTransaction(@Query() query: TransactionSearchDto) {
-    return this.transactionService.getTransaction({ where: { ...query } });
-  }
+  // @Get()
+  // getTransaction(@Query() query: TransactionSearchDto) {
+  //   return this.transactionService.getTransaction({ where: { ...query } });
+  // }
 }

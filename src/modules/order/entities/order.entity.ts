@@ -50,7 +50,7 @@ export class Order extends BaseEntity {
     enum: OrderStatus,
     default: OrderStatus.PENDING,
   })
-  orderStatus: OrderStatus;
+  status: OrderStatus;
 
   @DecimalColumn({ name: 'total_amount' })
   totalAmount: number;
@@ -109,11 +109,11 @@ export class Order extends BaseEntity {
   // }
 
   get isDelivered(): boolean {
-    return this.orderStatus === OrderStatus.DELIVERED;
+    return this.status === OrderStatus.DELIVERED;
   }
 
   get isCancelled(): boolean {
-    return this.orderStatus === OrderStatus.CANCELLED;
+    return this.status === OrderStatus.CANCELLED;
   }
 
   // get isRefunded(): boolean {
@@ -125,6 +125,6 @@ export class Order extends BaseEntity {
       OrderStatus.CONFIRMED,
       OrderStatus.PROCESSING,
       OrderStatus.SHIPPED,
-    ].includes(this.orderStatus);
+    ].includes(this.status);
   }
 }

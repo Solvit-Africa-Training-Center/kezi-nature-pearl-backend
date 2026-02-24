@@ -30,7 +30,7 @@ export class WishlistController {
       },
     );
   }
-  @Post('productId')
+  @Post('product/:productId')
   addWishlist(@CurrentUser() user, @Param('productId') productId: string) {
     return this.wishlistService.addToWishlist(user.sub, productId);
   }

@@ -14,8 +14,8 @@ export class PaymentController {
     return this.paymentService.momoPaymentService(dto);
   }
 
-  @Get()
-  getPayment() {
-    return this.paymentService.getPayment();
-  }
+  // @Get()
+  // getPayment() {
+  //   return this.paymentService.getPayment();
+  // }
 }

@@ -32,7 +32,7 @@ export class OrderInvoiceDto {
   constructor(order: Order) {
     this.orderNumber = order.orderNumber;
     this.shippingAddressSnapshot = order.shippingAddressSnapshot;
-    this.orderStatus = order.orderStatus;
+    this.orderStatus = order.status;
     // this.paymentStatus = order.payments?.map((payment) => {
     //   return payment.paymentStatus;
     // });
