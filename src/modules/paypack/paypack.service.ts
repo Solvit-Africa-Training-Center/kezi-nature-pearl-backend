@@ -7,6 +7,7 @@ import { Payment } from '../payment/entities/payment.entity';
 import { Repository } from 'typeorm';
 import { Order } from '../order/entities/order.entity';
 import { OrderStatus, PaymentStatus } from 'src/common/enums/product.enum';
+import { PaymentMethod } from 'src/common/enums/product.enum';
 
 @Injectable()
 export class PaypackService {

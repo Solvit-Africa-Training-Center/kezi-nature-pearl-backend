@@ -1,39 +1,55 @@
-import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
-import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
+import {
+  Entity,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  Index,
+  DeleteDateColumn,
+} from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
-import { NotificationType } from '../../../common/enums/product.enum';
+import { Order } from '../../order/entities/order.entity';
 import { User } from '../../../modules/user/entities/user.entity';
 
+export enum NotificationType {
+  ORDER = 'ORDER',
+}
+
 @Entity('notifications')
-@Index(['userId', 'isRead', 'createdAt'])
 export class Notification extends BaseEntity {
   @Column()
   userId: string;
 
-  @ManyToOne(() => User, (user) => user.notifications, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
-  user: User;
+  user?: User;
+
+  @Column({ nullable: true })
+  orderId?: string;
+
+  @ManyToOne(() => Order, { nullable: true, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'orderId' })
+  order?: Order;
+
+  @Column()
+  title: string;
+
+  @Column('text')
+  message: string;
 
   @Column({
     type: 'enum',
     enum: NotificationType,
+    default: NotificationType.ORDER,
   })
-  @IsEnum(NotificationType)
-  type: NotificationType;
+  type: string;
 
-  @Column()
-  @IsString()
-  title: string;
-
-  @Column('text')
-  @IsString()
-  message: string;
-
-  @Column('jsonb', { nullable: true })
-  @IsOptional()
-  data?: Record<string, any>;
-
-  @Column({ name: 'is_read', default: false })
-  @IsBoolean()
+  @Column({ default: false })
   isRead: boolean;
+
+  @Index()
+  @Column({ type: 'timestamptz', nullable: true })
+  readAt?: Date;
+
+  @DeleteDateColumn()
+  deletedAt: Date;
 }

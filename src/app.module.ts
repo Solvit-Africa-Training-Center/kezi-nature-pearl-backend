@@ -94,6 +94,7 @@ import { PaymentModule } from './modules/payment/payment.module';
     // InventoryLogModule,
     // NotificationModule,
     TransactionModule,
+    NotificationModule,
   ],
   providers: [
     {

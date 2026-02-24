@@ -6,6 +6,7 @@ import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { Order } from '../order/entities/order.entity';
 import { PaymentStatus } from 'src/common/enums/product.enum';
 import { PaypackService } from '../paypack/paypack.service';
+import { CreatePaypackDto } from '../paypack/dto/create-paypack.dto';
 
 @Injectable()
 export class TransactionService {

@@ -5,6 +5,8 @@ import {
   JoinColumn,
   Index,
   OneToOne,
+  BeforeInsert,
+  BeforeUpdate,
 } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import {
@@ -13,6 +15,7 @@ import {
 } from '../../../common/enums/product.enum';
 import { Order } from '../../../modules/order/entities/order.entity';
 import { DecimalColumn } from '../../../common/decorator/decimal-column.decorator';
+import { randomUUID } from 'crypto';
 
 @Entity('payments')
 export class Payment extends BaseEntity {
@@ -55,4 +58,15 @@ export class Payment extends BaseEntity {
 
   @Column({ name: 'refunded_at', type: 'timestamptz', nullable: true })
   refundedAt?: Date;
+
+  @Column({ unique: true })
+  @Index()
+  idempotencyKey: string;
+
+  @BeforeUpdate()
+  setIdempotency() {
+    if(this.paymentStatus === PaymentStatus.PAID){
+      this.idempotencyKey = randomUUID()
+    }
+  }
 }
