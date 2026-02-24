@@ -9,12 +9,4 @@ export class CreatePaypackDto {
   @ApiProperty({ example: '1000' })
   @IsNumber()
   amount: number;
-
-  @ApiProperty({ example: '' })
-  @IsString()
-  idempotency: string;
-
-  @ApiProperty({ example: '' })
-  @IsString()
-  orderId: string;
 }

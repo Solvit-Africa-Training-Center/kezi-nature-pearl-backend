@@ -1,6 +1,5 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreatePaypackDto } from './dto/create-paypack.dto';
-import { UpdatePaypackDto } from './dto/update-paypack.dto';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -27,7 +26,7 @@ export class PaypackService {
     @InjectRepository(Order)
     private readonly orderRepo: Repository<Order>,
   ) {
-    const cfg = config.get('paypack') as {
+    const cfg = this.config.get('paypack') as {
       key: string;
       secret: string;
       url: string;
@@ -59,90 +58,31 @@ export class PaypackService {
     return token;
   }
 
-  async requestPayment(dto: CreatePaypackDto) {
-    const existing = await this.paymentRepo.findOne({
-      where: { idempotencyKey: dto.idempotency },
-    });
-    if (existing) return existing;
+  async requestPayment(amount: number, number: string) {
+    const token = await this.login();
 
-    try {
-      const token = await this.login();
+    const endpoint = `${this.paypackConfig.url}/transactions/cashin`;
 
-      const endpoint = `${this.paypackConfig.url}/transactions/cashin`;
-
-      const response = await axios.post(
-        endpoint,
-        {
-          amount: dto.amount,
-          number: dto.phoneNumber,
+    const response = await axios.post(
+      endpoint,
+      {
+        amount,
+        number,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
+      },
+    );
 
-      const payment = this.paymentRepo.create({
-        amount: dto.amount,
-        paymentMethod: PaymentMethod.MOMO,
-        paymentGateway: 'Paypack',
-        transactionId: response.data?.ref,
-        idempotencyKey: dto.idempotency,
-        gatewayResponse: response.data,
-        paymentStatus: PaymentStatus.PENDING,
-        orderId: dto.orderId,
-      });
-
-      await this.paymentRepo.save(payment);
-
-      return payment;
-    } catch (error) {
-      console.error(error);
-      throw new InternalServerErrorException('Problem calling Paypack API');
-    }
-  }
-
-  async requestCashout(dto: CreatePaypackDto) {
-    const existing = await this.paymentRepo.findOne({
-      where: { idempotencyKey: dto.idempotency },
-    });
-    if (existing) return existing;
-
-    try {
-      const token = await this.login();
-      const endpoint = `${this.paypackConfig.url}/transactions/cashout`;
-
-      const response = await axios.post(
-        endpoint,
-        {
-          amount: dto.amount,
-          number: dto.phoneNumber,
-        },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
-
-      const payment = this.paymentRepo.create({
-        amount: dto.amount,
-        paymentMethod: PaymentMethod.MOMO,
-        paymentGateway: 'Paypack',
-        transactionId: response.data?.ref,
-        idempotencyKey: dto.idempotency,
-        gatewayResponse: response.data,
-        paymentStatus: PaymentStatus.PENDING,
-       
-      });
-
-      await this.paymentRepo.save(payment);
-      return payment;
-    } catch (error) {
-      console.error(error);
-      throw new InternalServerErrorException(
-        'Problem calling Paypack Cashout API',
-      );
-    }
+    return response.data;
   }
 
   async handlePaypackWebhook(payload: any) {
     const { reference, status, paidAt } = payload;
+
+    console.log(payload);
 
     const payment = await this.paymentRepo.findOne({
       where: { transactionId: reference },
@@ -178,11 +118,11 @@ export class PaypackService {
       await this.orderRepo.save(payment.order);
     }
   }
-  async create(dto: CreatePaypackDto) {
-    const idempotencyKey = `paypack-${Date.now()}-${Math.random()}`;
-    const payment = await this.requestPayment(dto);
-    return { message: 'Request sent', payment };
-  }
+
+  // async create(dto: CreatePaypackDto) {
+  //   await this.requestPayment(dto.amount, dto.phone);
+  //   return { message: 'Request sent' };
+  // }
 
   // findAll() {
   //   return `This action returns all paypack`;

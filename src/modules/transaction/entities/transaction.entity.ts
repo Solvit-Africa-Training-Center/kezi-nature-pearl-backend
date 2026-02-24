@@ -8,6 +8,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Order } from '../../../modules/order/entities/order.entity';
+import { BaseEntity } from '../../../common/entities/base.entity';
 
 export enum TransactionStatus {
   PENDING = 'pending',
@@ -15,11 +16,8 @@ export enum TransactionStatus {
   FAILED = 'failed',
 }
 
-@Entity()
-export class Transaction {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+@Entity('transactions')
+export class Transaction extends BaseEntity {
   @ManyToOne(() => Order, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'orderId' })
   order: Order;
@@ -36,10 +34,4 @@ export class Transaction {
 
   @Column({ unique: true, nullable: true })
   reference?: string;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 }

@@ -23,7 +23,6 @@ export class OptionalAuthGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
-    console.log(`Token is ${token}`);
 
     if (!token) {
       request.user = null; // guest

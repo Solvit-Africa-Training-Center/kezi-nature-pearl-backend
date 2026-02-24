@@ -9,7 +9,7 @@ import { PaypackService } from '../paypack/paypack.service';
 import { CreatePaypackDto } from '../paypack/dto/create-paypack.dto';
 
 @Injectable()
-export class TransactionsService {
+export class TransactionService {
   constructor(
     @InjectRepository(Transaction)
     private readonly transactionRepo: Repository<Transaction>,
@@ -20,7 +20,7 @@ export class TransactionsService {
     private readonly paypackService: PaypackService,
   ) {}
 
-  async createTransaction(dto: CreateTransactionDto): Promise<Transaction> {
+  async createTransaction(dto: CreateTransactionDto) {
     const order = await this.orderRepo.findOne({
       where: { id: dto.orderId },
     });
@@ -35,16 +35,16 @@ export class TransactionsService {
       status: TransactionStatus.PENDING,
     });
 
-    const paypackDto: CreatePaypackDto = {
-      amount: order.finalAmount,
-      phoneNumber: dto.phoneNumber,
-      orderId: dto.orderId,
-      idempotency: `paypack-${Date.now()}-${Math.random()}`,
-    };
+    const gatewayResponse = await this.paypackService.requestPayment(
+      order.finalAmount,
+      dto.phoneNumber,
+    );
 
-    await this.paypackService.requestPayment(paypackDto);
+    transaction.reference = gatewayResponse.ref;
 
-    return this.transactionRepo.save(transaction);
+    await this.transactionRepo.save(transaction);
+
+    return { transaction, gatewayResponse };
   }
 
   async getTransactionByReference(reference: string): Promise<Transaction> {

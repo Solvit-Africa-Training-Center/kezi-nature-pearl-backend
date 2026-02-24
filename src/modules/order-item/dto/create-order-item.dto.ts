@@ -3,9 +3,9 @@ import { Order } from 'src/modules/order/entities/order.entity';
 import { Product } from 'src/modules/product/entities/product.entity';
 
 export class CreateOrderItemDto {
-  order: Order;
+  orderId: string;
 
-  product: Product;
+  productId: string;
 
   quantity: number;
 

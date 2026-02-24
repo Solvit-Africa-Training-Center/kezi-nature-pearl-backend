@@ -16,3 +16,8 @@ export enum SkinType {
   SENSITIVE = 'sensitive',
   NORMAL = 'normal',
 }
+
+export enum CustomerType {
+  REGISTERED = 'registered',
+  GUEST = 'guest',
+}
