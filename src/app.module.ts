@@ -40,6 +40,7 @@ import { PaymentModule } from './modules/payment/payment.module';
 import { CurrencyModule } from './modules/currencies/currencies.module';
 import { SeederService } from './database/seeders/seeder.service';
 import { SeederModule } from './database/seeders/seeder.module';
+import { NotificationModule } from './modules/notification/notification.module';
 
 @Module({
   imports: [
@@ -97,9 +98,7 @@ import { SeederModule } from './database/seeders/seeder.module';
     // OrderCouponModule,
     // InventoryLogModule,
     // NotificationModule,
-
-    // seeder
-    SeederModule,
+    NotificationModule,
   ],
   providers: [
     {
