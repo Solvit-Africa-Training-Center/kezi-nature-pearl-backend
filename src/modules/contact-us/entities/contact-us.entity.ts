@@ -15,7 +15,10 @@ export class ContactUs extends BaseEntity {
   @Column({ type: 'uuid', nullable: true })
   userId: string | null = null;
 
-  @ManyToOne(() => User, (user) => user.contactSubmissions, { nullable: true })
+  @ManyToOne(() => User, (user) => user.contactSubmissions, {
+    onDelete: 'CASCADE',
+    nullable: true,
+  })
   @JoinColumn({ name: 'userId' })
   user: User | null = null;
 
