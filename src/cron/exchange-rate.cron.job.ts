@@ -16,14 +16,7 @@ export const scheduleExchangeRateSync = (
     logger.log(`Exchange Rate sync started at, ${new Date().toISOString()}`);
 
     try {
-      const updatedPayments = await currencyService.exchangeRateSync();
-      //   if (updatedPayments.length > 0) {
-      //     //         logger.log(
-      //     //           `Checked ${updatedPayments.length} order transactions. Latest statuses updated.`,
-      //     //         );
-      //   } else {
-      //     //         logger.log('No pending order transactions found.');
-      //   }
+      await currencyService.exchangeRateSync();
     } catch (error) {
       logger.error('Error syncing exchange rate:', error);
     }

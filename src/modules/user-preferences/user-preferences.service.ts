@@ -6,6 +6,7 @@ import { UserPreferences } from './entities/user-preference.entity';
 import { FindOneOptions, Repository } from 'typeorm';
 import { CurrencyService } from '../currencies/currencies.service';
 import { setUserGuestId } from 'src/util';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UserPreferencesService {
@@ -13,6 +14,7 @@ export class UserPreferencesService {
     @InjectRepository(UserPreferences)
     private readonly preferenceRepo: Repository<UserPreferences>,
     private readonly currencyService: CurrencyService,
+    private readonly config: ConfigService,
   ) {}
   async create(dto: CreateUserPreferenceDto) {
     let preference = await this.findOne({
@@ -20,7 +22,9 @@ export class UserPreferencesService {
     });
 
     if (!preference) {
-      const preferedCurrency = await this.currencyService.getCurrency('RWF');
+      const preferedCurrency = await this.currencyService.getCurrency(
+        String(this.config.get('exchange-rate.defaultCurrency')),
+      );
 
       preference = this.preferenceRepo.create({
         ...dto,

@@ -9,7 +9,6 @@ import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class CurrencyService {
   private readonly rateConfig: {
-    baseCurrency: string;
     defaultCurrency: string;
     currencyUpdateCron: string;
     key: string;
@@ -24,7 +23,6 @@ export class CurrencyService {
     private readonly config: ConfigService,
   ) {
     const cfg = this.config.get('exchange-rate') as {
-      baseCurrency: string;
       defaultCurrency: string;
       currencyUpdateCron: string;
       key: string;
@@ -33,7 +31,7 @@ export class CurrencyService {
 
     if (
       !cfg ||
-      !cfg.baseCurrency ||
+      // !cfg.baseCurrency ||
       !cfg.defaultCurrency ||
       !cfg.currencyUpdateCron ||
       !cfg.key ||
@@ -159,7 +157,7 @@ export class CurrencyService {
       .map((c) => c.code)
       .join(',');
 
-    const endpoint = `${this.rateConfig.url}/live?access_key=${this.rateConfig.key}&currencies=${currencyCodes}`;
+    const endpoint = `${this.rateConfig.url}/live?access_key=${this.rateConfig.key}&source=${this.rateConfig.defaultCurrency}&currencies=${currencyCodes}`;
 
     const response = await axios.get(endpoint);
 
