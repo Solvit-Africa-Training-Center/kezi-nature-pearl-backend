@@ -11,6 +11,8 @@ import { Order } from './entities/order.entity';
 import { OrderStatus, PaymentStatus } from 'src/common/enums/product.enum';
 import { PaymentService } from '../payment/payment.service';
 import { LoggerService } from 'src/common/logger/logger.service';
+import { ItemService } from '../item/item.service';
+import { ProductService } from '../product/product.service';
 
 @Injectable()
 export class OrderService {
@@ -18,7 +20,8 @@ export class OrderService {
     @InjectRepository(Order)
     private readonly orderRepo: Repository<Order>,
     private readonly paymentRepo: PaymentService,
-    private readonly logger: LoggerService,
+    private readonly itemService: ItemService,
+    private readonly productService: ProductService,
   ) {}
 
   async create(dto: CreateOrderDto) {
@@ -113,7 +116,10 @@ export class OrderService {
   }
 
   async updateOrderStatus(id: string, status: OrderStatus) {
-    const order = await this.findOne({ where: { id } });
+    const order = await this.findOne({
+      where: { id },
+      relations: { items: true },
+    });
 
     if (!order) throw new NotFoundException('Order not found');
 
@@ -137,6 +143,26 @@ export class OrderService {
 
       await this.orderRepo.update(order.id, {
         status: OrderStatus.PROCESSED,
+      });
+
+      order.items?.map(async (item) => {
+        const existingItem = await this.itemService.findOne({
+          where: { id: item.id },
+          relations: { product: true },
+        });
+
+        if (!existingItem)
+          throw new NotFoundException(`Item ${item.product.name} not found`);
+
+        const product = await this.productService.findOne({
+          where: { id: existingItem.product.id },
+        });
+
+        if (!product) throw new NotFoundException('Product not found');
+
+        await this.productService.update(product.id, {
+          stockQuantity: product.stockQuantity - 1,
+        });
       });
     } else if (status === OrderStatus.SHIPPED) {
       if (order.status !== OrderStatus.PROCESSED)

@@ -6,6 +6,7 @@ import {
   Delete,
   UseGuards,
   NotFoundException,
+  Query,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { AuthGuard, RolesGuard } from 'src/common/guards';
@@ -15,6 +16,7 @@ import { Payload } from 'src/util';
 import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { OrderDetailsDto } from './dto/response/order-details.dto';
 import { OrderStatus } from 'src/common/enums/product.enum';
+import { AdminOrderFilterDto } from './dto/request';
 
 @Controller('order')
 @UseGuards(AuthGuard, RolesGuard)
@@ -27,15 +29,15 @@ export class OrderController {
   @Get('admin')
   @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Get Orders *' })
-  async findAllForAdmin() {
-    // @Query() query: AdminOrderFilterDto
+  async findAllForAdmin(@Query() query: AdminOrderFilterDto) {
     const orders = await this.orderService.findAllForAdmin({
+      where: { ...query },
       relations: { items: { product: { images: { file: true } } }, user: true },
     });
     return orders.map((order) => new OrderDetailsDto(order));
   }
 
-  @Patch('admin/confirm/:id')
+  @Patch('admin/process/:id')
   @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Process user order by Id' })
   processOrder(@Param('id') id: string) {
@@ -60,9 +62,12 @@ export class OrderController {
   @Get()
   @Roles(UserRole.CUSTOMER)
   @ApiOperation({ summary: 'Get user orders *' })
-  async findAll(@CurrentUser() user: Payload) {
+  async findAll(
+    @CurrentUser() user: Payload,
+    @Query() query: AdminOrderFilterDto,
+  ) {
     const orders = await this.orderService.findAll({
-      where: { userId: user.sub },
+      where: { userId: user.sub, ...query },
       relations: { items: { product: { images: { file: true } } }, user: true },
       order: { createdAt: 'DESC' },
     });

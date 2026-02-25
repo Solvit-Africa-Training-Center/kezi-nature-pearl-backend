@@ -11,6 +11,7 @@ import {
   NotFoundException,
   UseGuards,
   Req,
+  Query,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/request/create-product.dto';
@@ -24,6 +25,7 @@ import { UserRole } from 'src/common/enums/user.enum';
 import { Public } from 'src/common/decorator/public.decorator';
 import { CurrencyConverterInterceptor } from 'src/common/interceptors/currency-converter.interceptor';
 import { GuestInterceptor } from 'src/common/interceptors/guest.interceptor';
+import { ProductFilterDto } from './dto/request/filter-product.dto';
 
 @Controller('product')
 @UseGuards(OptionalAuthGuard, RolesGuard)
@@ -47,9 +49,10 @@ export class ProductController {
   @Get()
   @Public()
   @ApiOperation({ summary: 'List of products' })
-  async findAll(@Req() req: Request) {
+  async findAll(@Req() req: Request, @Query() query: ProductFilterDto) {
     return (
       await this.productService.findAll({
+        where: { ...query },
         relations: { images: { file: true }, category: { image: true } },
         order: { createdAt: 'DESC' },
       })

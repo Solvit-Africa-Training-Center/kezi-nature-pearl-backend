@@ -10,10 +10,11 @@ import { OrderStatus } from 'src/common/enums/product.enum';
 import { CustomerType } from 'src/common/enums/user.enum';
 
 export class AdminOrderFilterDto {
-  // @ApiPropertyOptional()
-  // @IsOptional()
-  // @IsEnum(OrderStatus)
-  // orderStatus?: OrderStatus;
+  @ApiPropertyOptional({ enum: OrderStatus })
+  @IsOptional()
+  @IsEnum(OrderStatus)
+  status?: OrderStatus;
+
   // @ApiPropertyOptional()
   // @IsOptional()
   // @IsUUID()
