@@ -12,11 +12,11 @@ export class InventoryLog extends BaseEntity {
   @Column()
   productId: string;
 
-  @ManyToOne(() => Product, (product) => product.inventoryLogs, {
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn({ name: 'productId' })
-  product: Product;
+  // @ManyToOne(() => Product, (product) => product.inventoryLogs, {
+  //   onDelete: 'CASCADE',
+  // })
+  // @JoinColumn({ name: 'productId' })
+  // product: Product;
 
   @Column({
     name: 'change_type',

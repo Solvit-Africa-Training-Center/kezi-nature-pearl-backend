@@ -7,12 +7,12 @@ import { DecimalColumn } from '../../../common/decorator/decimal-column.decorato
 
 @Entity('order_coupon')
 export class OrderCoupon extends BaseEntity {
-  @Column()
-  orderId: string;
+  // @Column()
+  // orderId: string;
 
-  @ManyToOne(() => Order, (order) => order.coupons, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'orderId' })
-  order: Order;
+  // @ManyToOne(() => Order, (order) => order.coupons, { onDelete: 'CASCADE' })
+  // @JoinColumn({ name: 'orderId' })
+  // order: Order;
 
   @Column()
   couponId: string;

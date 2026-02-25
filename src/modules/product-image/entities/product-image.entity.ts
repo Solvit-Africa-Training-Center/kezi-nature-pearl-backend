@@ -18,7 +18,7 @@ export class ProductImage extends BaseEntity {
   fileId: string;
 
   @ManyToOne(() => File, (file) => file.productImageFiles, {
-    onDelete: 'CASCADE',
+    onDelete: 'SET NULL',
   })
   @JoinColumn({ name: 'fileId' })
   file: File;

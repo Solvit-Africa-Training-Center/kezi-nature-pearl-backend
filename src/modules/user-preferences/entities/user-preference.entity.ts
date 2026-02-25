@@ -17,7 +17,9 @@ export class UserPreferences extends BaseEntity {
   @Column({ name: 'currency_id' })
   currencyId: string;
 
-  @ManyToOne(() => Currency, (currency) => currency.preference)
+  @ManyToOne(() => Currency, (currency) => currency.preference, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'currency_id' })
   currency: Currency;
 }

@@ -67,8 +67,8 @@ export class Product extends BaseEntity {
   @OneToMany(() => Review, (review) => review.product)
   reviews?: Review[];
 
-  @OneToMany(() => InventoryLog, (log) => log.product)
-  inventoryLogs?: InventoryLog[];
+  // @OneToMany(() => InventoryLog, (log) => log.product)
+  // inventoryLogs?: InventoryLog[];
 
   // @BeforeUpdate()
   // updateStatusBasedOnStock() {

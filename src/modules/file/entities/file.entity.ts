@@ -23,12 +23,16 @@ export class File extends BaseEntity {
   size: number;
 
   // Relations
-  @OneToMany(() => User, (user) => user.profile)
+  @OneToMany(() => User, (user) => user.profile, { onDelete: 'CASCADE' })
   userProfiles?: User[];
 
-  @OneToMany(() => Category, (category) => category.image)
+  @OneToMany(() => Category, (category) => category.image, {
+    onDelete: 'CASCADE',
+  })
   categoryImages?: Category[];
 
-  @OneToMany(() => ProductImage, (productImage) => productImage.file)
+  @OneToMany(() => ProductImage, (productImage) => productImage.file, {
+    onDelete: 'CASCADE',
+  })
   productImageFiles?: ProductImage[];
 }

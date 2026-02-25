@@ -10,7 +10,10 @@ export class Review extends BaseEntity {
   @Column({ nullable: true })
   userId: string | null = null;
 
-  @ManyToOne(() => User, (user) => user.reviews, { nullable: true })
+  @ManyToOne(() => User, (user) => user.reviews, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
   @JoinColumn({ name: 'userId' })
   user: User | null = null;
 
@@ -34,40 +37,4 @@ export class Review extends BaseEntity {
 
   @Column({ name: 'is_verified_purchase', default: false })
   isVerifiedPurchase: boolean;
-
-  // @Column({
-  //   name: 'skin_type',
-  //   type: 'enum',
-  //   enum: SkinType,
-  //   nullable: true,
-  // })
-  // @IsEnum(SkinType)
-  // @IsOptional()
-  // skinType?: SkinType;
-
-  // @Column({ name: 'helpful_count', default: 0 })
-  // @IsInt()
-  // @Min(0)
-  // helpfulCount: number;
-
-  // @Column({
-  //   type: 'enum',
-  //   enum: ReviewStatus,
-  //   default: ReviewStatus.PENDING,
-  // })
-  // @IsEnum(ReviewStatus)
-  // status: ReviewStatus;
-
-  // Helper methods
-  // get isApproved(): boolean {
-  //   return this.status === ReviewStatus.APPROVED;
-  // }
-
-  // get isPending(): boolean {
-  //   return this.status === ReviewStatus.PENDING;
-  // }
-
-  // get isRejected(): boolean {
-  //   return this.status === ReviewStatus.REJECTED;
-  // }
 }

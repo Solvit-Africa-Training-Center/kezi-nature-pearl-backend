@@ -23,7 +23,10 @@ export class Order extends BaseEntity {
   @Column({ type: 'uuid', nullable: true })
   userId: string | null = null;
 
-  @ManyToOne(() => User, (user) => user.orders, { nullable: true })
+  @ManyToOne(() => User, (user) => user.orders, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'userId' })
   user: User | null = null;
 
@@ -80,16 +83,18 @@ export class Order extends BaseEntity {
   deletedAt: Date;
 
   // Relations
-  @OneToMany(() => Item, (orderItem) => orderItem.order)
+  @OneToMany(() => Item, (orderItem) => orderItem.order, {
+    onDelete: 'SET NULL',
+  })
   items?: Item[];
 
-  @OneToMany(() => Payment, (payment) => payment.order, { cascade: true })
+  @OneToMany(() => Payment, (payment) => payment.order)
   payments?: Payment[];
 
-  @OneToMany(() => OrderCoupon, (orderCoupon) => orderCoupon.order, {
-    cascade: true,
-  })
-  coupons?: OrderCoupon[];
+  // @OneToMany(() => OrderCoupon, (orderCoupon) => orderCoupon.order, {
+  //   cascade: true,
+  // })
+  // coupons?: OrderCoupon[];
 
   @BeforeInsert()
   generateOrderNumber() {
@@ -103,11 +108,6 @@ export class Order extends BaseEntity {
       this.totalAmount + this.shippingCost - this.discountAmount;
   }
 
-  // Helper methods
-  // get isPaid(): boolean {
-  //   return this.paymentStatus === PaymentStatus.PAID;
-  // }
-
   get isDelivered(): boolean {
     return this.status === OrderStatus.DELIVERED;
   }
@@ -115,10 +115,6 @@ export class Order extends BaseEntity {
   get isCancelled(): boolean {
     return this.status === OrderStatus.CANCELLED;
   }
-
-  // get isRefunded(): boolean {
-  //   return this.paymentStatus === PaymentStatus.REFUNDED;
-  // }
 
   get isProcessing(): boolean {
     return [

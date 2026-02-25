@@ -13,9 +13,7 @@ export class Transaction extends BaseEntity {
   @Column()
   paymentId: string;
 
-  @ManyToOne(() => Payment, (payment) => payment.transactions, {
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne(() => Payment, (payment) => payment.transactions)
   @JoinColumn({ name: 'paymentId' })
   payment: Payment;
 

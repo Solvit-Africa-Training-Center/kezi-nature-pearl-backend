@@ -82,4 +82,7 @@ export class User extends BaseEntity {
 
   @OneToMany(() => ContactUs, (contact) => contact.respondedByUser)
   respondedContacts?: ContactUs[];
+
+  @OneToMany(() => Notification, (notification) => notification.user)
+  notifications: Notification[];
 }

@@ -14,10 +14,10 @@ import { Order } from '../../../modules/order/entities/order.entity';
 
 @Entity('items')
 export class Item extends BaseEntity {
-  @Column()
+  @Column({ nullable: true })
   cartId: string;
 
-  @ManyToOne(() => Cart, (cart) => cart.items, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Cart, (cart) => cart.items, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'cartId' })
   cart: Cart;
 

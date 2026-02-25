@@ -54,7 +54,7 @@ export class ContactUs extends BaseEntity {
   @Column({ type: 'uuid', nullable: true })
   respondedBy: string;
 
-  @ManyToOne(() => User, { nullable: true })
+  @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'respondedBy' })
   respondedByUser: User;
 

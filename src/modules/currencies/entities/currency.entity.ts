@@ -35,21 +35,9 @@ export class Currency extends BaseEntity {
   @Column({ name: 'is_default', default: false })
   isDefault: boolean; // Default currency for new users
 
-  // @Column({ name: 'flag_icon', nullable: true })
-  // flagIcon: string; // 🇺🇸, 🇪🇺, etc.
-
-  // @Column({ type: 'jsonb', nullable: true })
-  // metadata: {
-  //   countries: string[]; // Countries using this currency
-  //   priority: number; // Display order
-  // };
-
   @OneToMany(() => ExchangeRate, (rate) => rate.fromCurrency)
   rate: ExchangeRate[];
 
   @OneToMany(() => UserPreferences, (preference) => preference.currency)
   preference: UserPreferences[];
-
-  // @OneToMany(() => ExchangeRate, (rate) => rate.toCurrency)
-  // rateTo: ExchangeRate[];
 }
