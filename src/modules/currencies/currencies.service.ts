@@ -39,7 +39,7 @@ export class CurrencyService {
       !cfg.key ||
       !cfg.url
     ) {
-      throw new Error('PayPack configuration missing in environment');
+      throw new Error('Exchange rate configuration missing in environment');
     }
 
     this.rateConfig = cfg;
