@@ -52,10 +52,10 @@ export class UserPreferencesController {
   }
 
   @Patch()
-  update(@Req() req: Request, @Body() dto: UpdateUserPreferenceDto) {
+  async update(@Req() req: Request, @Body() dto: UpdateUserPreferenceDto) {
     const userId = req['user']?.sub ?? null;
     const guestId = req['guestId'] ?? null;
-    return this.userPreferencesService.update({ userId, guestId }, dto);
+    return await this.userPreferencesService.update({ userId, guestId }, dto);
   }
 
   // @Delete(':id')
