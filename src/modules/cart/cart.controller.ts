@@ -17,11 +17,13 @@ import { CartResponseDto } from './dto/response/cart-response.dto';
 import { GuestInterceptor } from 'src/common/interceptors/guest.interceptor';
 import { CartCheckoutDto } from './dto/request';
 import { AddItemTocartDto, UpdateCartItemDto } from '../item/dto/request';
+import { CurrencyConverterInterceptor } from 'src/common/interceptors/currency-converter.interceptor';
 
 @Controller('cart')
 @UseGuards(OptionalAuthGuard)
 @UseInterceptors(GuestInterceptor)
 @ApiBearerAuth()
+@UseInterceptors(CurrencyConverterInterceptor)
 export class CartController {
   constructor(private readonly cartService: CartService) {}
 

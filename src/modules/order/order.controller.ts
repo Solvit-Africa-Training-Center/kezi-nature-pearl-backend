@@ -22,6 +22,40 @@ import { OrderStatus } from 'src/common/enums/product.enum';
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
+  // Admin
+
+  @Get('admin')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Get Orders *' })
+  async findAllForAdmin() {
+    // @Query() query: AdminOrderFilterDto
+    const orders = await this.orderService.findAllForAdmin({
+      relations: { items: { product: { images: { file: true } } }, user: true },
+    });
+    return orders.map((order) => new OrderDetailsDto(order));
+  }
+
+  @Patch('admin/confirm/:id')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Process user order by Id' })
+  processOrder(@Param('id') id: string) {
+    return this.orderService.updateOrderStatus(id, OrderStatus.PROCESSED);
+  }
+
+  @Patch('admin/ship/:id')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Ship user order by Id' })
+  shippedOrder(@Param('id') id: string) {
+    return this.orderService.updateOrderStatus(id, OrderStatus.SHIPPED);
+  }
+
+  @Patch('admin/deliver/:id')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Deliver user order by Id' })
+  deliveredOrder(@Param('id') id: string) {
+    return this.orderService.updateOrderStatus(id, OrderStatus.DELIVERED);
+  }
+
   // user
   @Get()
   @Roles(UserRole.CUSTOMER)
@@ -36,7 +70,7 @@ export class OrderController {
     return orders.map((order) => new OrderDetailsDto(order));
   }
 
-  @Get('id')
+  @Get(':id')
   @Roles(UserRole.CUSTOMER)
   @ApiOperation({ summary: 'Get user order by Id *' })
   async findOne(@CurrentUser() user: Payload, @Param('id') id: string) {
@@ -50,7 +84,7 @@ export class OrderController {
     return new OrderDetailsDto(order);
   }
 
-  @Patch('cancel/id')
+  @Patch('cancel/:id')
   @Roles(UserRole.CUSTOMER)
   @ApiOperation({ summary: 'Cancel user order by Id' })
   cancelOrder(@Param('id') id: string) {
@@ -61,39 +95,5 @@ export class OrderController {
   @Roles(UserRole.CUSTOMER)
   remove(@Param('id') id: string) {
     return this.orderService.remove(id);
-  }
-
-  // Admin
-
-  @Get('admin')
-  @Roles(UserRole.ADMIN)
-  @ApiOperation({ summary: 'Get Orders *' })
-  async findAllForAdmin() {
-    // @Query() query: AdminOrderFilterDto
-    const orders = await this.orderService.findAllForAdmin({
-      relations: { items: { product: { images: { file: true } } }, user: true },
-    });
-    return orders.map((order) => new OrderDetailsDto(order));
-  }
-
-  @Patch('confirm/id')
-  @Roles(UserRole.ADMIN)
-  @ApiOperation({ summary: 'Process user order by Id' })
-  processOrder(@Param('id') id: string) {
-    return this.orderService.updateOrderStatus(id, OrderStatus.PROCESSED);
-  }
-
-  @Patch('ship/id')
-  @Roles(UserRole.ADMIN)
-  @ApiOperation({ summary: 'Ship user order by Id' })
-  shippedOrder(@Param('id') id: string) {
-    return this.orderService.updateOrderStatus(id, OrderStatus.SHIPPED);
-  }
-
-  @Patch('deliver/id')
-  @Roles(UserRole.ADMIN)
-  @ApiOperation({ summary: 'Deliver user order by Id' })
-  deliveredOrder(@Param('id') id: string) {
-    return this.orderService.updateOrderStatus(id, OrderStatus.DELIVERED);
   }
 }

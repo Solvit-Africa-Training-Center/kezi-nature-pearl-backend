@@ -1,10 +1,11 @@
 import {
-  CallHandler,
-  ExecutionContext,
   Injectable,
   NestInterceptor,
+  ExecutionContext,
+  CallHandler,
 } from '@nestjs/common';
-import { from, Observable, switchMap } from 'rxjs';
+import { Observable, from } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { CurrencyService } from 'src/modules/currencies/currencies.service';
 import { UserPreferencesService } from 'src/modules/user-preferences/user-preferences.service';
 import { LoggerService } from '../logger/logger.service';
@@ -24,7 +25,13 @@ export class CurrencyConverterInterceptor implements NestInterceptor {
     const ctx = context.switchToHttp();
     const request = ctx.getRequest();
 
-    const moneyFields = ['price', 'oldPrice'];
+    const moneyFields = [
+      'price',
+      'oldPrice',
+      'unitPrice',
+      'totalPrice',
+      'finalAmount',
+    ];
 
     return from(this.getUserCurrency(request)).pipe(
       switchMap((currency) => {
@@ -34,32 +41,48 @@ export class CurrencyConverterInterceptor implements NestInterceptor {
 
         return next.handle().pipe(
           switchMap(async (data) => {
-            this.logger.log('helo');
+            const processObject = async (obj: any): Promise<any> => {
+              if (!obj || typeof obj !== 'object') return obj;
 
-            const processItem = async (item: any) => {
               for (const field of moneyFields) {
-                if (item[field] !== null && item[field] !== undefined) {
+                this.logger.log(`field ${field}`);
+                if (
+                  Object.prototype.hasOwnProperty.call(obj, field) &&
+                  obj[field] !== null &&
+                  obj[field] !== undefined
+                ) {
                   const converted = await this.currencyService.convertAmount(
-                    item[field],
+                    obj[field],
                     fromCurrency,
                     toCurrency,
                   );
-                  item[field] = converted;
-                  item[`${field}Formatted`] =
+                  obj[field] = converted;
+                  obj[`${field}Formatted`] =
                     await this.currencyService.formatPrice(
                       converted,
                       toCurrency,
                     );
                 }
               }
-              return item;
+
+              for (const key of Object.keys(obj)) {
+                if (Array.isArray(obj[key])) {
+                  obj[key] = await Promise.all(
+                    obj[key].map((item) => processObject(item)),
+                  );
+                } else if (typeof obj[key] === 'object') {
+                  obj[key] = await processObject(obj[key]);
+                }
+              }
+
+              return obj;
             };
 
             if (Array.isArray(data)) {
-              return Promise.all(data.map(processItem));
+              return Promise.all(data.map(processObject));
             }
 
-            return processItem(data);
+            return processObject(data);
           }),
         );
       }),
@@ -92,8 +115,6 @@ export class CurrencyConverterInterceptor implements NestInterceptor {
         relations: { currency: true },
       });
     }
-
-    this.logger.log(preference ?? `guestId ${guestId}`);
 
     if (!preference?.currency) return null;
 

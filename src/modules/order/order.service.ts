@@ -10,14 +10,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from './entities/order.entity';
 import { OrderStatus, PaymentStatus } from 'src/common/enums/product.enum';
 import { PaymentService } from '../payment/payment.service';
+import { LoggerService } from 'src/common/logger/logger.service';
 
 @Injectable()
 export class OrderService {
   constructor(
     @InjectRepository(Order)
     private readonly orderRepo: Repository<Order>,
-
     private readonly paymentRepo: PaymentService,
+    private readonly logger: LoggerService,
   ) {}
 
   async create(dto: CreateOrderDto) {
