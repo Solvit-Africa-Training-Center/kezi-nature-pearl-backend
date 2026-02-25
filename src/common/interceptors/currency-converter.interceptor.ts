@@ -15,7 +15,6 @@ export class CurrencyConverterInterceptor implements NestInterceptor {
   constructor(
     private readonly currencyService: CurrencyService,
     private readonly preferenceService: UserPreferencesService,
-    private readonly logger: LoggerService,
   ) {}
 
   async intercept(
@@ -45,7 +44,6 @@ export class CurrencyConverterInterceptor implements NestInterceptor {
               if (!obj || typeof obj !== 'object') return obj;
 
               for (const field of moneyFields) {
-                this.logger.log(`field ${field}`);
                 if (
                   Object.prototype.hasOwnProperty.call(obj, field) &&
                   obj[field] !== null &&
