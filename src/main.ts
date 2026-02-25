@@ -1,13 +1,14 @@
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { ValidationPipe } from '@nestjs/common';
+import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
-import { scheduleTransactionSync } from './cron';
+import { scheduleExchangeRateSync, scheduleTransactionSync } from './cron';
 import { LoggerService } from './common/logger/logger.service';
 import { OrderService } from './modules/order/order.service';
 import { SeederService } from './database/seeders/seeder.service';
+import { CurrencyService } from './modules/currencies/currencies.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -19,6 +20,13 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  app.useGlobalInterceptors(
+    new ClassSerializerInterceptor(app.get(Reflector), {
+      enableImplicitConversion: true,
+    }),
+  );
+
   app.use(cookieParser());
 
   const configService = app.get(ConfigService);
@@ -33,10 +41,13 @@ async function bootstrap() {
   const orderService = app.get(OrderService);
   scheduleTransactionSync(orderService, logger);
 
+  const currencyService = app.get(CurrencyService);
+  scheduleExchangeRateSync(configService, currencyService, logger);
+
   app.enableCors({
     origin: true,
     credentials: true,
-    // exposedHeaders: ['set-cookie'],
+    exposedHeaders: ['set-cookie'],
   });
 
   app.setGlobalPrefix(prefix);

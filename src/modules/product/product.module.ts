@@ -4,9 +4,16 @@ import { ProductController } from './product.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
 import { ProductImageModule } from '../product-image/product-image.module';
+import { CurrencyModule } from '../currencies/currencies.module';
+import { UserPreferencesModule } from '../user-preferences/user-preferences.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Product]), ProductImageModule],
+  imports: [
+    TypeOrmModule.forFeature([Product]),
+    ProductImageModule,
+    CurrencyModule,
+    UserPreferencesModule,
+  ],
   controllers: [ProductController],
   providers: [ProductService],
   exports: [ProductService],

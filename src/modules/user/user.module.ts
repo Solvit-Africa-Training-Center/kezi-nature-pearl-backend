@@ -4,10 +4,14 @@ import { UserController } from './user.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { FileModule } from '../file/file.module';
-import { LoggerService } from 'src/common/logger/logger.service';
+import { UserPreferencesModule } from '../user-preferences/user-preferences.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), FileModule],
+  imports: [
+    TypeOrmModule.forFeature([User]),
+    FileModule,
+    UserPreferencesModule,
+  ],
   controllers: [UserController],
   providers: [UserService],
   exports: [UserService],

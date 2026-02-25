@@ -57,7 +57,7 @@ export class User extends BaseEntity {
   @OneToOne(() => UserPreferences, (preferences) => preferences.user, {
     cascade: true,
   })
-  preferences?: UserPreferences;
+  preferences: UserPreferences;
 
   @OneToMany(() => Address, (address) => address.user)
   addresses?: Address[];

@@ -58,7 +58,7 @@ export class Payment extends BaseEntity {
   @Column({ name: 'refunded_at', type: 'timestamptz', nullable: true })
   refundedAt?: Date;
 
-  @Column({ unique: true })
+  @Column({ unique: true, nullable: true })
   @Index()
   idempotencyKey: string;
 

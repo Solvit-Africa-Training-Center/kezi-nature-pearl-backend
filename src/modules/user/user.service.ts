@@ -6,17 +6,13 @@ import {
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { RegisterDto } from '../auth/dto/request';
-import {
-  UpdateUserDto,
-  UpdateUserProfile,
-  UpdateUserRolesDto,
-} from './dto/request';
+import { UpdateUserDto, UpdateUserRolesDto } from './dto/request';
 import { comparehashContent, hashContent } from 'src/util';
 import { UserProfile, UserProfiles } from './dto/response';
 import { FileService } from '../file/file.service';
 import { FileType } from 'src/common/enums/product.enum';
 import { CreateUserDto } from './dto/request/create-user.dto';
+import { UserPreferencesService } from '../user-preferences/user-preferences.service';
 
 @Injectable()
 export class UserService {
@@ -24,20 +20,28 @@ export class UserService {
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
     private readonly fileService: FileService,
+    private readonly preferenceService: UserPreferencesService,
   ) {}
 
   async create(dto: CreateUserDto) {
     if (dto.password) dto.password = await hashContent(dto.password);
 
-    return await this.userRepo.save(dto);
+    const user = await this.userRepo.save(dto);
+    this.preferenceService.create({ userId: user.id });
+
+    return user;
   }
 
   async findAll(options?: FindManyOptions<User>) {
-    return await this.userRepo.find(options);
+    return await this.userRepo.find({
+      ...options,
+    });
   }
 
   async findOne(options: FindOneOptions<User>) {
-    const user = await this.userRepo.findOne({ ...options });
+    const user = await this.userRepo.findOne({
+      ...options,
+    });
     return user;
   }
 

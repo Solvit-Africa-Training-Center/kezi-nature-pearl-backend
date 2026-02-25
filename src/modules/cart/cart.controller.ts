@@ -13,15 +13,13 @@ import {
 import { CartService } from './cart.service';
 import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { OptionalAuthGuard, RolesGuard } from 'src/common/guards';
-import { UserRole } from 'src/common/enums/user.enum';
-import { CartStatus } from 'src/common/enums/product.enum';
 import { CartResponseDto } from './dto/response/cart-response.dto';
 import { GuestInterceptor } from 'src/common/interceptors/guest.interceptor';
 import { CartCheckoutDto } from './dto/request';
 import { AddItemTocartDto, UpdateCartItemDto } from '../item/dto/request';
 
 @Controller('cart')
-@UseGuards(OptionalAuthGuard, RolesGuard)
+@UseGuards(OptionalAuthGuard)
 @UseInterceptors(GuestInterceptor)
 @ApiBearerAuth()
 export class CartController {

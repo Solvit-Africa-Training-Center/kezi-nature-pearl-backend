@@ -31,20 +31,20 @@ export class CurrencyResponseDto {
 }
 
 export class PriceConversionResponseDto {
-  @Expose()
-  originalPrice: number;
+  // @Expose()
+  // originalPrice: number;
 
-  @Expose()
-  originalCurrency: string;
+  // @Expose()
+  // originalCurrency: string;
 
-  @Expose()
-  convertedPrice: number;
+  // @Expose()
+  // convertedPrice: number;
 
-  @Expose()
-  convertedCurrency: string;
+  // @Expose()
+  // convertedCurrency: string;
 
-  @Expose()
-  exchangeRate: number;
+  // @Expose()
+  // exchangeRate: number;
 
   @Expose()
   formattedPrice: string;

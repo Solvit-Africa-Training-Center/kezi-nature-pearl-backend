@@ -31,7 +31,10 @@ export class UserController {
   async getUserProfile(@CurrentUser() user: Payload) {
     return await this.userService.getUserProfile({
       where: { id: user.sub },
-      relations: { profile: true },
+      relations: {
+        profile: true,
+        preferences: { currency: true },
+      },
     });
   }
 
@@ -46,6 +49,7 @@ export class UserController {
     @UploadedFile() picture: Express.Multer.File,
   ) {
     await this.userService.update(user.sub, dto, picture);
+
     return await this.userService.getUserProfile({
       where: { id: user.sub },
       relations: { profile: true },

@@ -29,7 +29,8 @@ export class OrderController {
   async findAll(@CurrentUser() user: Payload) {
     const orders = await this.orderService.findAll({
       where: { userId: user.sub },
-      relations: { items: { product: { images: { file: true } } } },
+      relations: { items: { product: { images: { file: true } } }, user: true },
+      order: { createdAt: 'DESC' },
     });
 
     return orders.map((order) => new OrderDetailsDto(order));
@@ -70,7 +71,7 @@ export class OrderController {
   async findAllForAdmin() {
     // @Query() query: AdminOrderFilterDto
     const orders = await this.orderService.findAllForAdmin({
-      relations: { items: { product: { images: { file: true } } } },
+      relations: { items: { product: { images: { file: true } } }, user: true },
     });
     return orders.map((order) => new OrderDetailsDto(order));
   }

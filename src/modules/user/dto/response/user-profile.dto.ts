@@ -8,6 +8,7 @@ export class UserProfile {
   email: string;
   phoneNumber: string;
   role: UserRole;
+  preferences: object;
   createdAt: Date;
 
   constructor(user: User) {
@@ -17,6 +18,12 @@ export class UserProfile {
     this.email = user.email;
     this.phoneNumber = user.phoneNumber;
     this.role = user.role;
+    this.preferences = {
+      currency: {
+        id: user.preferences.currency.id,
+        code: user.preferences.currency.code,
+      },
+    };
     this.createdAt = user.createdAt;
   }
 }

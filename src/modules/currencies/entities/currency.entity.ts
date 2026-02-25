@@ -1,6 +1,7 @@
 import { Column, Entity, OneToMany } from 'typeorm';
 import { ExchangeRate } from './exchange-rate.entity';
 import { BaseEntity } from '../../../common/entities/base.entity';
+import { UserPreferences } from '../../../modules/user-preferences/entities/user-preference.entity';
 
 @Entity('currencies')
 export class Currency extends BaseEntity {
@@ -45,6 +46,9 @@ export class Currency extends BaseEntity {
 
   @OneToMany(() => ExchangeRate, (rate) => rate.fromCurrency)
   rate: ExchangeRate[];
+
+  @OneToMany(() => UserPreferences, (preference) => preference.currency)
+  preference: UserPreferences[];
 
   // @OneToMany(() => ExchangeRate, (rate) => rate.toCurrency)
   // rateTo: ExchangeRate[];

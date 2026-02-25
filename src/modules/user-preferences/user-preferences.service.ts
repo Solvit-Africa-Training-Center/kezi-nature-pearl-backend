@@ -1,26 +1,47 @@
 import { Injectable } from '@nestjs/common';
 import { CreateUserPreferenceDto } from './dto/create-user-preference.dto';
 import { UpdateUserPreferenceDto } from './dto/update-user-preference.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { UserPreferences } from './entities/user-preference.entity';
+import { FindOneOptions, Repository } from 'typeorm';
+import { CurrencyService } from '../currencies/currencies.service';
 
 @Injectable()
 export class UserPreferencesService {
-  create(createUserPreferenceDto: CreateUserPreferenceDto) {
-    return 'This action adds a new userPreference';
+  constructor(
+    @InjectRepository(UserPreferences)
+    private readonly preferenceRepo: Repository<UserPreferences>,
+    private readonly currencyService: CurrencyService,
+  ) {}
+  async create(dto: CreateUserPreferenceDto) {
+    let preference = await this.findOne({ where: { userId: dto.userId } });
+
+    if (!preference) {
+      const preferedCurrency = await this.currencyService.getCurrency('RWF');
+
+      preference = this.preferenceRepo.create({
+        ...dto,
+        currencyId: preferedCurrency.id,
+      });
+
+      await this.preferenceRepo.save(preference);
+    }
+
+    return { message: 'User preferences create' };
   }
 
-  findAll() {
-    return `This action returns all userPreferences`;
+  async findOne(options: FindOneOptions<UserPreferences>) {
+    return await this.preferenceRepo.findOne({
+      ...options,
+      relations: { currency: true },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} userPreference`;
-  }
+  async update(userId: string, dto: UpdateUserPreferenceDto) {
+    const preference = await this.preferenceRepo.findOne({ where: { userId } });
 
-  update(id: number, updateUserPreferenceDto: UpdateUserPreferenceDto) {
-    return `This action updates a #${id} userPreference`;
-  }
+    if (preference) await this.preferenceRepo.update(preference.id, { ...dto });
 
-  remove(id: number) {
-    return `This action removes a #${id} userPreference`;
+    return { message: 'User Preference updated' };
   }
 }

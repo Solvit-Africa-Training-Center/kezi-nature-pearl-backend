@@ -9,7 +9,7 @@ export const scheduleTransactionSync = (
   logger.log('Initializing transaction sync every 1 minute...');
 
   cron.schedule('* * * * *', async () => {
-    // console.log('Transaction sync started at', new Date().toISOString());
+    logger.log(`Transaction sync started at, ${new Date().toISOString()}`);
 
     try {
       const updatedPayments = await orderService.checkOrders();

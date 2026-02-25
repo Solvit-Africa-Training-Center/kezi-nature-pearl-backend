@@ -10,6 +10,7 @@ import {
   UploadedFiles,
   NotFoundException,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/request/create-product.dto';
@@ -21,10 +22,12 @@ import { AuthGuard, RolesGuard } from 'src/common/guards';
 import { Roles } from 'src/common/decorator';
 import { UserRole } from 'src/common/enums/user.enum';
 import { Public } from 'src/common/decorator/public.decorator';
+import { CurrencyConverterInterceptor } from 'src/common/interceptors/currency-converter.interceptor';
 
 @Controller('product')
 @UseGuards(AuthGuard, RolesGuard)
 @ApiBearerAuth()
+@UseInterceptors(CurrencyConverterInterceptor)
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
@@ -43,7 +46,7 @@ export class ProductController {
   @Get()
   @Public()
   @ApiOperation({ summary: 'List of products' })
-  async findAll() {
+  async findAll(@Req() req: Request) {
     return (
       await this.productService.findAll({
         relations: { images: { file: true }, category: { image: true } },
@@ -63,7 +66,6 @@ export class ProductController {
       relations: { images: { file: true }, category: { image: true } },
     });
     if (!product) throw new NotFoundException('Product not found');
-
     return new ProductResponseDto(product);
   }
 
