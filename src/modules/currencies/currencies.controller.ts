@@ -28,17 +28,17 @@ export class CurrencyController {
     return this.currencyService.getBaseCurrency();
   }
 
-  @Post('convert')
-  @Public()
-  @ApiOperation({ summary: 'Convert price between currencies' })
-  @ApiResponse({ status: 200, type: PriceConversionResponseDto })
-  async convertPrice(
-    @Body() dto: ConvertAndFormatPriceDto,
-  ): Promise<PriceConversionResponseDto> {
-    return await this.currencyService.convertAndFormat(
-      dto.amount,
-      dto.from,
-      dto.to,
-    );
-  }
+  // @Post('convert')
+  // @Public()
+  // @ApiOperation({ summary: 'Convert price between currencies' })
+  // @ApiResponse({ status: 200, type: PriceConversionResponseDto })
+  // async convertPrice(
+  //   @Body() dto: ConvertAndFormatPriceDto,
+  // ): Promise<PriceConversionResponseDto> {
+  //   return await this.currencyService.convertAndFormat(
+  //     dto.amount,
+  //     dto.from,
+  //     dto.to,
+  //   );
+  // }
 }

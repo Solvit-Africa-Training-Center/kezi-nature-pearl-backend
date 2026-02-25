@@ -21,11 +21,11 @@ async function bootstrap() {
     }),
   );
 
-  app.useGlobalInterceptors(
-    new ClassSerializerInterceptor(app.get(Reflector), {
-      enableImplicitConversion: true,
-    }),
-  );
+  // app.useGlobalInterceptors(
+  //   new ClassSerializerInterceptor(app.get(Reflector), {
+  //     enableImplicitConversion: true,
+  //   }),
+  // );
 
   app.use(cookieParser());
 

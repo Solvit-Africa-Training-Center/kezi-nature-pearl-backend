@@ -14,6 +14,9 @@ export class UserPreferences extends BaseEntity {
   @JoinColumn({ name: 'userId' })
   user: User | null = null;
 
+  @Column({ type: 'uuid', nullable: true })
+  guestId: string | null = null;
+
   @Column({ name: 'currency_id' })
   currencyId: string;
 

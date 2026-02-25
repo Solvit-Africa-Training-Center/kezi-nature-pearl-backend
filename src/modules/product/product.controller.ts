@@ -18,14 +18,15 @@ import { UpdateProductDto } from './dto/request/update-product.dto';
 import { FileUploadInterceptor } from 'src/common/interceptors/file-upload.interceptor';
 import { ApiBearerAuth, ApiConsumes, ApiOperation } from '@nestjs/swagger';
 import { ProductResponseDto } from './dto/response/product-response.dto';
-import { AuthGuard, RolesGuard } from 'src/common/guards';
+import { OptionalAuthGuard, RolesGuard } from 'src/common/guards';
 import { Roles } from 'src/common/decorator';
 import { UserRole } from 'src/common/enums/user.enum';
 import { Public } from 'src/common/decorator/public.decorator';
 import { CurrencyConverterInterceptor } from 'src/common/interceptors/currency-converter.interceptor';
+import { GuestInterceptor } from 'src/common/interceptors/guest.interceptor';
 
 @Controller('product')
-@UseGuards(AuthGuard, RolesGuard)
+@UseGuards(OptionalAuthGuard, RolesGuard)
 @ApiBearerAuth()
 @UseInterceptors(CurrencyConverterInterceptor)
 export class ProductController {

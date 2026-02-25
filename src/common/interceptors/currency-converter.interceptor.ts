@@ -34,11 +34,11 @@ export class CurrencyConverterInterceptor implements NestInterceptor {
 
         return next.handle().pipe(
           switchMap(async (data) => {
+            this.logger.log('helo');
+
             const processItem = async (item: any) => {
               for (const field of moneyFields) {
                 if (item[field] !== null && item[field] !== undefined) {
-                  this.logger.log('helo');
-
                   const converted = await this.currencyService.convertAmount(
                     item[field],
                     fromCurrency,
@@ -67,16 +67,35 @@ export class CurrencyConverterInterceptor implements NestInterceptor {
   }
 
   private async getUserCurrency(request: any) {
-    const user = request.user;
-    if (!user) return null;
+    const userId = request.user?.sub ?? null;
+    const guestId = request.cookies?.guestId ?? null;
 
-    const preference = await this.preferenceService.findOne({
-      where: { userId: user.sub },
-      relations: { currency: true },
-    });
-    if (!preference?.currency) return null;
+    if (!userId && !guestId) return null;
 
     const baseCurrency = await this.currencyService.getBaseCurrency();
+
+    const where = userId ? { userId } : { guestId };
+
+    let preference = await this.preferenceService.findOne({
+      where,
+      relations: { currency: true },
+    });
+
+    if (!preference && guestId) {
+      await this.preferenceService.create({
+        guestId,
+        currencyId: baseCurrency.id,
+      });
+
+      preference = await this.preferenceService.findOne({
+        where: { guestId },
+        relations: { currency: true },
+      });
+    }
+
+    this.logger.log(preference ?? `guestId ${guestId}`);
+
+    if (!preference?.currency) return null;
 
     return {
       from: baseCurrency.code,

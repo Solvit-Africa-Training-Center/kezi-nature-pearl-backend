@@ -6,10 +6,16 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { randomUUID } from 'crypto';
+import { CartService } from 'src/modules/cart/cart.service';
+import { isUUID } from 'class-validator';
 
 @Injectable()
 export class GuestInterceptor implements NestInterceptor {
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  constructor(private readonly cartService: CartService) {}
+  async intercept(
+    context: ExecutionContext,
+    next: CallHandler,
+  ): Promise<Observable<any>> {
     const ctx = context.switchToHttp();
     const request = ctx.getRequest();
     const response = ctx.getResponse();
@@ -17,7 +23,7 @@ export class GuestInterceptor implements NestInterceptor {
     if (!request.user) {
       let guestId = request.cookies?.guestId;
 
-      if (!guestId) {
+      if (!guestId || !(await this.cartExist(guestId))) {
         guestId = randomUUID();
 
         const isProd = process.env.NODE_ENV === 'production';
@@ -34,5 +40,15 @@ export class GuestInterceptor implements NestInterceptor {
     }
 
     return next.handle();
+  }
+
+  async cartExist(guestId: string) {
+    if (!isUUID(guestId)) {
+      return false;
+    }
+
+    return (await this.cartService.checkCart({ guestId, userId: null }))
+      ? true
+      : false;
   }
 }

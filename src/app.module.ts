@@ -9,7 +9,7 @@ import cloudinaryConfig from './config/cloudinary.config';
 import swaggerConfig from './config/swagger.config';
 import paypackConfig from './config/paypack.config';
 
-import { APP_FILTER, APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { AllExceptionsFilter } from './common/filters/AllExceptionFilter';
 import { HttpModule } from '@nestjs/axios';
 import { RedisModule } from './shared/redis/redis.module';
@@ -40,6 +40,7 @@ import { PaymentModule } from './modules/payment/payment.module';
 import { CurrencyModule } from './modules/currencies/currencies.module';
 import { SeederModule } from './database/seeders/seeder.module';
 import { NotificationModule } from './modules/notification/notification.module';
+import { GuestInterceptor } from './common/interceptors/guest.interceptor';
 
 @Module({
   imports: [
@@ -96,7 +97,6 @@ import { NotificationModule } from './modules/notification/notification.module';
     // CouponModule,
     // OrderCouponModule,
     // InventoryLogModule,
-    // NotificationModule,
     NotificationModule,
 
     // seed
@@ -106,6 +106,10 @@ import { NotificationModule } from './modules/notification/notification.module';
     {
       provide: APP_FILTER,
       useClass: AllExceptionsFilter,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: GuestInterceptor,
     },
   ],
 })

@@ -6,6 +6,7 @@ import { Product } from './entities/product.entity';
 import { ProductImageModule } from '../product-image/product-image.module';
 import { CurrencyModule } from '../currencies/currencies.module';
 import { UserPreferencesModule } from '../user-preferences/user-preferences.module';
+import { CartModule } from '../cart/cart.module';
 
 @Module({
   imports: [
