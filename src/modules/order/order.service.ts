@@ -161,7 +161,7 @@ export class OrderService {
         if (!product) throw new NotFoundException('Product not found');
 
         await this.productService.update(product.id, {
-          stockQuantity: product.stockQuantity - 1,
+          stockQuantity: product.stockQuantity - existingItem.quantity,
         });
       });
     } else if (status === OrderStatus.SHIPPED) {
