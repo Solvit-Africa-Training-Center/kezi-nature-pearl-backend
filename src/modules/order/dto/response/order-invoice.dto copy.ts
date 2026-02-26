@@ -1,6 +1,7 @@
 import { OrderStatus, PaymentStatus } from 'src/common/enums/product.enum';
 import { Order } from '../../entities/order.entity';
 import { OrderItemResponseDto } from 'src/modules/item/dto/response/orderItem-response.dto';
+import { Expose, Transform } from 'class-transformer';
 
 export class OrderInvoiceDto {
   orderNumber: string;
@@ -25,6 +26,12 @@ export class OrderInvoiceDto {
 
   finalAmount: number;
 
+  @Expose({ name: 'finalAmountFormatted' })
+  @Transform(({ value }) =>
+    value === null || value === undefined ? undefined : value,
+  )
+  finalAmountFormatted: number;
+
   items?: object;
 
   createdAt: Date;
@@ -33,13 +40,11 @@ export class OrderInvoiceDto {
     this.orderNumber = order.orderNumber;
     this.shippingAddressSnapshot = order.shippingAddressSnapshot;
     this.orderStatus = order.status;
-    // this.paymentStatus = order.payments?.map((payment) => {
-    //   return payment.paymentStatus;
-    // });
     this.finalAmount = order.finalAmount;
     this.items = order.items?.map((item) => {
       return new OrderItemResponseDto(item);
     });
     this.createdAt = order.createdAt;
+    this.finalAmountFormatted = order['unitPriceFormatted'];
   }
 }

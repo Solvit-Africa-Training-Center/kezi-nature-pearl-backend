@@ -15,7 +15,6 @@ export class CurrencyConverterInterceptor implements NestInterceptor {
   constructor(
     private readonly currencyService: CurrencyService,
     private readonly preferenceService: UserPreferencesService,
-    private readonly logger: LoggerService,
   ) {}
 
   async intercept(
@@ -91,8 +90,6 @@ export class CurrencyConverterInterceptor implements NestInterceptor {
   private async getUserCurrency(request: any) {
     const userId = request.user?.sub ?? null;
     const guestId = request.cookies?.guestId ?? null;
-
-    this.logger.log(`Id userId ${userId} guestId ${guestId}`);
 
     if (!userId && !guestId) return null;
 

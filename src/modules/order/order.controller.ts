@@ -7,9 +7,10 @@ import {
   UseGuards,
   NotFoundException,
   Query,
+  UseInterceptors,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
-import { AuthGuard, RolesGuard } from 'src/common/guards';
+import { AuthGuard, OptionalAuthGuard, RolesGuard } from 'src/common/guards';
 import { CurrentUser, Roles } from 'src/common/decorator';
 import { UserRole } from 'src/common/enums/user.enum';
 import { Payload } from 'src/util';
@@ -17,10 +18,12 @@ import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { OrderDetailsDto } from './dto/response/order-details.dto';
 import { OrderStatus } from 'src/common/enums/product.enum';
 import { AdminOrderFilterDto } from './dto/request';
+import { CurrencyConverterInterceptor } from 'src/common/interceptors/currency-converter.interceptor';
 
 @Controller('order')
-@UseGuards(AuthGuard, RolesGuard)
+@UseGuards(OptionalAuthGuard, RolesGuard)
 @ApiBearerAuth()
+@UseInterceptors(CurrencyConverterInterceptor)
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
