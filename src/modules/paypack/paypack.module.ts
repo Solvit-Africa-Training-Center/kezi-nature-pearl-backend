@@ -3,7 +3,7 @@ import { PaypackService } from './paypack.service';
 import { PaypackController } from './paypack.controller';
 
 @Module({
-  controllers: [PaypackController],
+  // controllers: [PaypackController],
   providers: [PaypackService],
   exports: [PaypackService],
 })

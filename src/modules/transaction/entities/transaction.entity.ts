@@ -10,10 +10,12 @@ export enum TransactionStatus {
 
 @Entity('transactions')
 export class Transaction extends BaseEntity {
-  @Column()
+  @Column({ nullable: true })
   paymentId: string;
 
-  @ManyToOne(() => Payment, (payment) => payment.transactions)
+  @ManyToOne(() => Payment, (payment) => payment.transactions, {
+    onDelete: 'SET NULL',
+  })
   @JoinColumn({ name: 'paymentId' })
   payment: Payment;
 

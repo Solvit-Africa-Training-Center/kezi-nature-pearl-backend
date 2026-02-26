@@ -24,7 +24,6 @@ import { Roles } from 'src/common/decorator';
 import { UserRole } from 'src/common/enums/user.enum';
 import { Public } from 'src/common/decorator/public.decorator';
 import { CurrencyConverterInterceptor } from 'src/common/interceptors/currency-converter.interceptor';
-import { GuestInterceptor } from 'src/common/interceptors/guest.interceptor';
 import { ProductFilterDto } from './dto/request/filter-product.dto';
 
 @Controller('product')

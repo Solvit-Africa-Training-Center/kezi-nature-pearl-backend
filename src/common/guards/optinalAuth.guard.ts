@@ -4,6 +4,7 @@ import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { IS_PUBLIC_KEY } from '../decorator/public.decorator';
 import { Request } from 'express';
+import { LoggerService } from '../logger/logger.service';
 
 @Injectable()
 export class OptionalAuthGuard implements CanActivate {
@@ -11,9 +12,29 @@ export class OptionalAuthGuard implements CanActivate {
     private reflector: Reflector,
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
+    private readonly logger: LoggerService,
   ) {}
 
   async canActivate(context: ExecutionContext) {
+    const request = context.switchToHttp().getRequest();
+    const token = this.extractTokenFromHeader(request);
+
+    if (token) {
+      try {
+        const jwtAccess = this.configService.get('server.jwt_access');
+        const payload = await this.jwtService.verifyAsync(token, {
+          secret: jwtAccess.secret,
+        });
+
+        request.user = payload;
+        return true;
+      } catch {
+        request.user = null;
+      }
+    }
+
+    request.user = null;
+
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -21,26 +42,7 @@ export class OptionalAuthGuard implements CanActivate {
 
     if (isPublic) return true;
 
-    const request = context.switchToHttp().getRequest();
-    const token = this.extractTokenFromHeader(request);
-
-    if (!token) {
-      request.user = null; // guest
-      return true;
-    }
-
-    try {
-      const jwtAccess = this.configService.get('server.jwt_access');
-      const payload = await this.jwtService.verifyAsync(token, {
-        secret: jwtAccess.secret,
-      });
-
-      request.user = payload;
-    } catch {
-      request.user = null;
-    }
-
-    return true;
+    return false;
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {

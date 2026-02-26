@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Patch,
+  Query,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -16,6 +17,7 @@ import { ApiBearerAuth, ApiConsumes, ApiOperation } from '@nestjs/swagger';
 import { UserRole } from 'src/common/enums/user.enum';
 import { UpdateUserProfile, UpdateUserRolesDto } from './dto/request';
 import { FileUploadInterceptor } from 'src/common/interceptors/file-upload.interceptor';
+import { FilterUserDto } from './dto/request/filter-user.dto';
 
 @Controller('user')
 @UseGuards(AuthGuard, RolesGuard)
@@ -68,8 +70,11 @@ export class UserController {
   @Get('all')
   @ApiOperation({ summary: 'Get List of Users' })
   @Roles(UserRole.ADMIN)
-  getAllUsers() {
-    return this.userService.getAllUsers({ relations: { profile: true } });
+  getAllUsers(@Query() query: FilterUserDto) {
+    return this.userService.getAllUsers({
+      where: { ...query },
+      relations: { profile: true },
+    });
   }
 
   @Patch('update-role')

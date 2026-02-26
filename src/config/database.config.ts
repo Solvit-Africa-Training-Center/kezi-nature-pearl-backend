@@ -24,7 +24,7 @@ function connectDb(): TypeOrmModuleOptions {
     url: process.env[`${envi}_DATABASE_URL`],
     entities: [__dirname + '/../**/*.entity{.ts,.js}'],
     synchronize: false,
-    logging: envi === 'DEV',
+    // logging: envi === 'DEV',
     migrations: [__dirname + '/../database/migrations/*{.ts,.js}'],
     migrationsRun: envi === 'PROD',
   };
