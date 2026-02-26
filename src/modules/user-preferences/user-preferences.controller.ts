@@ -18,6 +18,7 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 import { CurrentUser } from 'src/common/decorator';
 import { Payload } from 'src/util';
 import { UserPreferenceDto } from './dto/response/preference.dto';
+import { Public } from 'src/common/decorator/public.decorator';
 
 @Controller('user-preferences')
 @UseGuards(OptionalAuthGuard)
@@ -38,6 +39,7 @@ export class UserPreferencesController {
   // }
 
   @Get()
+  @Public()
   async findOne(@Req() req: Request) {
     const userId = req['user']?.sub ?? null;
     const guestId = req['guestId'] ?? null;
@@ -52,6 +54,7 @@ export class UserPreferencesController {
   }
 
   @Patch()
+  @Public()
   async update(@Req() req: Request, @Body() dto: UpdateUserPreferenceDto) {
     const userId = req['user']?.sub ?? null;
     const guestId = req['guestId'] ?? null;

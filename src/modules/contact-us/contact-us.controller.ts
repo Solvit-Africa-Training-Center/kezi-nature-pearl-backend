@@ -22,6 +22,7 @@ import {
 } from './dto/create-contact-us.dto';
 import { FilterContactUsDto } from './dto/filter-contact-us.dto';
 import { GuestInterceptor } from 'src/common/interceptors/guest.interceptor';
+import { Public } from 'src/common/decorator/public.decorator';
 
 @Controller('contact')
 @UseGuards(OptionalAuthGuard)
@@ -31,6 +32,7 @@ export class ContactUsController {
   constructor(private readonly contactUsService: ContactUsService) {}
 
   @Post()
+  @Public()
   @ApiOperation({ summary: 'Send Contact Message' })
   async submitMessage(@Req() req: Request, @Body() dto: CreateContactUsDto) {
     const userId = req['user']?.sub ?? null;

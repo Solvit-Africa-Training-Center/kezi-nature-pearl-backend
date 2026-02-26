@@ -16,6 +16,7 @@ import { OptionalAuthGuard } from 'src/common/guards';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { GuestInterceptor } from 'src/common/interceptors/guest.interceptor';
 import { UpdateReviewDto } from './dto/update-review.dto';
+import { Public } from 'src/common/decorator/public.decorator';
 
 @Controller('reviews')
 @UseGuards(OptionalAuthGuard)
@@ -25,6 +26,7 @@ export class ReviewController {
   constructor(private readonly reviewService: ReviewService) {}
 
   @Post(':productId')
+  @Public()
   createReview(
     @Req() req: Request,
     @Param('productId') productId: string,
@@ -37,11 +39,13 @@ export class ReviewController {
   }
 
   @Get('product/:productId')
+  @Public()
   async getProductReviews(@Param('productId') productId: string) {
     return await this.reviewService.getProductReview(productId);
   }
 
   @Patch(':id')
+  @Public()
   async updateReview(
     @Req() req: Request,
     @Param('id') id: string,
@@ -54,6 +58,7 @@ export class ReviewController {
   }
 
   @Delete(':id')
+  @Public()
   deleteReview(@Req() req: Request, @Param('id') id: string) {
     const userId = req['user']?.sub ?? null;
     const guestId = req['guestId'] ?? null;

@@ -18,6 +18,7 @@ import { GuestInterceptor } from 'src/common/interceptors/guest.interceptor';
 import { CartCheckoutDto } from './dto/request';
 import { AddItemTocartDto, UpdateCartItemDto } from '../item/dto/request';
 import { CurrencyConverterInterceptor } from 'src/common/interceptors/currency-converter.interceptor';
+import { Public } from 'src/common/decorator/public.decorator';
 
 @Controller('cart')
 @UseGuards(OptionalAuthGuard)
@@ -30,6 +31,7 @@ export class CartController {
   // User
 
   @Get()
+  @Public()
   @ApiOperation({ summary: 'Get User cart ' })
   async findOne(@Req() req: Request) {
     const userId = req['user']?.sub ?? null;
@@ -43,6 +45,7 @@ export class CartController {
   }
 
   @Post('item/add')
+  @Public()
   @ApiOperation({ summary: 'Add product to cart ' })
   async addItem(@Req() req: Request, @Body() dto: AddItemTocartDto) {
     const userId = req['user']?.sub ?? null;
@@ -52,6 +55,7 @@ export class CartController {
   }
 
   @Patch('item/update/:id')
+  @Public()
   @ApiOperation({ summary: 'Update product in cart quantity ' })
   async updateItem(
     @Req() req: Request,
@@ -70,6 +74,7 @@ export class CartController {
   }
 
   @Delete('item/remove/:id')
+  @Public()
   @ApiOperation({ summary: 'Remove item from cart ' })
   async deleteItem(@Req() req: Request, @Param('id') id: string) {
     const userId = req['user']?.sub ?? null;
@@ -79,6 +84,7 @@ export class CartController {
   }
 
   @Delete('clear')
+  @Public()
   @ApiOperation({ summary: 'Clear cart ' })
   async clearCart(@Req() req: Request) {
     const userId = req['user']?.sub ?? null;
@@ -88,6 +94,7 @@ export class CartController {
   }
 
   @Post('check-out')
+  @Public()
   @ApiOperation({ summary: 'Check out Cart ' })
   async checkout(@Req() req: Request, @Body() dto: CartCheckoutDto) {
     const userId = req['user']?.sub ?? null;

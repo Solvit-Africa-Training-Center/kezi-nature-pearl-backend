@@ -12,7 +12,6 @@ export class OptionalAuthGuard implements CanActivate {
     private reflector: Reflector,
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
-    private readonly logger: LoggerService,
   ) {}
 
   async canActivate(context: ExecutionContext) {
